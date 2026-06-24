@@ -1,0 +1,6 @@
+{
+  "name": "breakdown",
+  "version": "0.1.0",
+  "description": "Client intake → standardized PRD → task breakdown pipeline. Harness-agnostic.",
+  "author": { "name": "Etalas" }
+}
