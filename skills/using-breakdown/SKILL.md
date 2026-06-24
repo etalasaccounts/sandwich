@@ -14,9 +14,22 @@ Each stage is an agent prompt in `agents/`. Run the agent named below as a subag
 - On Pi / OpenClaw / Hermes: the `breakdown` extension exposes the `run_breakdown` tool and `/breakdown`, `/refine` commands — prefer those; they run the full TypeScript pipeline.
 - On Claude Code: run the workflow at `workflow/breakdown.workflow.ts`, or drive the agents directly per the sequence below.
 
+## Project Resolution (do this first)
+
+Before detecting a mode, you must know **which project** this conversation is about and **where its state lives** — `docs/breakdown/` always lives inside a specific repo or directory. In a chat context (e.g. Slack via OpenClaw) that location is not always implied, so resolve it before doing anything else:
+
+1. **One reachable project** (a single `docs/breakdown/` is in scope for this conversation) → use it. Proceed to Mode Detection.
+2. **Several reachable projects** and it's ambiguous which one the message refers to → ask which. Match the human's answer by project name against the registries you can see (the same way the Pi extension resolves a project by name).
+3. **No reachable project** → this is a cold start. Do NOT scatter `docs/breakdown/` into the current/temp directory by guessing. Instead:
+   - **Propose the name, don't ask for it.** Run `breakdown-intake-normalizer` on the intake first (you need its PRD anyway) and take `PROJECT_NAME` from the result. Offer it: *"I don't see an existing Breakdown project for this — the intake reads as **<name>**. Shall I start one?"*
+   - **Ask only for the location** — the one thing you genuinely cannot infer: which repo or directory the project should live in (or, if your team's convention is one repo per client, whether to create that repo). Wait for the answer.
+   - Once confirmed, scaffold the project there and continue into the **New Project** flow.
+
+This is the only place a confirmation is required on a fresh start: choosing where state lives is consequential and hard to undo, so never guess it silently. Everything after this point follows the friction-free mode rules below.
+
 ## Mode Detection
 
-First, inspect `docs/breakdown/` (the `readProjectState` helper in `lib/breakdown-lib.ts` returns exactly this snapshot — call it, or read the files directly):
+Once the project location is resolved, inspect its `docs/breakdown/` (the `readProjectState` helper in `lib/breakdown-lib.ts` returns exactly this snapshot — call it, or read the files directly):
 
 1. **No `task-registry.json`** → this is a **New Project**.
 2. **`task-registry.json` exists** → read it, then classify what the human just gave you:
