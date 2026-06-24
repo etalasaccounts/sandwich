@@ -1,0 +1,12 @@
+{
+  "name": "breakdown",
+  "version": "0.1.0",
+  "description": "Client intake → standardized PRD → task breakdown pipeline. Harness-agnostic.",
+  "type": "module",
+  "scripts": {
+    "test": "tsx lib/breakdown-lib.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}
