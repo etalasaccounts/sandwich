@@ -31,6 +31,15 @@ first bite of the sandwich.
 - **No speculative layers.** Don't add an ingredient until there's real appetite
   for it.
 
+## Installation
+
+Each ingredient installs on its own — there is no umbrella-level install. Open the
+ingredient's README and follow its **Installation** section:
+
+- **Breakdown** → [`breakdown/README.md` § Installation](breakdown/README.md#installation)
+  — prerequisites, then per-harness steps for Pi, OpenClaw, Hermes, and Claude Code.
+- **next-ingredient** → placeholder, nothing to install yet.
+
 ## Working on an ingredient
 
 Each ingredient is self-contained. To work on Breakdown:
@@ -41,5 +50,4 @@ npm install
 npm test
 ```
 
-See [`breakdown/README.md`](breakdown/README.md) for its layout, pipeline, modes,
-and install instructions.
+See [`breakdown/README.md`](breakdown/README.md) for its layout, pipeline, and modes.
