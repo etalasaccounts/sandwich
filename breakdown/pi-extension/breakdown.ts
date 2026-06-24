@@ -151,8 +151,9 @@ const EXTENSION_DIR = dirname(fileURLToPath(import.meta.url));
 
 function loadAgentDef(agentName: string, cwd: string): AgentDef {
 	const candidates = [
-		join(cwd, "agents", `${agentName}.md`),                        // project-local override
-		join(EXTENSION_DIR, "agents", `${agentName}.md`),              // bundled with the extension
+		join(cwd, "agents", `${agentName}.md`),                          // project-local override
+		join(EXTENSION_DIR, "..", "agents", `${agentName}.md`),          // bundled at the package root (../agents from pi-extension/)
+		join(EXTENSION_DIR, "agents", `${agentName}.md`),               // legacy: agents beside the extension file
 		join(os.homedir(), ".pi", "agent", "agents", `${agentName}.md`), // global fallback
 	];
 
