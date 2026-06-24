@@ -29,10 +29,14 @@ import {
 	normalizeTitle,
 	parseIntakeQuality,
 	readProjectState,
+	computeRegistryHealth,
+	obsoleteTasks,
+	setStability,
 	type Feature,
 	type TaskStability,
 	type IntakeConfidence,
 	type ProjectState,
+	type RegistryHealth,
 } from "./breakdown-lib.ts";
 
 let passed = 0;
@@ -836,6 +840,68 @@ test("survives a corrupt registry file", () => {
   _write(_join(dir, "task-registry.json"), "{ not json");
   const s = readProjectState(dir);
   assertEqual(s.exists, false);
+});
+
+// ── computeRegistryHealth / obsoleteTasks / setStability ─────────────────────
+console.log("registry health + mutations");
+
+const reg = (tasks: Partial<RegistryTask>[]): TaskRegistry => ({
+  project: "acme", projectName: "Acme", lastUpdated: "2026-06-01",
+  tasks: tasks.map((t, i): RegistryTask => ({
+    id: t.id ?? `ACME-M-BE-${String(i + 1).padStart(3, "0")}`,
+    title: t.title ?? `Task ${i}`, module: t.module ?? "M", division: t.division ?? "BE",
+    storyPoints: t.storyPoints ?? 2, status: t.status ?? "pending",
+    blocks: t.blocks ?? [], blockedBy: t.blockedBy ?? [], stability: t.stability ?? "provisional",
+    ...(t.reason ? { reason: t.reason } : {}),
+  })),
+});
+
+test("computeRegistryHealth counts stability and ready-to-start", () => {
+  const h = computeRegistryHealth(reg([
+    { id: "A-1", stability: "stable", status: "pending" },
+    { id: "A-2", stability: "provisional", status: "pending" },
+    { id: "A-3", stability: "stable", status: "done" },
+  ]));
+  assertEqual(h.active, 3);
+  assertEqual(h.stable, 2);
+  assertEqual(h.provisional, 1);
+  assertEqual(h.readyToStart.map(t => t.id), ["A-1"]); // stable + pending only
+});
+
+test("computeRegistryHealth flags broken deps and excludes obsolete from active", () => {
+  const h = computeRegistryHealth(reg([
+    { id: "A-1", blockedBy: ["A-9"] },           // A-9 doesn't exist → broken
+    { id: "A-2", status: "obsolete" },
+  ]));
+  assertEqual(h.obsolete, 1);
+  assertEqual(h.active, 1);
+  assertEqual(h.brokenDeps, [{ id: "A-1", missing: "A-9" }]);
+});
+
+test("computeRegistryHealth flags deps on obsolete and duplicate ids", () => {
+  const h = computeRegistryHealth(reg([
+    { id: "A-1", blockedBy: ["A-2"] },
+    { id: "A-2", status: "obsolete" },
+    { id: "A-1" },                                // duplicate id
+  ]));
+  assertEqual(h.depsOnObsolete, [{ id: "A-1", obsoleteId: "A-2" }]);
+  assertEqual(h.duplicateIds, ["A-1"]);
+  assert(h.totalIssues >= 2, "totalIssues should aggregate");
+});
+
+test("obsoleteTasks sets status and reason only on matching ids", () => {
+  const out = obsoleteTasks(reg([{ id: "A-1" }, { id: "A-2" }]), ["A-1"], "cut for v1");
+  const a1 = out.tasks.find(t => t.id === "A-1")!;
+  const a2 = out.tasks.find(t => t.id === "A-2")!;
+  assertEqual(a1.status, "obsolete");
+  assertEqual(a1.reason, "cut for v1");
+  assertEqual(a2.status, "pending");
+});
+
+test("setStability changes only matching ids", () => {
+  const out = setStability(reg([{ id: "A-1", stability: "provisional" }, { id: "A-2", stability: "provisional" }]), ["A-2"], "stable");
+  assertEqual(out.tasks.find(t => t.id === "A-1")!.stability, "provisional");
+  assertEqual(out.tasks.find(t => t.id === "A-2")!.stability, "stable");
 });
 
 // ── Summary ──────────────────────────────────────────────────────────────────

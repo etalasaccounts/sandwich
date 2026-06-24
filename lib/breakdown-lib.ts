@@ -881,3 +881,86 @@ export function readProjectState(docsDir: string): ProjectState {
     hasSource: existsSync(join(docsDir, "source.md")),
   };
 }
+
+// ── Registry Health + Mutations (pure; shared by Pi extension and Workflow) ───
+
+export interface RegistryHealth {
+  active: number;
+  obsolete: number;
+  stable: number;
+  provisional: number;
+  blockedByDesign: number;
+  readyToStart: RegistryTask[];
+  fullyBlockedModules: string[];
+  brokenDeps: Array<{ id: string; missing: string }>;
+  depsOnObsolete: Array<{ id: string; obsoleteId: string }>;
+  malformedIds: string[];
+  duplicateIds: string[];
+  totalIssues: number;
+}
+
+export function computeRegistryHealth(registry: TaskRegistry): RegistryHealth {
+  const all = registry.tasks;
+  const obsolete = all.filter(t => t.status === "obsolete");
+  const tasks = all.filter(t => t.status !== "obsolete");
+
+  const stable = tasks.filter(t => t.stability === "stable");
+  const provisional = tasks.filter(t => t.stability === "provisional");
+  const blockedByDesign = tasks.filter(t => t.stability === "blocked-by-design");
+  const readyToStart = stable.filter(t => t.status === "pending");
+
+  const byModule = new Map<string, RegistryTask[]>();
+  for (const t of tasks) {
+    if (!byModule.has(t.module)) byModule.set(t.module, []);
+    byModule.get(t.module)!.push(t);
+  }
+  const fullyBlockedModules = [...byModule.entries()]
+    .filter(([, mt]) => mt.length > 0 && mt.every(t => t.stability === "blocked-by-design"))
+    .map(([m]) => m);
+
+  const activeIds = new Set(tasks.map(t => t.id));
+  const obsoleteIds = new Set(obsolete.map(t => t.id));
+  const brokenDeps: Array<{ id: string; missing: string }> = [];
+  const depsOnObsolete: Array<{ id: string; obsoleteId: string }> = [];
+  for (const t of tasks) {
+    for (const dep of t.blockedBy) {
+      if (obsoleteIds.has(dep)) depsOnObsolete.push({ id: t.id, obsoleteId: dep });
+      else if (!activeIds.has(dep)) brokenDeps.push({ id: t.id, missing: dep });
+    }
+  }
+
+  const malformedIds = tasks.filter(t => t.id.includes("--") || !t.division).map(t => t.id);
+  const idCount = new Map<string, number>();
+  for (const t of tasks) idCount.set(t.id, (idCount.get(t.id) ?? 0) + 1);
+  const duplicateIds = [...new Set(tasks.filter(t => (idCount.get(t.id) ?? 0) > 1).map(t => t.id))];
+
+  const totalIssues = brokenDeps.length + depsOnObsolete.length + malformedIds.length + duplicateIds.length;
+
+  return {
+    active: tasks.length, obsolete: obsolete.length,
+    stable: stable.length, provisional: provisional.length, blockedByDesign: blockedByDesign.length,
+    readyToStart, fullyBlockedModules, brokenDeps, depsOnObsolete, malformedIds, duplicateIds, totalIssues,
+  };
+}
+
+export function obsoleteTasks(registry: TaskRegistry, ids: string[], reason?: string): TaskRegistry {
+  const idSet = new Set(ids);
+  return {
+    ...registry,
+    lastUpdated: new Date().toISOString().slice(0, 10),
+    tasks: registry.tasks.map(t =>
+      idSet.has(t.id)
+        ? { ...t, status: "obsolete" as const, ...(reason && reason.trim() ? { reason: reason.trim() } : {}) }
+        : t,
+    ),
+  };
+}
+
+export function setStability(registry: TaskRegistry, ids: string[], stability: TaskStability): TaskRegistry {
+  const idSet = new Set(ids);
+  return {
+    ...registry,
+    lastUpdated: new Date().toISOString().slice(0, 10),
+    tasks: registry.tasks.map(t => (idSet.has(t.id) ? { ...t, stability } : t)),
+  };
+}
