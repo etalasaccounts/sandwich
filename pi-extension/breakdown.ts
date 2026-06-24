@@ -62,6 +62,9 @@ import {
 	parseClarificationDelta,
 	applyTaskPatches,
 	parseIntakeQuality,
+	computeRegistryHealth,
+	obsoleteTasks,
+	setStability,
 } from "../lib/breakdown-lib.ts";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -1020,74 +1023,40 @@ async function runAnswerQuestionsMode(registry: TaskRegistry, cwd: string, ctx: 
 
 function runScopeReview(registry: TaskRegistry, cwd: string, ctx: any): void {
 	const { docsDir } = ensureDocsDir(cwd);
-	const allTasks      = registry.tasks;
-	const obsoleteTasks = allTasks.filter(t => t.status === "obsolete");
-	const tasks         = allTasks.filter(t => t.status !== "obsolete");
 
 	stepStates[0].status = "running";
 	updateWidget();
 
-	// ── Stability breakdown (active tasks only) ────────────────────────────────
-	const stable          = tasks.filter(t => t.stability === "stable");
-	const provisional     = tasks.filter(t => t.stability === "provisional");
-	const blockedByDesign = tasks.filter(t => t.stability === "blocked-by-design");
-
-	// ── Ready to start ─────────────────────────────────────────────────────────
-	const readyToStart = stable.filter(t => t.status === "pending");
-
-	// ── Fully blocked modules ──────────────────────────────────────────────────
-	const byModule = new Map<string, RegistryTask[]>();
-	for (const t of tasks) {
-		if (!byModule.has(t.module)) byModule.set(t.module, []);
-		byModule.get(t.module)!.push(t);
-	}
-	const fullyBlocked = [...byModule.entries()]
-		.filter(([, mt]) => mt.every(t => t.stability === "blocked-by-design"));
-
-	// ── Broken dependencies ────────────────────────────────────────────────────
-	const activeIdSet   = new Set(tasks.map(t => t.id));
-	const obsoleteIdSet = new Set(obsoleteTasks.map(t => t.id));
-	const brokenDeps: Array<{ task: RegistryTask; missing: string }> = [];
-	const depsOnObsolete: Array<{ task: RegistryTask; obsoleteId: string }> = [];
-	for (const t of tasks) {
-		for (const dep of t.blockedBy) {
-			if (obsoleteIdSet.has(dep)) depsOnObsolete.push({ task: t, obsoleteId: dep });
-			else if (!activeIdSet.has(dep)) brokenDeps.push({ task: t, missing: dep });
-		}
-	}
-
-	// ── Registry integrity ─────────────────────────────────────────────────────
-	const malformed  = tasks.filter(t => t.id.includes("--") || !t.division);
-	const idCount    = new Map<string, number>();
-	for (const t of tasks) idCount.set(t.id, (idCount.get(t.id) ?? 0) + 1);
-	const dupIds     = [...new Set(tasks.filter(t => (idCount.get(t.id) ?? 0) > 1).map(t => t.id))];
+	const health = computeRegistryHealth(registry);
 
 	// ── Build output ───────────────────────────────────────────────────────────
-	const pct = (n: number) => tasks.length > 0 ? `${Math.round((n / tasks.length) * 100)}%` : "—";
+	const activeTotalCount = health.active;
+	const pct = (n: number) => activeTotalCount > 0 ? `${Math.round((n / activeTotalCount) * 100)}%` : "—";
 	const pad  = (s: string, w: number) => s.length >= w ? s : s + " ".repeat(w - s.length);
 
 	const lines: string[] = [
 		`${registry.projectName} — Registry Health`,
 		"─".repeat(44),
 		"",
-		`ACTIVE TASKS  (${tasks.length} active, ${obsoleteTasks.length} obsolete)`,
-		`  ✓ stable              ${String(stable.length).padStart(4)}   (${pct(stable.length)})`,
-		`  ~ provisional         ${String(provisional.length).padStart(4)}   (${pct(provisional.length)})`,
-		`  ○ blocked-by-design   ${String(blockedByDesign.length).padStart(4)}   (${pct(blockedByDesign.length)})`,
+		`ACTIVE TASKS  (${health.active} active, ${health.obsolete} obsolete)`,
+		`  ✓ stable              ${String(health.stable).padStart(4)}   (${pct(health.stable)})`,
+		`  ~ provisional         ${String(health.provisional).padStart(4)}   (${pct(health.provisional)})`,
+		`  ○ blocked-by-design   ${String(health.blockedByDesign).padStart(4)}   (${pct(health.blockedByDesign)})`,
 	];
 
-	if (obsoleteTasks.length > 0) {
-		lines.push("", `OBSOLETE  (${obsoleteTasks.length} tasks — excluded from active work)`);
-		for (const t of obsoleteTasks) {
+	const obsoleteTasksList = registry.tasks.filter(t => t.status === "obsolete");
+	if (health.obsolete > 0) {
+		lines.push("", `OBSOLETE  (${health.obsolete} tasks — excluded from active work)`);
+		for (const t of obsoleteTasksList) {
 			const reasonStr = t.reason ? `  · ${t.reason}` : "";
 			lines.push(`  ✗ ${pad(t.id, 28)} ${t.module}${reasonStr}`);
 		}
 	}
 
-	if (readyToStart.length > 0) {
-		lines.push("", `READY TO START  (${readyToStart.length} tasks — stable + pending)`);
+	if (health.readyToStart.length > 0) {
+		lines.push("", `READY TO START  (${health.readyToStart.length} tasks — stable + pending)`);
 		const byMod = new Map<string, RegistryTask[]>();
-		for (const t of readyToStart) {
+		for (const t of health.readyToStart) {
 			if (!byMod.has(t.module)) byMod.set(t.module, []);
 			byMod.get(t.module)!.push(t);
 		}
@@ -1100,40 +1069,40 @@ function runScopeReview(registry: TaskRegistry, cwd: string, ctx: any): void {
 		lines.push("", "READY TO START  — none (no stable + pending tasks)");
 	}
 
-	if (fullyBlocked.length > 0) {
-		lines.push("", `FULLY BLOCKED MODULES  (${fullyBlocked.length} — nothing to build yet)`);
-		for (const [mod, mt] of fullyBlocked) {
-			lines.push(`  ${mod}   ${mt.length} tasks — all blocked-by-design`);
+	if (health.fullyBlockedModules.length > 0) {
+		lines.push("", `FULLY BLOCKED MODULES  (${health.fullyBlockedModules.length} — nothing to build yet)`);
+		for (const mod of health.fullyBlockedModules) {
+			const modTaskCount = registry.tasks.filter(t => t.module === mod && t.status !== "obsolete").length;
+			lines.push(`  ${mod}   ${modTaskCount} tasks — all blocked-by-design`);
 		}
 	}
 
-	if (brokenDeps.length > 0) {
-		lines.push("", `BROKEN DEPENDENCIES  (${brokenDeps.length} issues)`);
-		for (const { task, missing } of brokenDeps) {
-			lines.push(`  ${pad(task.id, 28)} blockedBy ${missing} ← not in registry`);
+	if (health.brokenDeps.length > 0) {
+		lines.push("", `BROKEN DEPENDENCIES  (${health.brokenDeps.length} issues)`);
+		for (const { id, missing } of health.brokenDeps) {
+			lines.push(`  ${pad(id, 28)} blockedBy ${missing} ← not in registry`);
 		}
 	}
 
-	if (depsOnObsolete.length > 0) {
-		lines.push("", `DEPS ON OBSOLETE TASKS  (${depsOnObsolete.length} — may now be unblocked)`);
-		for (const { task, obsoleteId } of depsOnObsolete) {
-			lines.push(`  ${pad(task.id, 28)} blockedBy ${obsoleteId} ← now obsolete`);
+	if (health.depsOnObsolete.length > 0) {
+		lines.push("", `DEPS ON OBSOLETE TASKS  (${health.depsOnObsolete.length} — may now be unblocked)`);
+		for (const { id, obsoleteId } of health.depsOnObsolete) {
+			lines.push(`  ${pad(id, 28)} blockedBy ${obsoleteId} ← now obsolete`);
 		}
 	}
 
 	const integrityLines: string[] = [];
-	if (malformed.length > 0)  integrityLines.push(`  ${malformed.length} malformed IDs    empty division  (e.g. ${malformed[0].id})`);
-	if (dupIds.length > 0)     integrityLines.push(`  ${dupIds.length} duplicate IDs   same ID on multiple tasks`);
+	if (health.malformedIds.length > 0)  integrityLines.push(`  ${health.malformedIds.length} malformed IDs    empty division  (e.g. ${health.malformedIds[0]})`);
+	if (health.duplicateIds.length > 0)  integrityLines.push(`  ${health.duplicateIds.length} duplicate IDs   same ID on multiple tasks`);
 	if (integrityLines.length > 0) {
 		lines.push("", `REGISTRY INTEGRITY  (${integrityLines.length} issue type${integrityLines.length > 1 ? "s" : ""})`);
 		lines.push(...integrityLines);
 	}
 
-	const totalIssues = brokenDeps.length + malformed.length + dupIds.length + depsOnObsolete.length;
-	const healthy = totalIssues === 0;
+	const healthy = health.totalIssues === 0;
 
 	stepStates[0].status = "done";
-	stepStates[0].lastWork = healthy ? "registry healthy" : `${totalIssues} issues found`;
+	stepStates[0].lastWork = healthy ? "registry healthy" : `${health.totalIssues} issues found`;
 	updateWidget();
 
 	ctx.ui.notify(lines.join("\n"), healthy ? "success" : "warning");
@@ -1266,16 +1235,8 @@ async function runManageRegistryMode(registry: TaskRegistry, cwd: string, ctx: a
 
 		backupExistingDocs(docsDir, historyDir, registry.project);
 
-		const obsoleteIds = new Set(targetTasks.map(t => t.id));
-		const updatedRegistry: TaskRegistry = {
-			...registry,
-			lastUpdated: new Date().toISOString().split("T")[0],
-			tasks: registry.tasks.map(t =>
-				obsoleteIds.has(t.id)
-					? { ...t, status: "obsolete" as const, ...(reason.trim() ? { reason: reason.trim() } : {}) }
-					: t
-			),
-		};
+		const targetIds = targetTasks.map(t => t.id);
+		const updatedRegistry = obsoleteTasks(registry, targetIds, reason.trim() || undefined);
 
 		for (const task of targetTasks) {
 			const moduleSlug = task.module.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -1332,14 +1293,8 @@ async function runManageRegistryMode(registry: TaskRegistry, cwd: string, ctx: a
 
 		backupExistingDocs(docsDir, historyDir, registry.project);
 
-		const targetIds = new Set(targetTasks.map(t => t.id));
-		const updatedRegistry: TaskRegistry = {
-			...registry,
-			lastUpdated: new Date().toISOString().split("T")[0],
-			tasks: registry.tasks.map(t =>
-				targetIds.has(t.id) ? { ...t, stability: newStability } : t
-			),
-		};
+		const targetStabilityIds = targetTasks.map(t => t.id);
+		const updatedRegistry = setStability(registry, targetStabilityIds, newStability);
 
 		for (const task of targetTasks) {
 			const moduleSlug = task.module.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
