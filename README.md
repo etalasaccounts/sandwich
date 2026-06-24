@@ -1,48 +1,45 @@
-# Breakdown
+# 🥪 Sandwich
 
-Turns client intake (any format) into a standardized PRD and a refined task
-breakdown, and keeps it current as requirements evolve. Runs on Pi, OpenClaw,
-Hermes, and Claude Code from one package.
+A composable agent stack for a software agency. Pick the ingredients you want —
+some projects take the lettuce, some don't.
 
-## Layout
+Each ingredient is a self-contained agent capability that installs across
+harnesses (Pi, OpenClaw, Hermes, Claude Code) and proves its value on its own.
+Ingredients compose through shared, git-backed artifacts in the project repo —
+no ingredient depends on another being present.
 
-- `agents/` — 12 agent prompts, shared by every harness
-- `lib/breakdown-lib.ts` — pure functions (parsing, ID assignment, doc building)
-- `skills/using-breakdown/SKILL.md` — session intelligence (auto mode detection)
-- `pi-extension/breakdown.ts` — Pi / OpenClaw / Hermes runtime
-- `workflow/breakdown.workflow.ts` — Claude Code Workflow runtime
-- `.claude-plugin/plugin.json` / `package.json` — distribution manifests
+## The menu
 
-## State
+| Ingredient | Role | Status |
+|---|---|---|
+| [`breakdown/`](breakdown/) | **Plan** — client intake (any format) → standardized PRD → refined task breakdown, kept current as requirements evolve | ✅ built |
+| [`next-ingredient/`](next-ingredient/) | placeholder — the next slice (Build / Review / QA / Handover…) | 🪧 reserved |
 
-All artifacts live in the consuming project's `docs/breakdown/`:
-`task-registry.json`, `source.md`, `task-breakdown.md`, `user-flows.md`,
-`client-recommendations.md`, `client-questions.md`, `technical-spec.md`, and
-`modules/*.md`. The format is identical across harnesses — a project started on
-one can continue on another.
+The `breakdown` ingredient already pairs with a Build slice: the `task` skill
+loads a task from breakdown's registry and implements it. Plan → Build is the
+first bite of the sandwich.
 
-## Pipeline
+## Philosophy
 
-Intake Normalizer → Classifier → Flow Analyst → NFR Extractor → Feature
-Extractor → Tech Spec → Task Generator (parallel per feature) → Dependency
-Mapper → artifacts.
+- **Optional layers.** Assemble the sandwich a project needs; leave out what it
+  doesn't.
+- **Each slice ships standalone.** An ingredient must be useful alone before the
+  next composes on top.
+- **State lives with the project.** Ingredients read and write git-backed
+  artifacts in the consuming repo, so any harness — or any teammate — picks up
+  where the last left off.
+- **No speculative layers.** Don't add an ingredient until there's real appetite
+  for it.
 
-## Modes
+## Working on an ingredient
 
-New Project, Refine, Answer Questions, Scope Review, Manage. The
-`using-breakdown` skill detects the right mode from project state and the
-request — no menus, no mid-pipeline gates.
-
-## Install
-
-- **Pi / OpenClaw / Hermes:** install the package; the `pi` field loads the
-  extension and skills.
-- **Claude Code:** install as a plugin; the skill loads at session start and the
-  workflow runs the pipeline.
-
-## Test
+Each ingredient is self-contained. To work on Breakdown:
 
 ```bash
+cd breakdown
 npm install
 npm test
 ```
+
+See [`breakdown/README.md`](breakdown/README.md) for its layout, pipeline, modes,
+and install instructions.
