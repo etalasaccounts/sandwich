@@ -4,7 +4,7 @@
   "description": "Client intake → standardized PRD → task breakdown pipeline. Harness-agnostic.",
   "type": "module",
   "scripts": {
-    "test": "tsx lib/breakdown-lib.test.ts && tsx lib/agents.test.ts && tsx lib/skill.test.ts"
+    "test": "tsx lib/breakdown-lib.test.ts && tsx lib/agents.test.ts && tsx lib/skill.test.ts && tsx lib/schemas.test.ts"
   },
   "devDependencies": {
     "@mariozechner/pi-coding-agent": "^0.73.1",
