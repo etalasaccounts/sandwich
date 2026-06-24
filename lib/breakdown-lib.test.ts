@@ -27,8 +27,10 @@ import {
 	categorizeGaps,
 	buildClientQuestionsDoc,
 	normalizeTitle,
+	parseIntakeQuality,
 	type Feature,
 	type TaskStability,
+	type IntakeConfidence,
 } from "./breakdown-lib.ts";
 
 let passed = 0;
@@ -746,6 +748,56 @@ test("different title gets new ID (no false positive)", () => {
   ];
   const result = assignTaskIds(incoming, "acme-project", registry);
   assert(result[0].id !== "ACME-AUTH-FE-001", "different title should get new ID");
+});
+
+// ── parseIntakeQuality ───────────────────────────────────────────────────────
+
+console.log("parseIntakeQuality");
+test("reads confidence and gaps from the Intake Quality block", () => {
+  const prd = [
+    "PROJECT_NAME: Acme",
+    "## Intake Quality",
+    "confidence: needs-more",
+    "gaps: payment provider unknown; no user roles defined",
+  ].join("\n");
+  const q = parseIntakeQuality(prd);
+  assertEqual(q.confidence, "needs-more");
+  assertEqual(q.gaps, ["payment provider unknown", "no user roles defined"]);
+});
+test("reads gaps written as a markdown list", () => {
+  const prd = [
+    "## Intake Quality",
+    "confidence: ambiguous",
+    "gaps:",
+    "- missing SLA",
+    "- unclear data retention",
+  ].join("\n");
+  const q = parseIntakeQuality(prd);
+  assertEqual(q.confidence, "ambiguous");
+  assertEqual(q.gaps, ["missing SLA", "unclear data retention"]);
+});
+test("defaults to ambiguous when block is absent", () => {
+  assertEqual(parseIntakeQuality("PROJECT_NAME: X\n## Objective\nbuild things"), {
+    confidence: "ambiguous",
+    gaps: [],
+  });
+});
+test("normalizes an unrecognized confidence value to ambiguous", () => {
+  const q = parseIntakeQuality("## Intake Quality\nconfidence: totally-fine\ngaps:");
+  assertEqual(q.confidence, "ambiguous");
+});
+test("does not bleed into a section that follows the Intake Quality block", () => {
+  const prd = [
+    "## Intake Quality",
+    "confidence: sufficient",
+    "gaps:",
+    "## Next Section",
+    "confidence: needs-more",
+    "gaps: should-not-be-read",
+  ].join("\n");
+  const q = parseIntakeQuality(prd);
+  assertEqual(q.confidence, "sufficient");
+  assertEqual(q.gaps, []);
 });
 
 // ── Summary ──────────────────────────────────────────────────────────────────

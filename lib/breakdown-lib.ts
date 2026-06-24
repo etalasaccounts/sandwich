@@ -798,3 +798,41 @@ export function extractDocumentText(resolvedPath: string): string {
 	// .md, .txt, .csv, etc — read directly
 	return readFileSync(resolvedPath, "utf-8");
 }
+
+// ── Intake Quality ───────────────────────────────────────────────────────────
+// The Intake Normalizer emits an "## Intake Quality" block at the end of the PRD.
+// Orchestrators read it to decide whether to run, ask, or flag assumptions.
+
+export type IntakeConfidence = "sufficient" | "needs-more" | "ambiguous";
+
+export interface IntakeQuality {
+  confidence: IntakeConfidence;
+  gaps: string[];
+}
+
+export function parseIntakeQuality(prd: string): IntakeQuality {
+  const fallback: IntakeQuality = { confidence: "ambiguous", gaps: [] };
+  const blockMatch = prd.match(/##\s*Intake Quality\s*\n([\s\S]*?)(?=\n##\s|$)/i);
+  if (!blockMatch) return fallback;
+  const block = blockMatch[1];
+
+  const confMatch = block.match(/confidence:\s*([a-z-]+)/i);
+  const raw = (confMatch?.[1] ?? "").toLowerCase().trim();
+  const valid: IntakeConfidence[] = ["sufficient", "needs-more", "ambiguous"];
+  const confidence: IntakeConfidence = valid.includes(raw as IntakeConfidence)
+    ? (raw as IntakeConfidence)
+    : "ambiguous";
+
+  // gaps: either inline "a; b; c" on the same line, or a markdown list below
+  let gaps: string[] = [];
+  const inline = block.match(/gaps:\s*([^\n]+)/i);
+  if (inline && inline[1].trim() && !inline[1].trim().startsWith("-")) {
+    gaps = inline[1].split(";").map(s => s.trim()).filter(Boolean);
+  } else {
+    const listPart = block.match(/gaps:([\s\S]*)$/i)?.[1] ?? "";
+    gaps = (listPart.match(/^\s*-\s+(.+)$/gm) ?? [])
+      .map(l => l.replace(/^\s*-\s+/, "").trim())
+      .filter(Boolean);
+  }
+  return { confidence, gaps };
+}
