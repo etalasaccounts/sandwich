@@ -1389,3 +1389,502 @@ git commit -m "feat: dual-harness distribution manifests (pi field + claude plug
 **Type consistency:** `parseIntakeQuality`/`IntakeQuality`/`IntakeConfidence` (Task 2) reused in Tasks 6, 7. `readProjectState`/`ProjectState` (Task 4) referenced in Task 5 prose and imported in Task 6. Schema names `INTAKE_SCHEMA`/`FEATURE_LIST_SCHEMA`/`NFR_SCHEMA`/`DEPS_SCHEMA` (Task 7) match their test (Task 7) usage. Library function names (`buildTaskBreakdownV2`, `buildModuleFile`, `assignTaskIds`, `categorizeGaps`, `parseGaps`, `extractClientRecommendations`, `normalizeTitle`) match the source library exactly. ✓
 
 **Noted deviation from pure unit-TDD:** Tasks 6 and 7 are runtime glue that spawns subprocesses / uses injected workflow globals; their testable logic lives in the library (Tasks 2, 4) and schemas (Task 7), which ARE unit-tested first. Runtime verification is an explicit typecheck + documented manual smoke run. This is called out rather than faked with hollow tests.
+
+---
+
+# Addendum — Full refinement parity (Phase 2)
+
+> Added after the final whole-branch review and a scope decision: (a) re-expose the Pi answer/scope/manage modes that became unreachable when the wizard menu was removed, and (b) give the Claude Code Workflow the refine/answer/scope/manage modes so a project can be evolved on either harness. Deterministic registry logic (health report, obsolete, stability override) is extracted into the shared library so both runtimes share one implementation (the final review flagged divergence risk).
+
+## Global Constraints (Phase 2)
+
+- Same constraints as Phase 1. Additionally: the deterministic scope-review and manage logic must live in `lib/breakdown-lib.ts` (pure, unit-tested) and be consumed by BOTH the Pi extension and the Workflow — no duplicated computation.
+- Task IDs immutable; never overwrite `in-progress`/`done`; back up `docs/breakdown/` before any write — applies to every new mode path.
+- The Workflow selects its mode from `args.mode` (`"new" | "refine" | "answer" | "scope" | "manage"`), defaulting to `"new"` when absent.
+
+---
+
+### Task 9: Re-expose Pi answer/scope/manage modes as slash commands
+
+Removing the wizard menu (Task 6) left `runAnswerQuestionsMode`, `runScopeReview`, and `runManageRegistryMode` defined but unreachable. Add slash commands that resolve the registry and invoke them — restoring access without an interactive startup menu.
+
+**Files:**
+- Modify: `pi-extension/breakdown.ts` (register three commands near the existing `/refine` and `/menu` registrations)
+- Test: typecheck (no new errors beyond the documented 6) + documented manual smoke
+
+**Interfaces:**
+- Consumes: existing functions `findExistingRegistries(cwd)`, `runAnswerQuestionsMode(registry, cwd, ctx)`, `runScopeReview(registry, cwd, ctx)`, `runManageRegistryMode(registry, cwd, ctx)`, and the `CLARIFICATION_STEPS`/`SCOPE_REVIEW_STEPS`/`MANAGE_STEPS` widget arrays — all already present in the file.
+- Produces: `/answer-questions`, `/scope-review`, `/manage` commands.
+
+- [ ] **Step 1: Add a shared registry-resolver helper**
+
+In `pi-extension/breakdown.ts`, inside the extension's default function (where commands are registered), add a helper that resolves a single registry from an optional project-name argument:
+
+```ts
+function resolveRegistryArg(args: string, ctx: any): TaskRegistry | null {
+	const registries = findExistingRegistries(ctx.cwd);
+	if (registries.length === 0) {
+		ctx.ui.notify("No breakdown project found. Run /breakdown first.", "error");
+		return null;
+	}
+	const name = args?.trim();
+	if (name) {
+		const match = registries.find(r => r.projectName.toLowerCase().includes(name.toLowerCase()) || r.project === name);
+		if (!match) {
+			ctx.ui.notify(`No project matching "${name}". Found: ${registries.map(r => r.projectName).join(", ")}`, "error");
+			return null;
+		}
+		return match;
+	}
+	if (registries.length > 1) {
+		ctx.ui.notify(`Multiple projects found — pass a name: ${registries.map(r => r.projectName).join(", ")}`, "warning");
+		return null;
+	}
+	return registries[0];
+}
+```
+
+- [ ] **Step 2: Register the three commands**
+
+After the `/refine` command registration, add:
+
+```ts
+	pi.registerCommand("answer-questions", {
+		description: "Resolve pending client questions for a project: /answer-questions [project name]",
+		handler: async (args, ctx) => {
+			widgetCtx = ctx;
+			const registry = resolveRegistryArg(args, ctx);
+			if (!registry) return;
+			stepStates = CLARIFICATION_STEPS.map(s => ({ ...s }));
+			projectLabel = `${registry.projectName} — Clarification`;
+			updateWidget();
+			try { await runAnswerQuestionsMode(registry, ctx.cwd, ctx); }
+			catch (err: any) { ctx.ui.notify(`Answer Questions failed: ${err.message}`, "error"); }
+			finally { stepStates = PIPELINE_STEPS.map(s => ({ ...s })); projectLabel = ""; updateWidget(); }
+		},
+	});
+
+	pi.registerCommand("scope-review", {
+		description: "Registry health check for a project: /scope-review [project name]",
+		handler: async (args, ctx) => {
+			widgetCtx = ctx;
+			const registry = resolveRegistryArg(args, ctx);
+			if (!registry) return;
+			stepStates = SCOPE_REVIEW_STEPS.map(s => ({ ...s }));
+			projectLabel = `${registry.projectName} — Scope Review`;
+			updateWidget();
+			try { runScopeReview(registry, ctx.cwd, ctx); }
+			catch (err: any) { ctx.ui.notify(`Scope Review failed: ${err.message}`, "error"); }
+			finally { stepStates = PIPELINE_STEPS.map(s => ({ ...s })); projectLabel = ""; updateWidget(); }
+		},
+	});
+
+	pi.registerCommand("manage", {
+		description: "Obsolete or override tasks directly for a project: /manage [project name]",
+		handler: async (args, ctx) => {
+			widgetCtx = ctx;
+			const registry = resolveRegistryArg(args, ctx);
+			if (!registry) return;
+			stepStates = MANAGE_STEPS.map(s => ({ ...s }));
+			projectLabel = `${registry.projectName} — Manage`;
+			updateWidget();
+			try { await runManageRegistryMode(registry, ctx.cwd, ctx); }
+			catch (err: any) { ctx.ui.notify(`Manage failed: ${err.message}`, "error"); }
+			finally { stepStates = PIPELINE_STEPS.map(s => ({ ...s })); projectLabel = ""; updateWidget(); }
+		},
+	});
+```
+
+Note: there is an existing `/menu` command; the new `/manage` name does not collide with it. If a `manage` command name is already taken, rename the new one to `manage-tasks` and update the description.
+
+- [ ] **Step 3: Typecheck**
+
+Run: `npx tsc --noEmit --skipLibCheck --allowImportingTsExtensions --module esnext --moduleResolution bundler --target es2022 pi-extension/breakdown.ts`
+Expected: error count stays at 6 (the documented pre-existing ones); no NEW errors.
+
+- [ ] **Step 4: Confirm the mode functions are now reachable**
+
+Run: `grep -n "registerCommand(\"answer-questions\"\|registerCommand(\"scope-review\"\|registerCommand(\"manage\"" pi-extension/breakdown.ts`
+Expected: three matches. Also grep that `runAnswerQuestionsMode`, `runScopeReview`, `runManageRegistryMode` each now have a call site outside their own definition.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git -c user.email=h@etalas.com -c user.name=etalas commit -m "feat: re-expose answer/scope/manage Pi modes as slash commands"
+```
+
+---
+
+### Task 10: Extract deterministic registry logic into the shared library
+
+Move the registry health computation and the obsolete/stability mutations out of the Pi extension into `lib/breakdown-lib.ts` as pure, unit-tested functions, so the Workflow (Task 12) and the Pi extension share one implementation.
+
+**Files:**
+- Modify: `lib/breakdown-lib.ts` (append pure functions + types)
+- Test: `lib/breakdown-lib.test.ts` (append tests)
+
+**Interfaces:**
+- Consumes: `TaskRegistry`, `RegistryTask`, `TaskStability` (existing).
+- Produces:
+  - `interface RegistryHealth { active: number; obsolete: number; stable: number; provisional: number; blockedByDesign: number; readyToStart: RegistryTask[]; fullyBlockedModules: string[]; brokenDeps: Array<{ id: string; missing: string }>; depsOnObsolete: Array<{ id: string; obsoleteId: string }>; malformedIds: string[]; duplicateIds: string[]; totalIssues: number; }`
+  - `function computeRegistryHealth(registry: TaskRegistry): RegistryHealth` (pure; mirrors the logic in `pi-extension/breakdown.ts` `runScopeReview`).
+  - `function obsoleteTasks(registry: TaskRegistry, ids: string[], reason?: string): TaskRegistry` (pure; sets matching tasks' `status` to `"obsolete"`, attaches `reason`, bumps `lastUpdated`).
+  - `function setStability(registry: TaskRegistry, ids: string[], stability: TaskStability): TaskRegistry` (pure; sets matching tasks' `stability`, bumps `lastUpdated`).
+
+- [ ] **Step 1: Write the failing tests**
+
+Append to `lib/breakdown-lib.test.ts` (add `computeRegistryHealth`, `obsoleteTasks`, `setStability`, `type RegistryHealth` to the import block). Use this fixture-and-assertions block:
+
+```ts
+// ── computeRegistryHealth / obsoleteTasks / setStability ─────────────────────
+console.log("registry health + mutations");
+
+const reg = (tasks: Partial<RegistryTask>[]): TaskRegistry => ({
+  project: "acme", projectName: "Acme", lastUpdated: "2026-06-01",
+  tasks: tasks.map((t, i): RegistryTask => ({
+    id: t.id ?? `ACME-M-BE-${String(i + 1).padStart(3, "0")}`,
+    title: t.title ?? `Task ${i}`, module: t.module ?? "M", division: t.division ?? "BE",
+    storyPoints: t.storyPoints ?? 2, status: t.status ?? "pending",
+    blocks: t.blocks ?? [], blockedBy: t.blockedBy ?? [], stability: t.stability ?? "provisional",
+    ...(t.reason ? { reason: t.reason } : {}),
+  })),
+});
+
+test("computeRegistryHealth counts stability and ready-to-start", () => {
+  const h = computeRegistryHealth(reg([
+    { id: "A-1", stability: "stable", status: "pending" },
+    { id: "A-2", stability: "provisional", status: "pending" },
+    { id: "A-3", stability: "stable", status: "done" },
+  ]));
+  assertEqual(h.active, 3);
+  assertEqual(h.stable, 2);
+  assertEqual(h.provisional, 1);
+  assertEqual(h.readyToStart.map(t => t.id), ["A-1"]); // stable + pending only
+});
+
+test("computeRegistryHealth flags broken deps and excludes obsolete from active", () => {
+  const h = computeRegistryHealth(reg([
+    { id: "A-1", blockedBy: ["A-9"] },           // A-9 doesn't exist → broken
+    { id: "A-2", status: "obsolete" },
+  ]));
+  assertEqual(h.obsolete, 1);
+  assertEqual(h.active, 1);
+  assertEqual(h.brokenDeps, [{ id: "A-1", missing: "A-9" }]);
+});
+
+test("computeRegistryHealth flags deps on obsolete and duplicate ids", () => {
+  const h = computeRegistryHealth(reg([
+    { id: "A-1", blockedBy: ["A-2"] },
+    { id: "A-2", status: "obsolete" },
+    { id: "A-1" },                                // duplicate id
+  ]));
+  assertEqual(h.depsOnObsolete, [{ id: "A-1", obsoleteId: "A-2" }]);
+  assertEqual(h.duplicateIds, ["A-1"]);
+  assert(h.totalIssues >= 2, "totalIssues should aggregate");
+});
+
+test("obsoleteTasks sets status and reason only on matching ids", () => {
+  const out = obsoleteTasks(reg([{ id: "A-1" }, { id: "A-2" }]), ["A-1"], "cut for v1");
+  const a1 = out.tasks.find(t => t.id === "A-1")!;
+  const a2 = out.tasks.find(t => t.id === "A-2")!;
+  assertEqual(a1.status, "obsolete");
+  assertEqual(a1.reason, "cut for v1");
+  assertEqual(a2.status, "pending");
+});
+
+test("setStability changes only matching ids", () => {
+  const out = setStability(reg([{ id: "A-1", stability: "provisional" }, { id: "A-2", stability: "provisional" }]), ["A-2"], "stable");
+  assertEqual(out.tasks.find(t => t.id === "A-1")!.stability, "provisional");
+  assertEqual(out.tasks.find(t => t.id === "A-2")!.stability, "stable");
+});
+```
+
+- [ ] **Step 2: Run tests, verify failure**
+
+Run: `npm test`
+Expected: FAIL — `computeRegistryHealth is not a function`.
+
+- [ ] **Step 3: Implement the functions**
+
+Append to `lib/breakdown-lib.ts`. Port the computation from the Pi extension's `runScopeReview` (the active/obsolete split, stability buckets, ready-to-start = stable+pending, fully-blocked modules, broken deps, deps-on-obsolete, malformed ids = id contains `--` or empty division, duplicate ids):
+
+```ts
+// ── Registry Health + Mutations (pure; shared by Pi extension and Workflow) ───
+
+export interface RegistryHealth {
+  active: number;
+  obsolete: number;
+  stable: number;
+  provisional: number;
+  blockedByDesign: number;
+  readyToStart: RegistryTask[];
+  fullyBlockedModules: string[];
+  brokenDeps: Array<{ id: string; missing: string }>;
+  depsOnObsolete: Array<{ id: string; obsoleteId: string }>;
+  malformedIds: string[];
+  duplicateIds: string[];
+  totalIssues: number;
+}
+
+export function computeRegistryHealth(registry: TaskRegistry): RegistryHealth {
+  const all = registry.tasks;
+  const obsolete = all.filter(t => t.status === "obsolete");
+  const tasks = all.filter(t => t.status !== "obsolete");
+
+  const stable = tasks.filter(t => t.stability === "stable");
+  const provisional = tasks.filter(t => t.stability === "provisional");
+  const blockedByDesign = tasks.filter(t => t.stability === "blocked-by-design");
+  const readyToStart = stable.filter(t => t.status === "pending");
+
+  const byModule = new Map<string, RegistryTask[]>();
+  for (const t of tasks) {
+    if (!byModule.has(t.module)) byModule.set(t.module, []);
+    byModule.get(t.module)!.push(t);
+  }
+  const fullyBlockedModules = [...byModule.entries()]
+    .filter(([, mt]) => mt.length > 0 && mt.every(t => t.stability === "blocked-by-design"))
+    .map(([m]) => m);
+
+  const activeIds = new Set(tasks.map(t => t.id));
+  const obsoleteIds = new Set(obsolete.map(t => t.id));
+  const brokenDeps: Array<{ id: string; missing: string }> = [];
+  const depsOnObsolete: Array<{ id: string; obsoleteId: string }> = [];
+  for (const t of tasks) {
+    for (const dep of t.blockedBy) {
+      if (obsoleteIds.has(dep)) depsOnObsolete.push({ id: t.id, obsoleteId: dep });
+      else if (!activeIds.has(dep)) brokenDeps.push({ id: t.id, missing: dep });
+    }
+  }
+
+  const malformedIds = tasks.filter(t => t.id.includes("--") || !t.division).map(t => t.id);
+  const idCount = new Map<string, number>();
+  for (const t of tasks) idCount.set(t.id, (idCount.get(t.id) ?? 0) + 1);
+  const duplicateIds = [...new Set(tasks.filter(t => (idCount.get(t.id) ?? 0) > 1).map(t => t.id))];
+
+  const totalIssues = brokenDeps.length + depsOnObsolete.length + malformedIds.length + duplicateIds.length;
+
+  return {
+    active: tasks.length, obsolete: obsolete.length,
+    stable: stable.length, provisional: provisional.length, blockedByDesign: blockedByDesign.length,
+    readyToStart, fullyBlockedModules, brokenDeps, depsOnObsolete, malformedIds, duplicateIds, totalIssues,
+  };
+}
+
+export function obsoleteTasks(registry: TaskRegistry, ids: string[], reason?: string): TaskRegistry {
+  const idSet = new Set(ids);
+  return {
+    ...registry,
+    lastUpdated: new Date().toISOString().slice(0, 10),
+    tasks: registry.tasks.map(t =>
+      idSet.has(t.id)
+        ? { ...t, status: "obsolete" as const, ...(reason && reason.trim() ? { reason: reason.trim() } : {}) }
+        : t,
+    ),
+  };
+}
+
+export function setStability(registry: TaskRegistry, ids: string[], stability: TaskStability): TaskRegistry {
+  const idSet = new Set(ids);
+  return {
+    ...registry,
+    lastUpdated: new Date().toISOString().slice(0, 10),
+    tasks: registry.tasks.map(t => (idSet.has(t.id) ? { ...t, stability } : t)),
+  };
+}
+```
+
+- [ ] **Step 4: Run tests, verify pass**
+
+Run: `npm test`
+Expected: all suites PASS including the 5 new assertions.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git -c user.email=h@etalas.com -c user.name=etalas commit -m "feat: extract registry health + mutations into shared lib"
+```
+
+---
+
+### Task 11: Refactor the Pi extension to use the shared registry logic
+
+Replace the in-line computation in the Pi extension's `runScopeReview` and `runManageRegistryMode` with the shared library functions from Task 10, so there is one implementation. Keep the Pi-specific TUI formatting/prompts.
+
+**Files:**
+- Modify: `pi-extension/breakdown.ts`
+- Test: typecheck (no new errors) + documented manual smoke
+
+**Interfaces:**
+- Consumes: `computeRegistryHealth`, `obsoleteTasks`, `setStability` from `../lib/breakdown-lib.ts`.
+
+- [ ] **Step 1: Import the new helpers**
+
+Add `computeRegistryHealth`, `obsoleteTasks`, `setStability` to the import block from `../lib/breakdown-lib.ts`.
+
+- [ ] **Step 2: Rewrite `runScopeReview` to consume `computeRegistryHealth`**
+
+Replace the body's computation (the active/obsolete split through the integrity checks) with a single `const health = computeRegistryHealth(registry);` call, then build the existing report lines from `health.*` fields (e.g. `health.stable`, `health.readyToStart`, `health.brokenDeps`, `health.duplicateIds`, `health.totalIssues`). Preserve the existing `ctx.ui.notify` report and the `scope-review-<date>.md` file write. Do not change the output format the user sees.
+
+- [ ] **Step 3: Rewrite the mutation paths in `runManageRegistryMode` to use `obsoleteTasks`/`setStability`**
+
+Where the function currently maps `registry.tasks` inline to set `status: "obsolete"` or a new stability, replace those inline transforms with `obsoleteTasks(registry, targetIds, reason)` and `setStability(registry, targetIds, newStability)`. Keep the interactive selection (`ctx.ui.select`/`ctx.ui.input`), the confirmation, the per-module file patching (`patchStatusInModule`/`patchStabilityInModule`), and the registry/breakdown writes.
+
+- [ ] **Step 4: Typecheck**
+
+Run: `npx tsc --noEmit --skipLibCheck --allowImportingTsExtensions --module esnext --moduleResolution bundler --target es2022 pi-extension/breakdown.ts`
+Expected: error count does not increase beyond the documented 6 (it may DECREASE if a cast is removed — that is fine).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git -c user.email=h@etalas.com -c user.name=etalas commit -m "refactor: Pi scope-review and manage modes use shared registry lib"
+```
+
+---
+
+### Task 12: Add mode dispatch + refine/answer/scope/manage to the Workflow
+
+Give the Claude Code Workflow the four evolution modes via `args.mode`, reusing the shared library throughout, so a project can be evolved on Claude Code with parity to Pi.
+
+**Files:**
+- Modify: `workflow/breakdown.workflow.ts`
+- Test: `workflow/schemas.ts` typecheck (unchanged); manual smoke documented
+
+**Interfaces:**
+- Consumes: `readProjectState` (to detect existing project), `parseClarificationDelta`, `applyTaskPatches`, `computeRegistryHealth`, `obsoleteTasks`, `setStability`, `assignTaskIds`, `buildTaskRegistry`, `buildTaskBreakdownV2`, `buildModuleFile`, `parseTaskBlocks`, `slugify`, `normalizeTitle` from `../lib/breakdown-lib.ts`; agent prompts `breakdown-refine-analyst`, `breakdown-clarification-analyst`, `breakdown-task-generator`.
+- Produces: a workflow whose behavior branches on `args.mode` (`"new"` default, plus `"refine" | "answer" | "scope" | "manage"`).
+
+- [ ] **Step 1: Add mode dispatch at the top of the script body**
+
+After the existing imports and the `existingRegistry` read (from the C1 fix), branch on `args.mode`. The existing New-Project body becomes the `"new"` branch (default). Structure:
+
+```ts
+const mode = args.mode ?? "new";
+
+if (mode === "scope") {
+  const health = computeRegistryHealth(existingRegistry);
+  log(`Registry health: ${health.active} active, ${health.totalIssues} issues, ${health.readyToStart.length} ready to start`);
+  return { status: "done", mode, health };
+}
+
+if (mode === "manage") {
+  // args.manage = { action: "obsolete" | "stability", ids: string[], reason?: string, stability?: string }
+  const m = args.manage ?? {};
+  let updated = existingRegistry;
+  if (m.action === "obsolete") updated = obsoleteTasks(existingRegistry, m.ids ?? [], m.reason);
+  else if (m.action === "stability") updated = setStability(existingRegistry, m.ids ?? [], m.stability);
+  backupRegistry();
+  writeRegistryAndBreakdown(updated);
+  return { status: "done", mode, changed: (m.ids ?? []).length };
+}
+
+if (mode === "refine" || mode === "answer") {
+  // handled below in the Refine/Answer block
+}
+```
+
+Add small local helpers `backupRegistry()` and `writeRegistryAndBreakdown(reg)` that reuse the existing backup loop and the `buildTaskBreakdownV2` write already present in the New-Project path (extract them from the inline Write phase so both paths share them).
+
+- [ ] **Step 2: Implement the refine/answer block**
+
+For `refine`/`answer`, mirror the Pi extension's `runRefineMode`/`runClarificationMode` using workflow agents and the shared lib:
+
+```ts
+if (mode === "refine" || mode === "answer") {
+  const source = existsSync(join(docsDir, "source.md")) ? readFileSync(join(docsDir, "source.md"), "utf-8") : "";
+  const moduleList = [...new Set(existingRegistry.tasks.map(t => t.module))].join(", ");
+  const registrySummary = existingRegistry.tasks
+    .map(t => `${t.id} [${t.division}] ${t.title} | module: ${t.module} | SP: ${t.storyPoints} | stability: ${t.stability} | status: ${t.status}`)
+    .join("\n");
+
+  let changeContext;
+  if (mode === "refine") {
+    phase("Analyze");
+    const refineInput = (args.intakePaths ?? []).map(p => extractDocumentText(p)).join("\n\n") || (args.input ?? "");
+    changeContext = await agent(
+      `${agentPrompt("breakdown-refine-analyst")}\n\nORIGINAL DOCUMENT:\n${source}\n\n---\n\nNEW INPUT:\n${refineInput}\n\n---\n\nEXISTING MODULES: ${moduleList}`,
+      { label: "refine-analyst", phase: "Analyze" },
+    );
+  } else {
+    changeContext = `Client answers:\n${args.input ?? ""}`;
+  }
+
+  phase("Analyze");
+  const deltaRaw = await agent(
+    `${agentPrompt("breakdown-clarification-analyst")}\n\nTask registry for "${existingRegistry.projectName}" (${existingRegistry.tasks.length} tasks):\n\n${registrySummary}\n\n---\n\n${mode === "refine" ? "Refinement analysis" : "New clarifications"}:\n\n${changeContext}\n\nBe conservative.`,
+    { label: "clarification-analyst", phase: "Analyze" },
+  );
+  const delta = parseClarificationDelta(deltaRaw);
+
+  // Generate tasks for any genuinely new scope
+  phase("Generate");
+  let newTasks = [];
+  if (delta.newScope.length > 0) {
+    const specText = existsSync(join(docsDir, "technical-spec.md")) ? readFileSync(join(docsDir, "technical-spec.md"), "utf-8") : "";
+    const perScope = await pipeline(delta.newScope, (f) => agent(
+      `${agentPrompt("breakdown-task-generator")}\n\nGenerate division tasks for this feature:\n\`\`\`json\n${JSON.stringify(f, null, 2)}\n\`\`\`\n\n---TECHNICAL SPEC---\n${specText}`,
+      { label: `tasks:${f.module}`, phase: "Generate" },
+    ));
+    const rawNew = [];
+    perScope.forEach((md, i) => { if (md) rawNew.push(...parseTaskBlocks(md, delta.newScope[i].module)); });
+    newTasks = assignTaskIds(rawNew, slugify(existingRegistry.projectName), existingRegistry);
+  }
+
+  // Apply stability patches + append new tasks
+  phase("Write");
+  let updated = applyTaskPatches(existingRegistry, delta.modified);
+  if (newTasks.length > 0) {
+    const existingIds = new Set(updated.tasks.map(t => t.id));
+    const trulyNew = newTasks.filter(t => !existingIds.has(t.id));
+    updated = { ...updated, tasks: [...updated.tasks, ...trulyNew.map(t => ({
+      id: t.id, title: t.title, module: t.module, division: t.division, storyPoints: t.storyPoints,
+      status: "pending", blocks: t.blocks, blockedBy: t.blockedBy, stability: t.stability,
+    }))] };
+  }
+  backupRegistry();
+  writeRegistryAndBreakdown(updated);
+  // Append new tasks to their module files
+  for (const t of newTasks) {
+    const modPath = join(modulesDir, `${slugify(t.module)}.md`);
+    const existing = existsSync(modPath) ? readFileSync(modPath, "utf-8") : buildModuleFile(existingRegistry.projectName, t.module, []);
+    writeFileSync(modPath, existing.trimEnd() + "\n" + formatTaskSection(t), "utf-8");
+  }
+  return { status: "done", mode, analysis: delta.analysis, patched: delta.modified.length, added: newTasks.length };
+}
+```
+
+Add `formatTaskSection`, `applyTaskPatches`, `parseClarificationDelta`, `extractDocumentText`, `computeRegistryHealth`, `obsoleteTasks`, `setStability` to the workflow's import from `../lib/breakdown-lib.ts`.
+
+- [ ] **Step 3: Guard the New-Project path against clobbering an existing project**
+
+In the `"new"` branch, if `existingRegistry` is non-null, `log()` a clear warning that an existing project is present and recommend `mode: "refine"`, but still proceed (the C1 fix already preserves IDs/status). This keeps the Workflow honest about overwrite safety described in the skill.
+
+- [ ] **Step 4: Update `meta.description` and phases if needed**
+
+Ensure `meta` remains a pure literal. If the new branches use phases not yet declared, add them to `meta.phases` (e.g. keep `Analyze`, `Generate`, `Write`).
+
+- [ ] **Step 5: Typecheck schemas (workflow body uses injected globals — expected not to standalone-typecheck)**
+
+Run: `npx tsc --noEmit --module esnext --moduleResolution bundler --target es2022 --skipLibCheck workflow/schemas.ts`
+Expected: clean.
+
+- [ ] **Step 6: Run the full suite (unchanged) and commit**
+
+Run: `npm test`
+Expected: all 5 suites PASS (this task does not change library tests, but confirms nothing regressed).
+
+```bash
+git -c user.email=h@etalas.com -c user.name=etalas commit -m "feat: workflow gains refine/answer/scope/manage modes via args.mode"
+```
+
+---
+
+## Self-Review (Phase 2)
+
+**Spec coverage:** Pi answer/scope/manage reachable (Task 9); deterministic logic shared, no divergence (Tasks 10-11); Workflow reaches full mode parity (Task 12). Cross-harness continuation now works both directions.
+
+**Placeholder scan:** Real code in every step; commands with expected output. Task 11's edits reference the existing functions to modify by name rather than repeating their full bodies — acceptable because the implementer modifies code that already exists in the file.
+
+**Type consistency:** `RegistryHealth`/`computeRegistryHealth`/`obsoleteTasks`/`setStability` defined in Task 10 are consumed by name in Tasks 11 and 12. `args.mode` values are consistent across Task 12. Workflow reuses `parseClarificationDelta`/`applyTaskPatches`/`formatTaskSection` which exist in the library.
+
+**Deviation note:** Tasks 11 and 12 are runtime glue; their shared computational core is unit-tested in Task 10. Verification is typecheck + documented manual smoke, consistent with Phase 1's Tasks 6-7.
