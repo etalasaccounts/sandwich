@@ -1,6 +1,6 @@
 export const meta = {
   name: "breakdown",
-  description: "Client intake → standardized PRD → task breakdown, written to docs/breakdown/",
+  description: "Client intake → standardized PRD → task breakdown (mode: new | refine | answer | scope | manage), written to docs/breakdown/",
   phases: [
     { title: "Normalize" },
     { title: "Analyze" },
@@ -20,6 +20,8 @@ import {
   assignTaskIds, buildTaskRegistry, buildTaskBreakdownV2, buildModuleFile,
   buildUserFlowsDoc, buildClientQuestionsDoc, categorizeGaps, parseGaps,
   extractClientRecommendations, slugify, normalizeTitle,
+  computeRegistryHealth, obsoleteTasks, setStability,
+  parseClarificationDelta, applyTaskPatches, formatTaskSection,
   type Feature,
 } from "../lib/breakdown-lib.ts";
 
@@ -37,6 +39,124 @@ if (existsSync(registryPath)) {
 function agentPrompt(name) {
   const raw = readFileSync(join(cwd, "agents", `${name}.md`), "utf-8");
   return raw.replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+}
+
+// --- Shared helpers used by multiple modes ---
+
+function backupRegistry() {
+  const historyDir = join(docsDir, "history");
+  mkdirSync(historyDir, { recursive: true });
+  const stamp = (args.timestamp ?? "run").replace(/[:.]/g, "-");
+  for (const f of ["task-registry.json", "task-breakdown.md", "user-flows.md", "client-recommendations.md", "client-questions.md", "technical-spec.md", "source.md"]) {
+    const p = join(docsDir, f);
+    if (existsSync(p)) copyFileSync(p, join(historyDir, `${stamp}-${f}`));
+  }
+}
+
+function writeRegistryAndBreakdown(reg) {
+  writeFileSync(join(docsDir, "task-registry.json"), JSON.stringify(reg, null, 2), "utf-8");
+  writeFileSync(join(docsDir, "task-breakdown.md"), buildTaskBreakdownV2(reg.projectName, reg.tasks), "utf-8");
+}
+
+// --- Mode dispatch ---
+
+const mode = args.mode ?? "new";
+
+if (mode === "scope") {
+  if (!existingRegistry) {
+    log("No existing task registry found. Run mode: \"new\" first.");
+    return { status: "error", mode, message: "No registry found" };
+  }
+  const health = computeRegistryHealth(existingRegistry);
+  log(`Registry health: ${health.active} active, ${health.totalIssues} issues, ${health.readyToStart.length} ready to start`);
+  return { status: "done", mode, health };
+}
+
+if (mode === "manage") {
+  if (!existingRegistry) {
+    log("No existing task registry found. Run mode: \"new\" first.");
+    return { status: "error", mode, message: "No registry found" };
+  }
+  const m = args.manage ?? {};
+  let updated = existingRegistry;
+  if (m.action === "obsolete") updated = obsoleteTasks(existingRegistry, m.ids ?? [], m.reason);
+  else if (m.action === "stability") updated = setStability(existingRegistry, m.ids ?? [], m.stability);
+  else { log(`Unknown manage action: ${m.action}`); return { status: "error", mode, error: `unknown manage action: ${m.action}` }; }
+  backupRegistry();
+  writeRegistryAndBreakdown(updated);
+  return { status: "done", mode, changed: (m.ids ?? []).length };
+}
+
+if (mode === "refine" || mode === "answer") {
+  if (!existingRegistry) {
+    log("No existing task registry found. Run mode: \"new\" first.");
+    return { status: "error", mode, message: "No registry found" };
+  }
+  const source = existsSync(join(docsDir, "source.md")) ? readFileSync(join(docsDir, "source.md"), "utf-8") : "";
+  const moduleList = [...new Set(existingRegistry.tasks.map(t => t.module))].join(", ");
+  const registrySummary = existingRegistry.tasks
+    .map(t => `${t.id} [${t.division}] ${t.title} | module: ${t.module} | SP: ${t.storyPoints} | stability: ${t.stability} | status: ${t.status}`)
+    .join("\n");
+
+  let changeContext;
+  if (mode === "refine") {
+    phase("Analyze");
+    const refineInput = (args.intakePaths ?? []).map(p => extractDocumentText(p)).join("\n\n") || (args.input ?? "");
+    changeContext = await agent(
+      `${agentPrompt("breakdown-refine-analyst")}\n\nORIGINAL DOCUMENT:\n${source}\n\n---\n\nNEW INPUT:\n${refineInput}\n\n---\n\nEXISTING MODULES: ${moduleList}`,
+      { label: "refine-analyst", phase: "Analyze" },
+    );
+  } else {
+    changeContext = `Client answers:\n${args.input ?? ""}`;
+  }
+
+  phase("Analyze");
+  const deltaRaw = await agent(
+    `${agentPrompt("breakdown-clarification-analyst")}\n\nTask registry for "${existingRegistry.projectName}" (${existingRegistry.tasks.length} tasks):\n\n${registrySummary}\n\n---\n\n${mode === "refine" ? "Refinement analysis" : "New clarifications"}:\n\n${changeContext}\n\nBe conservative.`,
+    { label: "clarification-analyst", phase: "Analyze" },
+  );
+  const delta = parseClarificationDelta(deltaRaw);
+
+  // Generate tasks for any genuinely new scope
+  phase("Generate");
+  let newTasks = [];
+  if (delta.newScope.length > 0) {
+    const specText = existsSync(join(docsDir, "technical-spec.md")) ? readFileSync(join(docsDir, "technical-spec.md"), "utf-8") : "";
+    const perScope = await pipeline(delta.newScope, (f) => agent(
+      `${agentPrompt("breakdown-task-generator")}\n\nGenerate division tasks for this feature:\n\`\`\`json\n${JSON.stringify(f, null, 2)}\n\`\`\`\n\n---TECHNICAL SPEC---\n${specText}`,
+      { label: `tasks:${f.module}`, phase: "Generate" },
+    ));
+    const rawNew = [];
+    perScope.forEach((md, i) => { if (md) rawNew.push(...parseTaskBlocks(md, delta.newScope[i].module)); });
+    newTasks = assignTaskIds(rawNew, slugify(existingRegistry.projectName), existingRegistry);
+  }
+
+  // Apply stability patches + append new tasks
+  phase("Write");
+  let updated = applyTaskPatches(existingRegistry, delta.modified);
+  let trulyNew = [];
+  if (newTasks.length > 0) {
+    const existingIds = new Set(updated.tasks.map(t => t.id));
+    trulyNew = newTasks.filter(t => !existingIds.has(t.id));
+    updated = { ...updated, tasks: [...updated.tasks, ...trulyNew.map(t => ({
+      id: t.id, title: t.title, module: t.module, division: t.division, storyPoints: t.storyPoints,
+      status: "pending", blocks: t.blocks, blockedBy: t.blockedBy, stability: t.stability,
+    }))] };
+  }
+  backupRegistry();
+  writeRegistryAndBreakdown(updated);
+  // Append new tasks to their module files
+  for (const t of trulyNew) {
+    const modPath = join(modulesDir, `${slugify(t.module)}.md`);
+    const existing = existsSync(modPath) ? readFileSync(modPath, "utf-8") : buildModuleFile(existingRegistry.projectName, t.module, []);
+    writeFileSync(modPath, existing.trimEnd() + "\n" + formatTaskSection(t), "utf-8");
+  }
+  return { status: "done", mode, analysis: delta.analysis, patched: delta.modified.length, added: newTasks.length };
+}
+
+// mode === "new" (default) — guard against clobbering an existing project
+if (mode === "new" && existingRegistry) {
+  log(`WARNING: An existing task registry was found for "${existingRegistry.projectName}". Re-running "new" will overwrite it. Consider using mode: "refine" to evolve the existing project instead.`);
 }
 
 phase("Normalize");
@@ -121,17 +241,10 @@ const idByTitle = new Map(withIds.map(t => [t.title, t.id]));
 for (const t of withIds) t.blockedBy = t.blockedBy.map(x => idByTitle.get(x) ?? x);
 
 // Back up existing artifacts before writing.
-const historyDir = join(docsDir, "history");
-mkdirSync(historyDir, { recursive: true });
-const stamp = (args.timestamp ?? "run").replace(/[:.]/g, "-");
-for (const f of ["task-registry.json", "task-breakdown.md", "user-flows.md", "client-recommendations.md", "client-questions.md", "technical-spec.md", "source.md"]) {
-  const p = join(docsDir, f);
-  if (existsSync(p)) copyFileSync(p, join(historyDir, `${stamp}-${f}`));
-}
+backupRegistry();
 
 const registry = buildTaskRegistry(projectName, slug, withIds, existingRegistry ?? undefined);
-writeFileSync(join(docsDir, "task-registry.json"), JSON.stringify(registry, null, 2), "utf-8");
-writeFileSync(join(docsDir, "task-breakdown.md"), buildTaskBreakdownV2(projectName, withIds), "utf-8");
+writeRegistryAndBreakdown(registry);
 writeFileSync(join(docsDir, "user-flows.md"), buildUserFlowsDoc(projectName, flowAnalysis), "utf-8");
 writeFileSync(join(docsDir, "client-recommendations.md"), extractClientRecommendations(flowAnalysis), "utf-8");
 const { client, internal } = categorizeGaps(parseGaps(flowAnalysis));
