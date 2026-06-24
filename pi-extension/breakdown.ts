@@ -2059,6 +2059,74 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
+	// ── registry resolver helper (used by answer-questions, scope-review, manage) ──
+	function resolveRegistryArg(args: string, ctx: any): TaskRegistry | null {
+		const registries = findExistingRegistries(ctx.cwd);
+		if (registries.length === 0) {
+			ctx.ui.notify("No breakdown project found. Run /breakdown first.", "error");
+			return null;
+		}
+		const name = args?.trim();
+		if (name) {
+			const match = registries.find(r => r.projectName.toLowerCase().includes(name.toLowerCase()) || r.project === name);
+			if (!match) {
+				ctx.ui.notify(`No project matching "${name}". Found: ${registries.map(r => r.projectName).join(", ")}`, "error");
+				return null;
+			}
+			return match;
+		}
+		if (registries.length > 1) {
+			ctx.ui.notify(`Multiple projects found — pass a name: ${registries.map(r => r.projectName).join(", ")}`, "warning");
+			return null;
+		}
+		return registries[0];
+	}
+
+	pi.registerCommand("answer-questions", {
+		description: "Resolve pending client questions for a project: /answer-questions [project name]",
+		handler: async (args, ctx) => {
+			widgetCtx = ctx;
+			const registry = resolveRegistryArg(args, ctx);
+			if (!registry) return;
+			stepStates = CLARIFICATION_STEPS.map(s => ({ ...s }));
+			projectLabel = `${registry.projectName} — Clarification`;
+			updateWidget();
+			try { await runAnswerQuestionsMode(registry, ctx.cwd, ctx); }
+			catch (err: any) { ctx.ui.notify(`Answer Questions failed: ${err.message}`, "error"); }
+			finally { stepStates = PIPELINE_STEPS.map(s => ({ ...s })); projectLabel = ""; updateWidget(); }
+		},
+	});
+
+	pi.registerCommand("scope-review", {
+		description: "Registry health check for a project: /scope-review [project name]",
+		handler: async (args, ctx) => {
+			widgetCtx = ctx;
+			const registry = resolveRegistryArg(args, ctx);
+			if (!registry) return;
+			stepStates = SCOPE_REVIEW_STEPS.map(s => ({ ...s }));
+			projectLabel = `${registry.projectName} — Scope Review`;
+			updateWidget();
+			try { runScopeReview(registry, ctx.cwd, ctx); }
+			catch (err: any) { ctx.ui.notify(`Scope Review failed: ${err.message}`, "error"); }
+			finally { stepStates = PIPELINE_STEPS.map(s => ({ ...s })); projectLabel = ""; updateWidget(); }
+		},
+	});
+
+	pi.registerCommand("manage", {
+		description: "Obsolete or override tasks directly for a project: /manage [project name]",
+		handler: async (args, ctx) => {
+			widgetCtx = ctx;
+			const registry = resolveRegistryArg(args, ctx);
+			if (!registry) return;
+			stepStates = MANAGE_STEPS.map(s => ({ ...s }));
+			projectLabel = `${registry.projectName} — Manage`;
+			updateWidget();
+			try { await runManageRegistryMode(registry, ctx.cwd, ctx); }
+			catch (err: any) { ctx.ui.notify(`Manage failed: ${err.message}`, "error"); }
+			finally { stepStates = PIPELINE_STEPS.map(s => ({ ...s })); projectLabel = ""; updateWidget(); }
+		},
+	});
+
 	// ── before_agent_start: APPEND to existing system prompt ─────────────────
 	// Pattern from purpose-gate.ts: event.systemPrompt + "\n\n..."
 	// Never replace — replacing strips all default agent instructions.
