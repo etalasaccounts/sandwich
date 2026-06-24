@@ -28,9 +28,11 @@ import {
 	buildClientQuestionsDoc,
 	normalizeTitle,
 	parseIntakeQuality,
+	readProjectState,
 	type Feature,
 	type TaskStability,
 	type IntakeConfidence,
+	type ProjectState,
 } from "./breakdown-lib.ts";
 
 let passed = 0;
@@ -798,6 +800,42 @@ test("does not bleed into a section that follows the Intake Quality block", () =
   const q = parseIntakeQuality(prd);
   assertEqual(q.confidence, "sufficient");
   assertEqual(q.gaps, []);
+});
+
+// ── readProjectState ─────────────────────────────────────────────────────────
+import { mkdtempSync, mkdirSync as _mkdir, writeFileSync as _write } from "fs";
+import { tmpdir } from "os";
+import { join as _join } from "path";
+
+console.log("readProjectState");
+test("returns exists:false for an empty dir", () => {
+  const dir = mkdtempSync(_join(tmpdir(), "bd-"));
+  const s = readProjectState(dir);
+  assertEqual(s.exists, false);
+  assertEqual(s.taskCount, 0);
+});
+test("reads registry name, task count, and open questions", () => {
+  const dir = mkdtempSync(_join(tmpdir(), "bd-"));
+  _write(_join(dir, "task-registry.json"), JSON.stringify({
+    project: "acme", projectName: "Acme", lastUpdated: "2026-06-24",
+    tasks: [{ id: "A-1", title: "x", module: "M", division: "BE",
+      storyPoints: 2, status: "pending", blocks: [], blockedBy: [], stability: "stable" }],
+  }));
+  _write(_join(dir, "client-questions.md"),
+    "## Client Questions\n- [ ] What payment provider?\n- [x] Already answered\n- [ ] Which regions?");
+  _write(_join(dir, "source.md"), "PROJECT_NAME: Acme");
+  const s = readProjectState(dir);
+  assertEqual(s.exists, true);
+  assertEqual(s.projectName, "Acme");
+  assertEqual(s.taskCount, 1);
+  assertEqual(s.openQuestions, ["What payment provider?", "Which regions?"]);
+  assertEqual(s.hasSource, true);
+});
+test("survives a corrupt registry file", () => {
+  const dir = mkdtempSync(_join(tmpdir(), "bd-"));
+  _write(_join(dir, "task-registry.json"), "{ not json");
+  const s = readProjectState(dir);
+  assertEqual(s.exists, false);
 });
 
 // ── Summary ──────────────────────────────────────────────────────────────────

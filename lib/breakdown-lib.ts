@@ -7,8 +7,8 @@
  */
 
 import { spawnSync } from "child_process";
-import { readFileSync } from "fs";
-import { extname } from "path";
+import { readFileSync, existsSync } from "fs";
+import { extname, join } from "path";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -835,4 +835,49 @@ export function parseIntakeQuality(prd: string): IntakeQuality {
       .filter(Boolean);
   }
   return { confidence, gaps };
+}
+
+// ── Project State ────────────────────────────────────────────────────────────
+// A deterministic snapshot of docs/breakdown/ so any harness can decide the mode.
+
+export interface ProjectState {
+  exists: boolean;
+  projectName: string | null;
+  taskCount: number;
+  openQuestions: string[];
+  hasSource: boolean;
+}
+
+export function readProjectState(docsDir: string): ProjectState {
+  const empty: ProjectState = {
+    exists: false, projectName: null, taskCount: 0, openQuestions: [], hasSource: false,
+  };
+  const regPath = join(docsDir, "task-registry.json");
+  if (!existsSync(regPath)) return empty;
+
+  let registry: TaskRegistry;
+  try {
+    registry = JSON.parse(readFileSync(regPath, "utf-8")) as TaskRegistry;
+  } catch {
+    return empty;
+  }
+  if (!registry || !Array.isArray(registry.tasks)) return empty;
+
+  const questionsPath = join(docsDir, "client-questions.md");
+  let openQuestions: string[] = [];
+  if (existsSync(questionsPath)) {
+    openQuestions = readFileSync(questionsPath, "utf-8")
+      .split("\n")
+      .filter(l => l.trim().startsWith("- [ ]"))
+      .map(l => l.replace(/^.*- \[ \] /, "").trim())
+      .filter(Boolean);
+  }
+
+  return {
+    exists: true,
+    projectName: registry.projectName ?? null,
+    taskCount: registry.tasks.length,
+    openQuestions,
+    hasSource: existsSync(join(docsDir, "source.md")),
+  };
 }
