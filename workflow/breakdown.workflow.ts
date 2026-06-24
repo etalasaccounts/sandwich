@@ -14,19 +14,25 @@ export const meta = {
 // Agent prompt bodies are loaded from agents/<name>.md by the host; here we pass
 // the stage instruction and rely on the workflow runtime's agentType mapping.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from "fs";
-import { join, basename } from "path";
+import { join } from "path";
 import {
-  extractDocumentText, parseIntakeQuality, parseNfrJson, parseTaskBlocks,
+  extractDocumentText, parseIntakeQuality, parseTaskBlocks,
   assignTaskIds, buildTaskRegistry, buildTaskBreakdownV2, buildModuleFile,
   buildUserFlowsDoc, buildClientQuestionsDoc, categorizeGaps, parseGaps,
   extractClientRecommendations, slugify, normalizeTitle,
-  type RawTask, type Feature,
+  type Feature,
 } from "../lib/breakdown-lib.ts";
 
 const cwd = args.cwd;
 const docsDir = join(cwd, "docs", "breakdown");
 const modulesDir = join(docsDir, "modules");
 mkdirSync(modulesDir, { recursive: true });
+
+let existingRegistry = null;
+const registryPath = join(docsDir, "task-registry.json");
+if (existsSync(registryPath)) {
+  try { existingRegistry = JSON.parse(readFileSync(registryPath, "utf-8")); } catch { existingRegistry = null; }
+}
 
 function agentPrompt(name) {
   const raw = readFileSync(join(cwd, "agents", `${name}.md`), "utf-8");
@@ -110,7 +116,7 @@ for (const t of deduped) t.blockedBy = depsMap.get(t.title) ?? [];
 
 phase("Write");
 const slug = slugify(projectName);
-const withIds = assignTaskIds(deduped, slug);
+const withIds = assignTaskIds(deduped, slug, existingRegistry ?? undefined);
 const idByTitle = new Map(withIds.map(t => [t.title, t.id]));
 for (const t of withIds) t.blockedBy = t.blockedBy.map(x => idByTitle.get(x) ?? x);
 
@@ -123,7 +129,7 @@ for (const f of ["task-registry.json", "task-breakdown.md", "user-flows.md", "cl
   if (existsSync(p)) copyFileSync(p, join(historyDir, `${stamp}-${f}`));
 }
 
-const registry = buildTaskRegistry(projectName, slug, withIds);
+const registry = buildTaskRegistry(projectName, slug, withIds, existingRegistry ?? undefined);
 writeFileSync(join(docsDir, "task-registry.json"), JSON.stringify(registry, null, 2), "utf-8");
 writeFileSync(join(docsDir, "task-breakdown.md"), buildTaskBreakdownV2(projectName, withIds), "utf-8");
 writeFileSync(join(docsDir, "user-flows.md"), buildUserFlowsDoc(projectName, flowAnalysis), "utf-8");

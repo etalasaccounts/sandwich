@@ -16,7 +16,7 @@ Each stage is an agent prompt in `agents/`. Run the agent named below as a subag
 
 ## Mode Detection
 
-First, inspect `docs/breakdown/` (this is what `readProjectState` reports):
+First, inspect `docs/breakdown/` (the `readProjectState` helper in `lib/breakdown-lib.ts` returns exactly this snapshot — call it, or read the files directly):
 
 1. **No `task-registry.json`** → this is a **New Project**.
 2. **`task-registry.json` exists** → read it, then classify what the human just gave you:
@@ -29,7 +29,7 @@ First, inspect `docs/breakdown/` (this is what `readProjectState` reports):
 ## New Project
 
 1. Run `breakdown-intake-normalizer` on the raw intake → a PRD. Read its `## Intake Quality` block.
-   - `confidence: needs-more` → ask the human the 1–3 specific questions named in `gaps`, wait, then re-run the normalizer with their answers folded in.
+   - `confidence: needs-more` → ask the human the 1–3 specific questions named in `gaps`, wait, then re-run the normalizer with their answers folded in. (Note: the Pi `run_breakdown` tool and the Claude Code workflow do not pause for this — the Pi tool proceeds with a warning, and the workflow returns a `needs-more` status with the gaps for you to act on. When you are driving the agents yourself, prefer the ask-and-rerun behavior above.)
    - `confidence: ambiguous` → proceed; unclear items will be marked `[ASSUMPTION]` / `[PENDING CLIENT INPUT]` in the outputs.
    - `confidence: sufficient` → proceed.
 2. The PRD becomes `docs/breakdown/source.md`.
@@ -54,7 +54,7 @@ Direct registry edits, no agent. Mark tasks/modules obsolete, or override stabil
 
 ## Overwrite Safety
 
-If `task-registry.json` already exists and the incoming intake looks like a wholly different project (no overlap with `source.md`), do NOT overwrite silently. Tell the human what exists and what would be replaced, and proceed only on explicit confirmation. Every other mode runs without a gate.
+If `task-registry.json` already exists and the incoming intake looks like a wholly different project (no overlap with `source.md`), do NOT overwrite silently. Tell the human what exists and what would be replaced, and proceed only on explicit confirmation. Every other mode runs without a gate. This check is your responsibility as the agent — the packaged `run_breakdown` tool and workflow do not themselves prompt before overwriting, so you must perform this confirmation before invoking them on a path that already has a registry.
 
 ## Invariants
 
