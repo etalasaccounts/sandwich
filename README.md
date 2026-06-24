@@ -1,14 +1,5 @@
 <div align="center">
 
-<pre>
- .--------------------------.
- |     S A N D W I C H      |
- |--------------------------|
- |  >  breakdown    · plan  |
- |  >  next-layer   · soon  |
- '--------------------------'
-</pre>
-
 # 🥪 Sandwich
 
 **A composable agent stack for software agencies — pick the ingredients you want.**
