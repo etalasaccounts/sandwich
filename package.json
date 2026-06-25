@@ -9,7 +9,13 @@
     "url": "https://github.com/etalasaccounts/sandwich.git"
   },
   "pi": {
-    "extensions": ["./brief/pi-extension/brief.ts"],
-    "skills": ["./brief/skills"]
+    "extensions": [
+      "./brief/pi-extension/brief.ts",
+      "./discover/pi-extension/discover.ts"
+    ],
+    "skills": [
+      "./brief/skills",
+      "./discover/skills"
+    ]
   }
 }
