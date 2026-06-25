@@ -1,0 +1,11 @@
+{
+  "name": "sandwich",
+  "version": "0.1.0",
+  "description": "Composable agent stack for software agencies — pick the ingredients you want.",
+  "type": "module",
+  "keywords": ["pi-package", "breakdown", "planning", "task-registry", "client-intake", "agent-stack"],
+  "pi": {
+    "extensions": ["./breakdown/pi-extension/breakdown.ts"],
+    "skills": ["./breakdown/skills"]
+  }
+}

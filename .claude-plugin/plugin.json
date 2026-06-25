@@ -1,0 +1,13 @@
+{
+  "name": "sandwich",
+  "description": "Composable agent stack for software agencies — breakdown pipeline for client intake → PRD → task registry.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Etalas",
+    "email": "h@etalas.com"
+  },
+  "homepage": "https://github.com/etalasaccounts/sandwich",
+  "repository": "https://github.com/etalasaccounts/sandwich",
+  "license": "MIT",
+  "keywords": ["breakdown", "planning", "task-registry", "client-intake", "agent-stack"]
+}

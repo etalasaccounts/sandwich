@@ -37,55 +37,28 @@ request — no menus, no mid-pipeline gates.
 
 ### Prerequisites
 
-- **Node 18+** (or Bun) — the pipeline glue runs as TypeScript via `tsx`.
 - **`pi` CLI** — for the Pi / OpenClaw / Hermes path.
+- **Node 18+** (or Bun) — the pipeline glue runs as TypeScript via `tsx`.
 - **For PDF / DOCX intake only** (Markdown / TXT / CSV need nothing extra):
   - PDF → PyMuPDF (`pip3 install pymupdf`) **or** poppler (`brew install poppler`)
   - DOCX → python-docx (`pip3 install python-docx`)
 
-Keep the `breakdown/` folder intact wherever you put it — the extension loads its
-sibling `lib/` and `agents/` by relative path, so don't copy the extension file
-on its own.
-
-### Pi (one session, quick try)
-
-Point Pi straight at the extension file:
+### Pi / OpenClaw / Hermes
 
 ```bash
-pi -e /absolute/path/to/breakdown/pi-extension/breakdown.ts
+pi install https://github.com/etalasaccounts/sandwich.git
 ```
 
-Then drop an intake file or run `/breakdown <path>`.
-
-### Pi (persistent)
-
-Pi auto-loads extensions from its extension directories
-(`~/.pi/work-extensions/`, `~/.pi/personal-extensions/`). Place the `breakdown/`
-package on the machine and have Pi load `breakdown/pi-extension/breakdown.ts`
-every session — either by adding it to your Pi configuration or by symlinking the
-package into one of those directories. (Exact persistence depends on your Pi
-setup.)
-
-### OpenClaw / Hermes (self-extending Pi agents)
-
-Just ask, in plain English:
-
-> install the breakdown ingredient from `<repo URL or path>`
-
-They pick it up through the package's `pi` field (`extensions` + `skills`) and
-self-install. This is the intended path for the team.
+Start a new Pi session and run `/breakdown <path-to-intake>` to verify.
 
 ### Claude Code
 
-The package is a Claude Code plugin (`.claude-plugin/plugin.json`) plus a skill
-(`skills/using-breakdown/`):
+```bash
+claude install https://github.com/etalasaccounts/sandwich.git
+```
 
-1. Install the `breakdown/` directory as a local plugin (via your plugin
-   marketplace or local-plugin path) so the `using-breakdown` skill loads at
-   session start.
-2. Drop intake or ask to break down a document — the skill routes it to the right
-   mode and runs the pipeline via `workflow/breakdown.workflow.ts` (or by driving
-   the agents directly per the skill).
+The `using-breakdown` skill loads automatically. Drop an intake file or ask to
+break down a document — the skill routes to the right mode automatically.
 
 ### Verify the install
 

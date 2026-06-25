@@ -32,10 +32,25 @@ depends on another being present. Some projects take the lettuce, some don't.
 
 ## 📦 Installation
 
-There is no umbrella-level install — each ingredient installs on its own. Open the
-ingredient and follow its **Installation** section:
+### Pi / OpenClaw / Hermes
 
-- **breakdown** → [`breakdown/README.md` › Installation](breakdown/README.md#installation) — prerequisites, then per-harness steps for Pi, OpenClaw, Hermes, and Claude Code.
+```bash
+pi install https://github.com/etalasaccounts/sandwich.git
+```
+
+Start a new session and run `/breakdown <path-to-intake>` to verify.
+
+### Claude Code
+
+```bash
+claude install https://github.com/etalasaccounts/sandwich.git
+```
+
+### Per-ingredient details
+
+Each ingredient documents its own prerequisites and harness-specific steps:
+
+- **breakdown** → [`breakdown/README.md` › Installation](breakdown/README.md#installation)
 - **next-ingredient** → placeholder, nothing to install yet.
 
 ## 🛠️ Working on an ingredient
