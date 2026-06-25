@@ -1,6 +1,6 @@
 ---
 name: brief
-description: Turn any client input into standardized PRD artifacts. Use when you receive a KAK, RFQ, MOM, or any messy requirement document that needs to become prd.md + user-flows.md + technical-notes.md + client-questions.md.
+description: Turn any client input into standardized PRD artifacts. Use ONLY when explicitly invoked with /brief or when the user pastes a raw requirement document (KAK, RFQ, MOM) as the primary input. Do NOT invoke during active development, coding tasks, or general conversation.
 ---
 
 # sandwich/brief
