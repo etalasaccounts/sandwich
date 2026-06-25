@@ -1,20 +1,9 @@
 {
-  "name": "sandwich-marketplace",
-  "description": "Marketplace for the Sandwich agent stack by Etalas",
-  "owner": {
-    "name": "Etalas",
-    "email": "h@etalas.com"
-  },
-  "plugins": [
-    {
-      "name": "sandwich",
-      "description": "Composable agent stack for software agencies — breakdown pipeline for client intake → PRD → task registry.",
-      "version": "0.1.0",
-      "source": "./",
-      "author": {
-        "name": "Etalas",
-        "email": "h@etalas.com"
-      }
-    }
-  ]
+  "name": "sandwich",
+  "displayName": "Sandwich",
+  "description": "Composable agent stack for software agencies. First ingredient: brief — turns messy client input into standardized PRD artifacts.",
+  "version": "0.1.0",
+  "author": "etalas",
+  "repository": "https://github.com/etalasaccounts/sandwich.git",
+  "tags": ["prd", "brief", "agency", "planning"]
 }

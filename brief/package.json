@@ -1,0 +1,6 @@
+{
+  "name": "@sandwich/brief",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Turn any client input into standardized PRD artifacts"
+}

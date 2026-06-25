@@ -1,11 +1,15 @@
 {
   "name": "sandwich",
   "version": "0.1.0",
-  "description": "Composable agent stack for software agencies — pick the ingredients you want.",
+  "description": "Composable agent stack for software agencies",
   "type": "module",
-  "keywords": ["pi-package", "breakdown", "planning", "task-registry", "client-intake", "agent-stack"],
+  "keywords": ["pi-package", "claude-plugin", "sandwich", "brief", "prd"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/etalasaccounts/sandwich.git"
+  },
   "pi": {
-    "extensions": ["./breakdown/pi-extension/breakdown.ts"],
-    "skills": ["./breakdown/skills"]
+    "extensions": ["./brief/pi-extension/brief.ts"],
+    "skills": ["./brief/skills"]
   }
 }
