@@ -1,7 +1,19 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-export type BriefMode = "new" | "refine" | "answer";
+export type BriefMode =
+  | "greenfield-doc"    // no codebase, formal document (KAK/RFQ/MOM)
+  | "greenfield-idea"   // no codebase, conversational/vague input
+  | "brownfield"        // codebase exists, no brief yet
+  | "refine"            // brief exists + new requirements input
+  | "answer";           // brief exists + client answered questions
+
+export interface BriefContext {
+  mode: BriefMode;
+  hasCodebase: boolean;
+  hasBrief: boolean;
+  hasInput: boolean;
+}
 
 export interface BriefPaths {
   root: string;
@@ -29,14 +41,48 @@ export function getBriefPaths(projectRoot: string): BriefPaths {
   };
 }
 
-export function detectMode(projectRoot: string): BriefMode {
-  const paths = getBriefPaths(projectRoot);
-  return existsSync(paths.prd) ? "refine" : "new";
+export function detectCodebase(projectRoot: string): boolean {
+  const signals = ["package.json", "go.mod", "requirements.txt", "Cargo.toml", "pom.xml", "build.gradle", "composer.json"];
+  if (signals.some((f) => existsSync(join(projectRoot, f)))) return true;
+  const srcDirs = ["src", "app", "lib", "cmd", "internal"];
+  return srcDirs.some((d) => existsSync(join(projectRoot, d)));
+}
+
+export function detectContext(projectRoot: string, input: string): BriefContext {
+  const hasBrief = existsSync(getBriefPaths(projectRoot).prd);
+  const hasCodebase = detectCodebase(projectRoot);
+  const hasInput = input.trim().length > 0;
+
+  let mode: BriefMode;
+  if (hasBrief && hasInput) {
+    // Heuristic: if input looks like answers (short responses, checkmarks, quoted questions)
+    // vs new requirements (long paragraphs, module names, feature lists)
+    const looksLikeAnswers =
+      input.length < 2000 &&
+      (input.includes("ya,") ||
+        input.includes("tidak,") ||
+        input.includes("iya,") ||
+        input.includes("yes,") ||
+        input.includes("no,") ||
+        /Q\d+/.test(input));
+    mode = looksLikeAnswers ? "answer" : "refine";
+  } else if (!hasBrief && hasCodebase) {
+    mode = "brownfield";
+  } else if (!hasBrief && hasInput) {
+    // Formal doc signals: long text, structured sections, legal language
+    const looksLikeFormalDoc =
+      input.length > 3000 ||
+      /KAK|RFQ|MOM|Kerangka Acuan|Terms of Reference|Ruang Lingkup|Scope of Work/i.test(input);
+    mode = looksLikeFormalDoc ? "greenfield-doc" : "greenfield-idea";
+  } else {
+    mode = "greenfield-idea";
+  }
+
+  return { mode, hasCodebase, hasBrief, hasInput };
 }
 
 export function ensureBriefDir(projectRoot: string): void {
-  const paths = getBriefPaths(projectRoot);
-  mkdirSync(paths.root, { recursive: true });
+  mkdirSync(getBriefPaths(projectRoot).root, { recursive: true });
 }
 
 export function readBriefArtifacts(projectRoot: string): Partial<BriefArtifacts> {

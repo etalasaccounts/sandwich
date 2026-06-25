@@ -1,25 +1,11 @@
 # Detect Brief Mode
 
-You receive a JSON context:
-```json
-{
-  "input": "<raw client input text>",
-  "existingArtifacts": {
-    "prd": "<content or null>",
-    "userFlows": "<content or null>",
-    "technicalNotes": "<content or null>",
-    "clientQuestions": "<content or null>"
-  }
-}
-```
+> NOTE: Mode detection is handled in brief-lib.ts (detectContext). This agent is kept as documentation only and is not called by the workflow.
 
-Classify this run into exactly one mode:
+The five modes:
 
-- **new** — No existing artifacts (all null). Start fresh.
-- **answer** — Existing artifacts exist AND the input appears to be client answers to questions (the input contains direct responses to items that appear in the clientQuestions artifact — phrases like "ya, kami akan", "tidak perlu", specific numbers or names answering open questions).
-- **refine** — Existing artifacts exist AND the input is new/updated requirements, scope changes, or clarifications that aren't direct question answers.
-
-Output exactly one JSON object, nothing else:
-```json
-{ "mode": "new" | "refine" | "answer", "reasoning": "<one sentence>" }
-```
+- **greenfield-doc** — no codebase, formal document input (KAK, RFQ, MOM, long structured text)
+- **greenfield-idea** — no codebase, conversational or vague input
+- **brownfield** — codebase exists, no brief yet → scan codebase first
+- **refine** — brief exists + new requirements or scope changes
+- **answer** — brief exists + client answered questions from client-questions.md

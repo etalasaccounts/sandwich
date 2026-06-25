@@ -1,65 +1,69 @@
 ---
 name: brief
-description: Turn any client input into standardized PRD artifacts. Use ONLY when explicitly invoked with /brief or when the user pastes a raw requirement document (KAK, RFQ, MOM) as the primary input. Do NOT invoke during active development, coding tasks, or general conversation.
+description: Generate or update project brief artifacts (prd.md, user-flows.md, technical-notes.md, client-questions.md). Use ONLY when explicitly invoked with /brief, or when the user asks to document/brief a project. Do NOT invoke during active development, coding tasks, or general conversation.
 ---
 
 # sandwich/brief
 
-You are running the `brief` pipeline. Your job is to turn the client's input into four standardized artifacts in `docs/sandwich/brief/`.
+You are running the `brief` pipeline. Your job: produce four standardized artifacts in `docs/sandwich/brief/` that feed the downstream task breakdown pipeline.
 
-## When to invoke this skill
+## When to invoke
 
-- User pastes a KAK, RFQ, MOM, or meeting notes
-- User says "brief this" / "run brief" / "buat brief" / "generate prd"
 - User runs `/brief`
+- User pastes a KAK, RFQ, MOM, or meeting notes
+- User says "brief this" / "buat brief" / "document this project" / "generate prd"
+- User is onboarding onto a project with no brief yet
 
 ## Artifacts
 
-All four are always generated (or updated) at: `docs/sandwich/brief/`
+All four are always written to `docs/sandwich/brief/`:
 
 | File | Purpose |
 |------|---------|
-| `prd.md` | Canonical requirements — actors, modules, features, constraints |
-| `user-flows.md` | Narrative user journeys (Jeff Patton backbone stories) |
-| `technical-notes.md` | Tech lead's architecture notes — decisions, risks, stack |
-| `client-questions.md` | Prioritized questions the team needs answered |
+| `prd.md` | Canonical requirements — actors, modules, features, constraints, confidence markers |
+| `user-flows.md` | Narrative user journeys with module status (planned/exists/partial) |
+| `technical-notes.md` | Tech lead's architecture notes — decisions, risks, current state |
+| `client-questions.md` | Prioritized questions blocking task breakdown |
 
-## Mode detection
+## Mode detection (automatic)
 
-Before running, check whether `docs/sandwich/brief/prd.md` already exists:
+You detect the right mode — the user doesn't need to specify:
 
-- **New mode** — file does not exist. Create all four from scratch.
-- **Refine mode** — file exists AND user is providing new/updated requirements. Update all four, mark changed sections with `<!-- updated -->`.
-- **Answer mode** — file exists AND user is pasting client answers to questions in `client-questions.md`. Integrate answers, move resolved questions to Answered section.
+| Mode | Signals |
+|------|---------|
+| `greenfield-doc` | No codebase, formal document (KAK/RFQ/MOM, long structured text) |
+| `greenfield-idea` | No codebase, conversational or vague input |
+| `brownfield` | Codebase exists, no `docs/sandwich/brief/prd.md` yet |
+| `refine` | Brief exists + new requirements input |
+| `answer` | Brief exists + input looks like answers to client-questions.md |
 
 ## Pipeline
 
-Run these steps in order. Each step's output feeds the next.
+1. **Detect context** — check: does `docs/sandwich/brief/prd.md` exist? does a codebase exist (`package.json`, `src/`, etc.)? what kind of input is this?
 
-1. **Detect mode** — check for existing `docs/sandwich/brief/prd.md`
-2. **Read existing artifacts** — if refine/answer mode, read all four files
-3. **Extract requirements** — parse the raw input into structured requirements (actors, modules, features, constraints, ambiguities)
-4. **Write prd.md** — canonical requirements document
-5. **Write user-flows.md** — narrative flows, one per major actor journey
-6. **Write technical-notes.md** — tech lead's architecture notes
-7. **Write client-questions.md** — prioritized questions for client
-8. **Summarize** — print a one-paragraph summary of what was created/changed
+2. **Discover** *(brownfield only)* — scan file tree, read key files, read git history in parallel
+
+3. **Extract requirements** — parse input (or codebase signals) into structured requirements with confidence markers: `[stated]`, `[discussed]`, `[inferred]`, `[assumed]`
+
+4. **Generate all four artifacts in parallel** — prd.md, user-flows.md, technical-notes.md, client-questions.md
+
+5. **Reconcile** *(refine/answer only)* — summarize what changed
 
 ## Output
 
-After writing all four files, print:
 ```
 ✓ docs/sandwich/brief/prd.md
 ✓ docs/sandwich/brief/user-flows.md
 ✓ docs/sandwich/brief/technical-notes.md
 ✓ docs/sandwich/brief/client-questions.md
 
-[one sentence summary of what the project is and what mode was used]
+[one sentence: project name, mode used, N questions remain / N inferred items to validate]
 ```
 
 ## Style rules
 
-- Keep client's terminology — don't translate their module names
-- Be opinionated in technical-notes.md — recommend, don't just list options
-- client-questions.md max 5 questions per priority level
-- user-flows.md is narrative, not UI spec — "requests asset collaboration" not "clicks the blue button"
+- Keep client's terminology — do not translate module names
+- Be opinionated in technical-notes.md
+- client-questions.md: max 5 per priority level, Priority 1 = blocks task breakdown
+- user-flows.md: narrative, not UI spec — "requests collaboration" not "clicks button"
+- Brownfield: every inferred item carries `[inferred]` — do not present guesses as facts
