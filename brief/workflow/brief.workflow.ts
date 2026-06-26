@@ -25,6 +25,10 @@ import {
   writeBriefContext,
   getBriefPaths,
 } from "../lib/brief-lib.js";
+import {
+  validateBriefArtifacts,
+  validateBriefForPlanning,
+} from "../lib/validation.js";
 
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
@@ -210,6 +214,34 @@ log(`✓ ${paths.prd}`);
 log(`✓ ${paths.userFlows}`);
 log(`✓ ${paths.technicalNotes}`);
 log(`✓ ${paths.clientQuestions}`);
+
+// Post-generation validation
+const artifactValidation = validateBriefArtifacts({
+  prd: after.prd,
+  userFlows: after.userFlows,
+  technicalNotes: after.technicalNotes,
+  clientQuestions: after.clientQuestions,
+});
+
+if (artifactValidation.warnings.length > 0) {
+  log("\nArtifact warnings:");
+  artifactValidation.warnings.slice(0, 3).forEach(w => log(`  ⚠ ${w}`));
+}
+
+const planningReadiness = validateBriefForPlanning({
+  prd: after.prd,
+  userFlows: after.userFlows,
+  technicalNotes: after.technicalNotes,
+  clientQuestions: after.clientQuestions,
+});
+
+log(`\nConfidence: ${artifactValidation.confidence.score.toFixed(2)} (${artifactValidation.confidence.level})`);
+log(`Ready for /plan: ${planningReadiness.ready ? "✓" : "✗"} ${planningReadiness.reason}`);
+
+if (!planningReadiness.ready) {
+  log("\nActions needed:");
+  planningReadiness.actions.forEach(a => log(`  • ${a}`));
+}
 
 // Phase 6: Reconcile (refine/answer only)
 if (context.mode === "refine" || context.mode === "answer") {

@@ -1,15 +1,40 @@
 {
   "name": "sandwich",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Composable agent stack for software agencies",
   "type": "module",
-  "keywords": ["pi-package", "claude-plugin", "sandwich", "brief", "prd"],
+  "keywords": [
+    "pi-package",
+    "claude-plugin",
+    "sandwich",
+    "brief",
+    "prd",
+    "plan"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/etalasaccounts/sandwich.git"
   },
+  "scripts": {
+    "test": "node --experimental-strip-types plan/lib/validation.selfcheck.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
   "pi": {
-    "extensions": ["./brief/pi-extension/brief.ts"],
-    "skills": ["./brief/skills"]
+    "extensions": [
+      "./brief/pi-extension/brief.ts",
+      "./plan/pi-extension/plan.ts",
+      "./spec/pi-extension/spec.ts"
+    ],
+    "skills": [
+      "./brief/skills",
+      "./plan/skills/plan",
+      "./spec/skills/recipe"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "typescript": "^6.0.3"
   }
 }
