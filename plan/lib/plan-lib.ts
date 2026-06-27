@@ -29,6 +29,7 @@ export interface FeatureScore {
   impact: { score: number; factors: string[] };
   effort: { score: number; factors: string[]; hours?: string };
   risk: { score: number; factors: string[] };
+  urgency: { factor: 0.8 | 1.0 | 1.2 | 1.5; reason: string };
   priority: number;
 }
 
