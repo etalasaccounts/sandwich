@@ -28,6 +28,7 @@ import {
   writePlanContext,
   getGitState,
   matchFeatures,
+  applyReconciliation,
   type Feature,
   type FeatureScore,
   type ImpactAnalysis,
@@ -116,8 +117,8 @@ log(`Brief hash: ${briefHash} ${briefChanged ? "(changed)" : "(unchanged)"}`);
 // Skip extraction if nothing changed
 if (!forceFresh && !briefChanged && existingFeatures.length > 0) {
   log("\nBrief unchanged. Use --fresh to force re-extraction.\n");
-  log("Existing queue preserved. Run `/plan --fresh` to regenerate.");
-  
+  log("Existing queue preserved. Run `/prep --fresh` to regenerate.");
+
   // Still show recommendation from previous run
   const prevQueue = readPlanArtifacts(projectRoot).featureQueue;
   if (prevQueue) {
@@ -125,7 +126,7 @@ if (!forceFresh && !briefChanged && existingFeatures.length > 0) {
     const lines = prevQueue.split("\n").slice(0, 20);
     lines.forEach(l => log(`  ${l}`));
   }
-  return;
+  throw new Error("SKIP");
 }
 
 // Special case: Impact-only mode
@@ -154,7 +155,7 @@ if (impactOnly && featureIdArg) {
   writeImpactAnalysis(projectRoot, featureIdArg, analysis);
   
   log(`✓ .sandwich/impact-analysis.md for ${featureIdArg}`);
-  return;
+  throw new Error("SKIP");
 }
 
 // ==================== PHASE 2: VALIDATE BRIEF ====================
@@ -284,6 +285,8 @@ if (existingFeatures.length > 0 && !forceFresh) {
         log(`    - ${r.id}: ${r.title}`);
       });
     }
+
+    ({ features: featuresToScore } = applyReconciliation(featuresToScore, existingFeatures, reconciliation, []));
   }
 }
 
