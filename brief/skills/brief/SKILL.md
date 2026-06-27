@@ -1,6 +1,6 @@
 ---
-name: brief
-description: Generate or update project brief artifacts (prd.md, user-flows.md, technical-notes.md, client-questions.md). Use ONLY when explicitly invoked with /brief, or when the user asks to document/brief a project. Do NOT invoke during active development, coding tasks, or general conversation.
+name: order
+description: Generate or update project brief artifacts (prd.md, user-flows.md, technical-notes.md, client-questions.md). Use ONLY when explicitly invoked with /order, or when the user asks to document/brief a project. Do NOT invoke during active development, coding tasks, or general conversation.
 ---
 
 # sandwich/brief
@@ -9,7 +9,7 @@ You are running the `brief` pipeline. Your job: produce four standardized artifa
 
 ## When to invoke
 
-- User runs `/brief`
+- User runs `/order`
 - User pastes a KAK, RFQ, MOM, or meeting notes
 - User says "brief this" / "buat brief" / "document this project" / "generate prd"
 - User is onboarding onto a project with no brief yet
