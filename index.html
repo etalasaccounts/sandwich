@@ -114,33 +114,6 @@ gtag('config', 'G-2M6V79H761');
     class="text-zinc-800 antialiased selection:bg-[#f91814] selection:text-white min-h-screen flex flex-col overflow-x-hidden bg-[#F4EBE1]"
     style="font-family: 'Inter', sans-serif;"
   >
-    <!-- Navigation -->
-    <nav class="fixed top-0 inset-x-0 z-50 bg-transparent">
-      <div
-        class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between"
-      >
-        <a
-          href="/"
-          class="flex items-center"
-        >
-          <img
-            src="sandwich-logo.png"
-            alt="SANDWICH"
-            class="h-10 w-auto"
-          />
-        </a>
-
-        <a
-          href="https://github.com/etalasaccounts/sandwich"
-          target="_blank"
-          class="inline-flex items-center gap-2 text-xs uppercase tracking-tight font-medium text-white bg-black hover:bg-zinc-800 px-5 py-2 rounded-full transition-all shadow-sm"
-        >
-          <iconify-icon icon="mdi:github" class="text-lg"></iconify-icon>
-          GitHub
-        </a>
-      </div>
-    </nav>
-
     <!-- Hero Section -->
     <section
       class="relative pt-32 pb-20 md:pt-40 md:pb-32 flex flex-col items-center text-center px-6 overflow-hidden"
@@ -200,36 +173,6 @@ gtag('config', 'G-2M6V79H761');
       </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="py-24 md:py-32 bg-black">
-      <div
-        class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center"
-      >
-        <p
-          class="text-2xl tracking-tight mb-4 uppercase text-white"
-          style="font-family: 'Mouse Memoirs', sans-serif;"
-        >
-          The Process
-        </p>
-        <h2
-          class="text-4xl md:text-6xl tracking-tighter leading-tight mb-8 text-white"
-          style="font-family: 'Bowlby One', system-ui;"
-        >
-          ORDER → PREP → RECIPE
-        </h2>
-        <p
-          class="max-w-xl mx-auto text-white mb-10 text-sm font-medium tracking-tight leading-relaxed"
-        >
-          Start with messy client input. <strong>Order</strong> turns it into structured brief artifacts. <strong>Prep</strong> prioritizes features with impact analysis. <strong>Recipe</strong> generates machine-checkable specs. Human decisions at each gate, AI automates the analysis.
-        </p>
-        <img
-          src="client-intakes.webp"
-          alt="Client Intake Process"
-          class="w-full max-w-2xl rounded-2xl shadow-xl mt-8"
-        />
-      </div>
-    </section>
-
     <!-- Experience / Feature Section -->
     <section class="py-24 md:py-32 relative overflow-hidden bg-[#f91814]">
       <div class="max-w-7xl mx-auto px-6">
@@ -241,153 +184,87 @@ gtag('config', 'G-2M6V79H761');
             The Harnesses
           </p>
           <h2
-            class="text-4xl md:text-5xl tracking-tighter leading-tight text-white"
+            class="text-4xl md:text-5xl tracking-tighter leading-tight text-white mb-6"
             style="font-family: 'Bowlby One', system-ui;"
           >
-            VALIDATION BY DESIGN
+            MESSY INPUT. CLEAN SPEC.
           </h2>
+          <p class="max-w-lg mx-auto text-white/80 text-sm font-medium tracking-tight leading-relaxed">
+            Clients send voice notes, screenshots, Notion dumps. SANDWICH turns all of it into structured, machine-readable specs — validated, scored, and ready for your agents to execute.
+          </p>
         </div>
 
-        <div
-          class="flex flex-col md:flex-row items-center justify-between gap-12 mt-12 relative bg-transparent p-0"
-        >
-          <div
-            class="flex flex-col gap-6 text-xs uppercase tracking-tight font-medium md:w-1/4 text-white"
-          >
+        <div class="flex flex-row items-center justify-center gap-10 mt-8">
+          <!-- Left -->
+          <div class="flex flex-col gap-10 items-start shrink-0 text-xs uppercase tracking-tight font-medium text-white">
             <div class="flex items-center gap-3">
-              <iconify-icon
-                icon="solar:shield-check-linear"
-                class="text-lg text-white"
-                style="stroke-width: 1.5;"
-              ></iconify-icon>
-              <span>Schema Validation</span>
+              <iconify-icon icon="solar:microphone-linear" class="text-xl" style="stroke-width:1.5;"></iconify-icon>
+              <span>Voice Note</span>
             </div>
             <div class="flex items-center gap-3">
-              <iconify-icon
-                icon="solar:refresh-linear"
-                class="text-lg text-white"
-                style="stroke-width: 1.5;"
-              ></iconify-icon>
-              <span>Retry with Repair</span>
+              <iconify-icon icon="solar:camera-linear" class="text-xl" style="stroke-width:1.5;"></iconify-icon>
+              <span>Screenshot</span>
             </div>
             <div class="flex items-center gap-3">
-              <iconify-icon
-                icon="solar:code-linear"
-                class="text-lg text-white"
-                style="stroke-width: 1.5;"
-              ></iconify-icon>
-              <span>Zod Schemas</span>
+              <iconify-icon icon="solar:document-text-linear" class="text-xl" style="stroke-width:1.5;"></iconify-icon>
+              <span>Notion Dump</span>
             </div>
           </div>
 
-          <div class="md:w-2/4 relative flex justify-center z-10">
-            <img
-              src="sandwich-with-hands.webp"
-              alt="Sandwich with hands"
-              class="w-full max-w-[280px] md:max-w-[400px] drop-shadow-xl"
-            />
-          </div>
+          <!-- Illustration -->
+          <img src="spec-illustration.webp" alt="Messy input to clean spec" class="w-72 md:w-96 drop-shadow-xl shrink-0" />
 
-          <div
-            class="flex flex-col gap-6 text-xs uppercase tracking-tight font-medium md:w-1/4 md:items-end text-white"
-          >
-            <div class="flex items-center gap-3 flex-row-reverse md:flex-row">
-              <span>Confidence Scoring</span>
-              <iconify-icon
-                icon="solar:chart-linear"
-                class="text-lg text-white"
-                style="stroke-width: 1.5;"
-              ></iconify-icon>
+          <!-- Right -->
+          <div class="flex flex-col gap-10 items-start shrink-0 text-xs uppercase tracking-tight font-medium text-white">
+            <div class="flex items-center gap-3">
+              <iconify-icon icon="solar:chat-line-linear" class="text-xl" style="stroke-width:1.5;"></iconify-icon>
+              <span>Slack Thread</span>
             </div>
-            <div class="flex items-center gap-3 flex-row-reverse md:flex-row">
-              <span>Threshold Blocking</span>
-              <iconify-icon
-                icon="solar:lock-linear"
-                class="text-lg text-white"
-                style="stroke-width: 1.5;"
-              ></iconify-icon>
+            <div class="flex items-center gap-3">
+              <iconify-icon icon="solar:letter-linear" class="text-xl" style="stroke-width:1.5;"></iconify-icon>
+              <span>Email Chain</span>
             </div>
-            <div class="flex items-center gap-3 flex-row-reverse md:flex-row">
-              <span>Human Review Gates</span>
-              <iconify-icon
-                icon="solar:user-check-linear"
-                class="text-lg text-white"
-                style="stroke-width: 1.5;"
-              ></iconify-icon>
+            <div class="flex items-center gap-3">
+              <iconify-icon icon="solar:phone-linear" class="text-xl" style="stroke-width:1.5;"></iconify-icon>
+              <span>Call Recording</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Ingredients Bento Grid -->
-    <section id="ingredients" class="py-24 md:py-32 bg-[#F4EBE1]">
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2
-            class="text-4xl md:text-5xl tracking-tighter mb-4 text-[#f91814]"
-            style="font-family: 'Bowlby One', system-ui;"
-          >
-            THE INGREDIENTS
-          </h2>
-          <h3
-            class="text-xl md:text-2xl font-medium tracking-tight text-[#f91814]"
-          >
-            Each layer serves a purpose
-          </h3>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12">
-          <div
-            class="rounded-3xl p-8 flex flex-col items-center text-center transition-colors bg-transparent"
-          >
-            <img
-              src="https://www.cravburgers.shop/img-webp/tomato.webp"
-              alt="Order"
-              class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-md mb-6 hover:scale-110 transition-transform duration-500"
-            />
-            <h4 class="tracking-tight text-[#f91814] font-bold text-lg">
-              Order
-            </h4>
+    <!-- Ingredients Section -->
+    <section id="about" class="py-24 md:py-32 bg-black">
+      <div class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+        <p class="text-2xl tracking-tight mb-4 uppercase text-white" style="font-family: 'Mouse Memoirs', sans-serif;">
+          Ingredients
+        </p>
+        <h2 class="text-4xl md:text-6xl tracking-tighter leading-tight mb-6 text-white" style="font-family: 'Bowlby One', system-ui;">
+          WHAT'S IN THE STACK
+        </h2>
+        <p class="max-w-lg mx-auto text-white/60 mb-16 text-sm font-medium tracking-tight leading-relaxed">
+          Four layers, each with a job. Together they take raw client chaos and hand your agent a spec it can actually execute.
+        </p>
+        <div class="flex flex-row justify-center items-start gap-24">
+          <div class="flex flex-col items-center text-center w-40">
+            <img src="https://www.cravburgers.shop/img-webp/tomato.webp" alt="Order" class="w-36 h-36 object-contain drop-shadow-md mb-5 hover:scale-110 transition-transform duration-500" />
+            <h4 class="tracking-tight text-white font-bold text-base uppercase">/ Order</h4>
+            <p class="text-xs text-white/60 mt-1 font-medium">Structures the brief</p>
           </div>
-
-          <div
-            class="rounded-3xl p-8 flex flex-col items-center text-center transition-colors md:translate-y-4 bg-transparent"
-          >
-            <img
-              src="https://www.cravburgers.shop/img-webp/cheese.webp"
-              alt="Prep"
-              class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-md mb-6 hover:scale-110 transition-transform duration-500"
-            />
-            <h4 class="tracking-tight text-[#f91814] font-bold text-lg">
-              Prep
-            </h4>
+          <div class="flex flex-col items-center text-center w-40 translate-y-8">
+            <img src="https://www.cravburgers.shop/img-webp/cheese.webp" alt="Prep" class="w-36 h-36 object-contain drop-shadow-md mb-5 hover:scale-110 transition-transform duration-500" />
+            <h4 class="tracking-tight text-white font-bold text-base uppercase">/ Prep</h4>
+            <p class="text-xs text-white/60 mt-1 font-medium">Scores impact</p>
           </div>
-
-          <div
-            class="rounded-3xl p-8 flex flex-col items-center text-center transition-colors bg-transparent"
-          >
-            <img
-              src="https://www.cravburgers.shop/img-webp/meat.webp"
-              alt="Recipe"
-              class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-md mb-6 hover:scale-110 transition-transform duration-500"
-            />
-            <h4 class="tracking-tight text-[#f91814] font-bold text-lg">
-              Recipe
-            </h4>
+          <div class="flex flex-col items-center text-center w-40">
+            <img src="https://www.cravburgers.shop/img-webp/meat.webp" alt="Recipe" class="w-36 h-36 object-contain drop-shadow-md mb-5 hover:scale-110 transition-transform duration-500" />
+            <h4 class="tracking-tight text-white font-bold text-base uppercase">/ Recipe</h4>
+            <p class="text-xs text-white/60 mt-1 font-medium">Writes the spec</p>
           </div>
-
-          <div
-            class="rounded-3xl p-8 flex flex-col items-center text-center transition-colors md:translate-y-4 bg-transparent"
-          >
-            <img
-              src="https://www.cravburgers.shop/img-webp/lettuce.webp"
-              alt="Validation"
-              class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-md mb-6 hover:scale-110 transition-transform duration-500"
-            />
-            <h4 class="tracking-tight text-[#f91814] font-bold text-lg">
-              Validation
-            </h4>
+          <div class="flex flex-col items-center text-center w-40 translate-y-8">
+            <img src="https://www.cravburgers.shop/img-webp/lettuce.webp" alt="Validation" class="w-36 h-36 object-contain drop-shadow-md mb-5 hover:scale-110 transition-transform duration-500" />
+            <h4 class="tracking-tight text-white font-bold text-base uppercase">/ Validate</h4>
+            <p class="text-xs text-white/60 mt-1 font-medium">Checks confidence</p>
           </div>
         </div>
       </div>
@@ -472,14 +349,10 @@ gtag('config', 'G-2M6V79H761');
       </div>
     </section>
 
-    <!-- CTA Section -->
-    <section id="cta" class="py-24 md:py-32 relative overflow-hidden bg-[#F4EBE1]">
-      <div
-        class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12 md:gap-20"
-      >
-        <div
-          class="md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left"
-        >
+    <!-- Q&A Section -->
+    <section id="faq" class="py-24 md:py-32 bg-black">
+      <div class="max-w-3xl mx-auto px-6">
+        <div class="text-center mb-16">
           <p
             class="text-xl md:text-2xl tracking-tight mb-4 uppercase text-[#f91814]"
             style="font-family: 'Mouse Memoirs', sans-serif;"
@@ -487,139 +360,90 @@ gtag('config', 'G-2M6V79H761');
             Shout Out
           </p>
           <h2
-            class="text-5xl md:text-7xl tracking-tighter text-[#f91814] leading-none mb-8"
+            class="text-4xl md:text-6xl tracking-tighter leading-tight text-white"
             style="font-family: 'Bowlby One', system-ui;"
           >
-            BORN FROM
-            <br />
-            REAL EXPERIENCE
+            GOT QUESTIONS?
           </h2>
-          <p
-            class="text-sm text-zinc-500 mb-10 font-medium leading-relaxed max-w-sm"
-          >
-            This project was born at <a href="https://etalas.com" target="_blank" class="text-[#f91814] hover:underline font-semibold">Etalas</a>, an Indonesian software house working with enterprise clients. These skills were forged from actual agency battles — messy inputs, unpredictable AI, and the need for reliable delivery.
-          </p>
+        </div>
+
+        <div class="flex flex-col divide-y divide-zinc-800">
+
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none gap-4">
+              <span class="text-base font-semibold text-white tracking-tight">Who built this?</span>
+              <iconify-icon icon="solar:alt-arrow-down-linear" class="text-[#f91814] text-xl shrink-0 transition-transform duration-300 group-open:rotate-180"></iconify-icon>
+            </summary>
+            <p class="mt-4 text-sm text-zinc-400 leading-relaxed font-medium">
+              SANDWICH was built at <a href="https://etalas.com" target="_blank" class="text-[#f91814] hover:underline">Etalas</a>, an Indonesian software house working with enterprise clients. These skills were forged from actual agency battles — messy inputs, unpredictable AI, and the need for reliable delivery.
+            </p>
+          </details>
+
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none gap-4">
+              <span class="text-base font-semibold text-white tracking-tight">Why does this exist?</span>
+              <iconify-icon icon="solar:alt-arrow-down-linear" class="text-[#f91814] text-xl shrink-0 transition-transform duration-300 group-open:rotate-180"></iconify-icon>
+            </summary>
+            <p class="mt-4 text-sm text-zinc-400 leading-relaxed font-medium">
+              Client briefs are chaotic by nature. SANDWICH gives you a repeatable pipeline — from raw client input to validated, machine-checkable specs — so your AI agent doesn't guess, it executes.
+            </p>
+          </details>
+
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none gap-4">
+              <span class="text-base font-semibold text-white tracking-tight">Is it free?</span>
+              <iconify-icon icon="solar:alt-arrow-down-linear" class="text-[#f91814] text-xl shrink-0 transition-transform duration-300 group-open:rotate-180"></iconify-icon>
+            </summary>
+            <p class="mt-4 text-sm text-zinc-400 leading-relaxed font-medium">
+              Yes. Fully open source on <a href="https://github.com/etalasaccounts/sandwich" target="_blank" class="text-[#f91814] hover:underline">GitHub</a>. Install it with one command and use it in any project, no account required.
+            </p>
+          </details>
+
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none gap-4">
+              <span class="text-base font-semibold text-white tracking-tight">Which AI agents are supported?</span>
+              <iconify-icon icon="solar:alt-arrow-down-linear" class="text-[#f91814] text-xl shrink-0 transition-transform duration-300 group-open:rotate-180"></iconify-icon>
+            </summary>
+            <p class="mt-4 text-sm text-zinc-400 leading-relaxed font-medium">
+              Pi, Claude Code, and Codex. Each has a one-liner install command — pick your agent from the hero and copy it. More agents coming as the ecosystem grows.
+            </p>
+          </details>
+
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none gap-4">
+              <span class="text-base font-semibold text-white tracking-tight">Do I need to configure anything?</span>
+              <iconify-icon icon="solar:alt-arrow-down-linear" class="text-[#f91814] text-xl shrink-0 transition-transform duration-300 group-open:rotate-180"></iconify-icon>
+            </summary>
+            <p class="mt-4 text-sm text-zinc-400 leading-relaxed font-medium">
+              Just install via your agent's skill manager. The Order → Prep → Recipe pipeline works out of the box. Each ingredient is a standalone skill — use all three or drop in just what you need.
+            </p>
+          </details>
+
+        </div>
+
+        <div class="mt-14 text-center">
           <a
             href="https://etalas.com"
             target="_blank"
             class="inline-flex items-center gap-2 bg-[#f91814] text-white px-8 py-3.5 rounded-full font-medium text-xs uppercase tracking-tight hover:bg-red-700 transition-colors shadow-md shadow-red-500/20"
           >
-            etalas.com
-            <iconify-icon
-              icon="solar:arrow-right-up-linear"
-              style="stroke-width: 1.5;"
-            ></iconify-icon>
+            Visit Etalas
+            <iconify-icon icon="solar:arrow-right-up-linear" style="stroke-width: 1.5;"></iconify-icon>
           </a>
-        </div>
-
-        <div class="md:w-1/2 w-full relative">
-          <div
-            class="absolute inset-0 bg-gradient-to-tr from-zinc-100 to-transparent rounded-[2rem] -z-10 translate-x-4 translate-y-4"
-          ></div>
-          <img
-            src="https://www.cravburgers.shop/img-webp/cta.webp"
-            alt="Premium smashed burger"
-            class="rounded-[2rem] shadow-xl object-cover aspect-[4/5] w-full border border-zinc-100"
-          />
         </div>
       </div>
     </section>
 
     <!-- Footer -->
-    <footer
-      class="pt-20 pb-12 mt-auto text-white border-t bg-black border-zinc-800"
-    >
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="flex flex-col md:flex-row justify-between gap-16 mb-16">
-          <!-- Brand -->
-          <div class="max-w-md">
-            <a
-              href="/"
-              class="block mb-6"
-            >
-              <img
-                src="sandwich-logo.png"
-                alt="SANDWICH"
-                class="h-12 w-auto"
-              />
-            </a>
-            <p
-              class="text-sm text-zinc-400 font-medium leading-relaxed tracking-tight mb-6"
-            >
-              Composable agent stack with validated outputs and confidence checks. Schema-driven, self-repairing, threshold-aware.
-            </p>
-            <div class="flex items-center gap-4 text-zinc-400">
-              <a
-                href="https://github.com/etalasaccounts/sandwich"
-                aria-label="GitHub"
-                class="hover:text-white transition-colors"
-              >
-                <iconify-icon
-                  icon="mdi:github"
-                  class="text-2xl"
-                ></iconify-icon>
-              </a>
-              <a
-                href="https://twitter.com/etalasworks"
-                aria-label="Twitter"
-                class="hover:text-white transition-colors"
-              >
-                <iconify-icon
-                  icon="mdi:twitter"
-                  class="text-2xl"
-                ></iconify-icon>
-              </a>
-            </div>
-          </div>
-
-          <!-- Newsletter -->
-          <div class="max-w-sm">
-            <h4
-              class="text-white font-bold tracking-tight mb-6 uppercase text-sm"
-            >
-              Stay Updated
-            </h4>
-            <p
-              class="text-sm text-zinc-400 font-medium leading-relaxed tracking-tight mb-4"
-            >
-              Get updates on new features and releases.
-            </p>
-            <form
-              class="flex flex-col gap-3"
-              onsubmit="event.preventDefault();"
-            >
-              <input
-                type="email"
-                placeholder="Your email"
-                class="w-full border rounded-full px-5 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#f91814] transition-colors bg-zinc-900 border-zinc-700"
-                required=""
-              />
-              <button
-                type="submit"
-                class="w-full bg-[#f91814] text-white px-5 py-3 rounded-full font-semibold text-xs uppercase tracking-tight hover:bg-red-700 transition-colors shadow-sm"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
+    <footer class="py-10 text-white bg-black border-t border-zinc-800">
+      <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-xs font-medium text-white/40">© 2026 SANDWICH by Etalas</p>
+        <div class="flex items-center gap-6">
+          <a href="https://github.com/etalasaccounts/sandwich" target="_blank" class="text-xs font-medium text-white/70 hover:text-white transition-colors">GitHub</a>
+          <a href="https://etalas.com" target="_blank" class="text-xs font-medium text-white/70 hover:text-white transition-colors">Etalas</a>
+          <a href="https://twitter.com/etalasworks" target="_blank" class="text-xs font-medium text-white/70 hover:text-white transition-colors">Twitter</a>
         </div>
-
-        <!-- Bottom -->
-        <div
-          class="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4 border-zinc-800"
-        >
-          <p class="text-xs font-medium tracking-tight text-zinc-500">
-            © 2026 SANDWICH — All rights reserved.
-          </p>
-          <div class="flex gap-4">
-            <a
-              href="https://github.com/etalasaccounts/sandwich/blob/main/LICENSE"
-              class="text-xs font-medium tracking-tight text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              License
-            </a>
-          </div>
-        </div>
+      </div>
     </footer>
     <script>
       const commands = {
