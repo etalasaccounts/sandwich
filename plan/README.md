@@ -13,16 +13,16 @@ Consumes brief artifacts and produces a prioritized feature queue with:
 
 ```bash
 # Full prioritization pipeline
-/plan
+/prep
 
 # Impact analysis for specific feature
-/plan F-001
+/prep F-001
 
 # Update queue only (no recommendation)
-/plan --queue-only
+/prep --queue-only
 
 # Impact analysis only (skip prioritization)
-/plan --impact-only F-001
+/prep --impact-only F-001
 ```
 
 ## Output
@@ -69,9 +69,9 @@ Where urgency_factor:
 ## Relationship to other ingredients
 
 ```
-/brief → /plan → User picks → /spec → /build → Superpowers
+/order → /prep → User picks → /recipe → Superpowers (execution)
            │
-           └─→ feature-queue.md (execution state)
+           └─→ .sandwich/registry/ (source of truth) → feature-queue.md (view)
 ```
 
 The feature queue is git-ignored because it's derivative work from brief. Can be regenerated at any time from brief + git state.

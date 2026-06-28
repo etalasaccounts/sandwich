@@ -48,32 +48,47 @@ check("dependencies accept a valid graph", () => {
   assert.equal(r.valid, true);
 });
 
-// --- scores: the urgency-formula regression ---
-const scoreOf = (priority: number) => ({
+// --- scores: priority is computed in code, never trusted from the model ---
+const scoreInput = () => ({
   scores: [{
     id: "F-001",
     impact: { score: 8, factors: ["core"] },
     effort: { score: 3, factors: ["medium"] },
     risk: { score: 2, factors: ["low"] },
     urgency: { factor: 1.5 as const, reason: "blocks others" },
-    priority,
   }],
   recommendation: { top: ["F-001"], reasoning: "x" },
 });
-check("scores: formula-consistent priority produces no warning", () => {
-  // (8 × 1.5 × (10-2)) / 3 / 1.35 = 23.7 → ~24
-  const r = validateScores(scoreOf(24));
+check("scores: priority computed deterministically from dimensions", () => {
+  // (8 × 1.5 × (10-2)) / 3 / 1.35 = 23.7 → 24
+  const r = validateScores(scoreInput());
   assert.equal(r.valid, true);
-  assert.equal(r.warnings.filter(w => w.includes("differs from formula")).length, 0);
+  assert.equal(r.data?.scores[0].priority, 24);
 });
-check("scores: inconsistent priority is flagged", () => {
-  const r = validateScores(scoreOf(95));
-  assert.ok(r.warnings.some(w => w.includes("differs from formula")));
+check("scores: a priority the model emits is ignored and recomputed", () => {
+  const withBogus = scoreInput() as unknown as { scores: Array<Record<string, unknown>> };
+  withBogus.scores[0].priority = 95; // model tries to dictate the number
+  const r = validateScores(withBogus);
+  assert.equal(r.valid, true);
+  assert.equal(r.data?.scores[0].priority, 24); // recomputed, not 95
 });
 check("scores: urgency factor outside the allowed set is rejected", () => {
-  const bad = scoreOf(24);
+  const bad = scoreInput();
   (bad.scores[0].urgency as { factor: number }).factor = 2.0;
   assert.equal(validateScores(bad).valid, false);
+});
+check("scores: recommendation outside top-3 computed priority warns", () => {
+  const four = {
+    scores: [
+      { id: "F-001", impact: { score: 9, factors: ["x"] }, effort: { score: 2, factors: ["x"] }, risk: { score: 1, factors: ["x"] }, urgency: { factor: 1.5 as const, reason: "x" } },
+      { id: "F-002", impact: { score: 8, factors: ["x"] }, effort: { score: 2, factors: ["x"] }, risk: { score: 1, factors: ["x"] }, urgency: { factor: 1.2 as const, reason: "x" } },
+      { id: "F-003", impact: { score: 7, factors: ["x"] }, effort: { score: 2, factors: ["x"] }, risk: { score: 2, factors: ["x"] }, urgency: { factor: 1.0 as const, reason: "x" } },
+      { id: "F-004", impact: { score: 2, factors: ["x"] }, effort: { score: 8, factors: ["x"] }, risk: { score: 6, factors: ["x"] }, urgency: { factor: 0.8 as const, reason: "x" } },
+    ],
+    recommendation: { top: ["F-004"], reasoning: "x" },
+  };
+  const r = validateScores(four);
+  assert.ok(r.warnings.some(w => w.includes("not in top 3")));
 });
 
 // --- spec ---

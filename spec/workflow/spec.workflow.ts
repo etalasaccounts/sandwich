@@ -14,14 +14,19 @@ import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
 import {
   getPlanPaths,
-  readPlanArtifacts,
-  parseExistingFeatures,
   readBriefArtifacts,
   writeSpec,
   type Spec,
 } from "../../plan/lib/plan-lib.js";
 import { validateSpec } from "../lib/validation.js";
 import { runAgentWithValidation, type RepairContext } from "../lib/agent-wrapper.js";
+import {
+  readProject,
+  readFeatures,
+  writeFeatures,
+  appendJournal,
+  renderFeatureQueue,
+} from "../../registry/registry-io.ts";
 
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
@@ -52,22 +57,31 @@ if (!featureId) {
   throw new Error("No feature ID provided to /recipe");
 }
 
-// Phase 1: Load
+// Phase 1: Load — read the feature from the registry (the source of truth).
 phase("Load");
-const plan = readPlanArtifacts(projectRoot);
-if (!plan.featureQueue) {
-  log("✗ No feature queue found — run /prep first");
-  throw new Error("Missing .sandwich/feature-queue.md");
+const project = readProject(projectRoot);
+const features = readFeatures(projectRoot);
+if (!project || features.length === 0) {
+  log("✗ No registry found — run /prep first to build the queue");
+  throw new Error("Missing .sandwich/registry");
+}
+
+const feature = features.find((f) => f.id === featureId);
+if (!feature) {
+  log(`✗ ${featureId} not found in the registry`);
+  throw new Error(`${featureId} not in registry`);
+}
+
+// Gate: warn (don't hard-block) if the queue hasn't been approved.
+if (!project.gates.queueApproved.passed) {
+  log("⚠ Queue not approved yet — run /prep --approve once priorities look right.");
+  log("  Proceeding, but this spec may rest on an unreviewed queue.");
+}
+if (feature.flags.orphaned) {
+  log(`⚠ ${featureId} was dropped from the brief (orphaned) — speccing anyway.`);
 }
 
 const paths = getPlanPaths(projectRoot);
-const features = parseExistingFeatures(paths.featureQueue);
-const feature = features.find((f) => f.id === featureId);
-if (!feature) {
-  log(`✗ ${featureId} not found in feature queue`);
-  throw new Error(`${featureId} not in queue`);
-}
-
 const brief = readBriefArtifacts(projectRoot);
 const impactAnalysis = existsSync(paths.impactAnalysis)
   ? readFileSync(paths.impactAnalysis, "utf8")
@@ -119,5 +133,25 @@ phase("Write");
 const written = writeSpec(projectRoot, spec);
 log(`✓ ${written.json}`);
 log(`✓ ${written.md}`);
+
+// Update the registry: this feature now has a spec, advances to "speced", and
+// any prior stale flag is cleared (the spec was just regenerated from the
+// current brief). Don't regress a feature already building/in-review/done.
+const now = new Date().toISOString();
+const updated = features.map((f) => {
+  if (f.id !== featureId) return f;
+  const advance = f.lifecycle === "proposed" || f.lifecycle === "queued";
+  return {
+    ...f,
+    lifecycle: advance ? ("speced" as const) : f.lifecycle,
+    specRef: `specs/${featureId}.json`,
+    flags: { ...f.flags, stale: false },
+    updatedAt: now,
+  };
+});
+writeFeatures(projectRoot, updated);
+appendJournal(projectRoot, { ts: now, actor: "system", type: "spec-generated", target: featureId, summary: `Spec generated for ${feature.title}` });
+renderFeatureQueue(projectRoot, updated, project);
+log(`✓ ${featureId} → speced · stale cleared (registry updated)`);
 
 return spec;

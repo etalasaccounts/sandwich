@@ -16,13 +16,31 @@ You are running the `plan` pipeline. Your job: produce prioritization data that 
 
 ## What it produces
 
-All output goes to `.sandwich/` (git-ignored):
+Output is split into the **committed registry** (the source of truth) and
+**git-ignored views** (disposable projections). A `.sandwich/.gitignore` is
+written automatically to enforce this posture.
+
+**Committed — `.sandwich/registry/`:**
 
 | File | Purpose |
 |------|---------|
-| `feature-queue.md` | Ordered list of features with status, dependencies, scores |
+| `project.json` | Project metadata, brief hashes, gate states |
+| `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides, spec links, commits |
+| `questions.json` | Client questions ↔ answers ↔ what they unblock |
+| `decisions.json` | ADR-lite scope/architecture decisions |
+| `journal.jsonl` | Append-only audit trail of every change |
+
+**Git-ignored — rendered each run:**
+
+| File | Purpose |
+|------|---------|
+| `feature-queue.md` | Human-readable projection of the registry |
 | `impact-analysis.md` | Deep dive on a specific feature (on demand) |
-| `.plan-context.json` | Raw extraction output for debugging |
+| `.plan-context.json` | Validation/debug context |
+
+Feature identity is stable: a feature keeps its ID (and its spec, commits, and
+human overrides) across re-runs even if the brief rewore its title, because
+matching is by content fingerprint — never by position or exact text.
 
 ## Pipeline
 
@@ -38,7 +56,7 @@ All output goes to `.sandwich/` (git-ignored):
 
 6. **Analyze dependencies** — build dependency graph with validation
 
-7. **Score features** — impact × urgency ÷ effort, adjusted for risk (validated)
+7. **Score features** — the agent supplies four dimension scores (impact, effort, risk, urgency); code computes the priority deterministically as `(impact × urgency × (10 − risk)) ÷ effort`, normalized to 0-100. The model never supplies the number, so the ranking is always reproducible.
 
 8. **Present recommendation** — top 3 candidates with validation status
 
@@ -105,6 +123,7 @@ Agent output → JSON parse → Schema validate → Confidence check
 | `/prep [feature-id]` | Deep impact analysis for specific feature |
 | `/prep --impact-only [feature-id]` | Skip prioritization, just analyze impact |
 | `/prep --queue-only` | Update queue without recommendation |
+| `/prep --approve` | Pass the queue gate — confirm priorities before `/recipe`. A material change to the brief later clears this automatically. |
 
 ## Key principles
 
@@ -143,7 +162,7 @@ When brief changes after initial `/prep`:
 ## Relationship to other ingredients
 
 ```
-/order → /prep → User picks → /recipe → /build → Superpowers
+/order → /prep → User picks → /recipe → Superpowers (execution)
            │
            └─→ feature-queue.md (execution state)
 ```
