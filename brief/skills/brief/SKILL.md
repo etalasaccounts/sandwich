@@ -13,7 +13,6 @@ You are running the `brief` pipeline. Your job: produce four standardized artifa
 - User pastes a KAK, RFQ, MOM, or meeting notes
 - User says "brief this" / "buat brief" / "document this project" / "generate prd"
 - User is onboarding onto a project with no brief yet
-- `/order --approve` — pass the brief gate once you've reviewed `client-questions.md` and it's ready to share with the client (regenerating the brief later clears this automatically)
 
 ## Artifacts
 

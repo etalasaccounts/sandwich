@@ -72,11 +72,6 @@ if (!feature) {
   throw new Error(`${featureId} not in registry`);
 }
 
-// Gate: warn (don't hard-block) if the queue hasn't been approved.
-if (!project.gates.queueApproved.passed) {
-  log("⚠ Queue not approved yet — run /prep --approve once priorities look right.");
-  log("  Proceeding, but this spec may rest on an unreviewed queue.");
-}
 if (feature.flags.orphaned) {
   log(`⚠ ${featureId} was dropped from the brief (orphaned) — speccing anyway.`);
 }

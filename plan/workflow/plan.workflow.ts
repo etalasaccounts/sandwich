@@ -43,8 +43,6 @@ import {
   attachScores,
   effectivePriority,
   fingerprint,
-  passGate,
-  resetGate,
   parseClientQuestions,
   type Feature as RegistryFeature,
   type ExtractedFeature,
@@ -99,7 +97,6 @@ const featureIdArg = argv.find((a) => a.startsWith("F-"));
 const impactOnly = argv.includes("--impact-only");
 const queueOnly = argv.includes("--queue-only");
 const forceFresh = argv.includes("--fresh");
-const approve = argv.includes("--approve");
 
 // ==================== PHASE 1: READ ====================
 phase("Read");
@@ -120,20 +117,6 @@ let project = readProject(projectRoot) ?? initProject(deriveProjectName(briefArt
 const existingFeatures: RegistryFeature[] = readFeatures(projectRoot);
 
 log(`Git: ${gitState.branches.length} branches | Registry: ${existingFeatures.length} existing features`);
-
-// Approve the current queue — a deliberate human gate, no re-extraction.
-if (approve) {
-  if (existingFeatures.length === 0) {
-    log("Nothing to approve — run /prep first to build the queue.");
-    throw new Error("SKIP");
-  }
-  project = passGate(project, "queueApproved", "user", now);
-  writeProject(projectRoot, project);
-  appendJournal(projectRoot, { ts: now, actor: "user", type: "gate-passed", summary: "Queue approved" });
-  renderFeatureQueue(projectRoot, existingFeatures, project);
-  log("✓ Queue approved. You can now run /recipe <F-id> to spec a feature.");
-  throw new Error("SKIP");
-}
 
 // Per-artifact hashes so drift detection knows exactly which brief file moved.
 const hashFile = (s: string | null | undefined): string | null =>
@@ -416,18 +399,6 @@ phase("Recommend");
 // Persist the registry — the source of truth — then render the view from it.
 ensureSandwichGitignore(projectRoot);
 project = { ...project, briefHashes: currentHashes, updatedAt: now };
-
-// A material change to the queue invalidates any prior queue approval — the
-// human must re-approve what they're now looking at.
-const materialChange =
-  briefChanged ||
-  match.added.length > 0 ||
-  rippleReport.changed.length > 0 ||
-  rippleReport.orphaned.length > 0;
-if (materialChange && project.gates.queueApproved.passed) {
-  project = resetGate(project, "queueApproved", now);
-  log("ℹ Queue changed — prior approval cleared. Review and run /prep --approve.");
-}
 
 writeFeatures(projectRoot, registryFeatures);
 writeProject(projectRoot, project);

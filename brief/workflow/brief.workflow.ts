@@ -29,21 +29,6 @@ import {
   validateBriefArtifacts,
   validateBriefForPlanning,
 } from "../lib/validation.js";
-import {
-  readProject,
-  writeProject,
-  initProject,
-  appendJournal,
-} from "../../registry/registry-io.ts";
-import { passGate, resetGate } from "../../registry/registry-lib.ts";
-
-function deriveName(prd: string | null | undefined): string {
-  const m = prd?.match(/^#\s+(.+)$/m);
-  if (!m) return "Project";
-  const parts = m[1].split("—");
-  return (parts[1] ?? parts[0]).trim() || "Project";
-}
-
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
 
@@ -61,20 +46,6 @@ function tryExec(cmd: string, cwd: string): string {
 
 const projectRoot = process.cwd();
 const input: string = args ?? "";
-const argv = input.trim().split(/\s+/).filter(Boolean);
-
-// /order --approve: pass the brief gate once the client-questions are reviewed.
-// No regeneration — a deliberate human checkpoint before the brief goes out.
-if (argv.includes("--approve")) {
-  const now = new Date().toISOString();
-  const arts = readBriefArtifacts(projectRoot);
-  let project = readProject(projectRoot) ?? initProject(deriveName(arts.prd), now);
-  project = passGate(project, "briefApproved", "user", now);
-  writeProject(projectRoot, project);
-  appendJournal(projectRoot, { ts: now, actor: "user", type: "gate-passed", summary: "Brief approved (client-questions reviewed)" });
-  log("✓ Brief approved. Share client-questions.md with the client, then run /prep.");
-  throw new Error("SKIP");
-}
 
 // Phase 1: Detect
 phase("Detect");
@@ -236,14 +207,6 @@ const after = {
 };
 
 writeBriefArtifacts(projectRoot, after);
-
-// A regenerated brief invalidates any prior brief approval — the questions may
-// have changed, so they must be re-reviewed before going out again.
-const existingProject = readProject(projectRoot);
-if (existingProject?.gates.briefApproved.passed) {
-  writeProject(projectRoot, resetGate(existingProject, "briefApproved", new Date().toISOString()));
-  log("ℹ Brief regenerated — prior approval cleared. Re-review client-questions, then /order --approve.");
-}
 
 const paths = getBriefPaths(projectRoot);
 log(`✓ ${paths.prd}`);
