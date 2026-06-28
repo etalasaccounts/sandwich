@@ -14,97 +14,197 @@ Composable agent stack for software agencies. **All outputs validated with zod s
 claude install https://github.com/etalasaccounts/sandwich.git
 ```
 
-## Why sandwich?
-
-**Problem:** LLM output is non-deterministic. Agent pipes crash on malformed JSON. Low-confidence outputs treated same as high.
-
-**Solution:**
-- **Schema validation** on every agent output (zod)
-- **Retry with repair** — agent fixes its own mistakes (max 3 retries)
-- **Confidence scoring** — weighted by `[stated]`/`[inferred]`/`[assumed]` markers
-- **Threshold blocking** — low confidence blocks execution, requires human review
-
 ## Ingredients
 
-### order
+| Command | Role |
+|---------|------|
+| `/order` | Turn any client input into four standardized brief artifacts |
+| `/prep` | Tech lead prioritization — score features, build the queue |
+| `/recipe` | Generate a machine-checkable spec for one feature |
+| `/status` | Morning-check dashboard — what's blocking, what's next |
 
-Turns any messy client input (MOM, RFQ, KAK, verbal notes) into four standardized artifacts:
+---
 
-- `docs/sandwich/brief/prd.md` — Product Requirements Document
-- `docs/sandwich/brief/user-flows.md` — User flow narratives
-- `docs/sandwich/brief/technical-notes.md` — Tech lead's architecture notes
-- `docs/sandwich/brief/client-questions.md` — Clarifying questions for client
+## How to use it (daily flow)
 
-**In pi:** type `/order` or paste your client document and describe it
+### 1. Brief a project
 
-### prep
-
-Tech lead-level prioritization and impact analysis. Consumes brief artifacts to produce:
-
-- `.sandwich/feature-queue.md` — Prioritized features with impact/effort/risk scores
-- `.sandwich/impact-analysis.md` — Deep dive on a specific feature
-
-**In pi:** type `/prep` to get prioritization data, or `/prep F-001` for impact analysis on a specific feature
-
-### recipe
-
-Generate machine-checkable spec for autonomous execution. Produces acceptance criteria, tasks, and harness definition.
-
-- `.sandwich/specs/F-001.json` — Machine-readable spec
-- `.sandwich/specs/F-001.md` — Human-readable spec
-
-**In pi:** type `/recipe F-001` after you've picked a feature from the queue
-
-## Pipeline
+Paste a KAK, RFQ, MOM, meeting notes, or just describe the project. The skill detects the context automatically.
 
 ```
-/order (PM dumps intake iteratively)
-      ↓
-Brief artifacts (prd.md, user-flows.md, etc.)
-      ↓
-/prep (tech lead prioritization)
-      ↓
-Feature queue + recommendation
-      ↓
-User picks feature
-      ↓
-/recipe F-001 (machine-checkable spec)
-      ↓
-/build → Superpowers executes
+/order
 ```
 
-**Key insight:** Human makes decisions at each gate. AI automates analysis.
+Produces four artifacts in `docs/sandwich/brief/`:
 
-## Commands
+| File | Purpose |
+|------|---------|
+| `prd.md` | Canonical requirements — modules, features, constraints, confidence markers |
+| `user-flows.md` | Narrative user journeys |
+| `technical-notes.md` | Tech lead's architecture notes — decisions, risks |
+| `client-questions.md` | Prioritized questions to send the client before starting |
 
-| Command | Purpose |
-|---------|---------|
-| `/order` | Generate/update brief artifacts from client input |
-| `/prep` | Smart: reconcile if brief changed, else use existing queue |
-| `/prep --fresh` | Force re-extraction, ignore existing queue |
-| `/prep F-001` | Deep impact analysis for specific feature |
-| `/recipe F-001` | Generate machine-checkable spec for execution |
+Review `client-questions.md`. When it's ready to share with the client:
+
+```
+/order --approve
+```
+
+This sets the brief gate so downstream steps know the brief has been reviewed.
+
+---
+
+### 2. Refine the brief (when client answers arrive)
+
+Paste the client's answers alongside `/order`. The skill detects `answer` mode and integrates them — resolved questions are cleared, affected features are updated.
+
+```
+/order
+[paste client's answers here]
+```
+
+> **Note:** Regenerating the brief clears the prior approval. You'll need to re-run `/order --approve` after reviewing the updated questions.
+
+---
+
+### 3. Prioritize features
+
+```
+/prep
+```
+
+Reads the brief, extracts all features, scores them (impact × urgency × risk ÷ effort), and writes the registry. On re-run it reconciles — new features are added, dropped features are flagged, and any feature that was in-progress is never auto-removed.
+
+**The registry** (`.sandwich/registry/`) is committed to git — it's the source of truth that survives across re-runs. A rendered view (`feature-queue.md`) is generated each run but git-ignored.
+
+Review the queue. When priorities look right:
+
+```
+/prep --approve
+```
+
+This sets the queue gate — required before `/recipe` will run.
+
+---
+
+### 4. Spec a feature
+
+Pick a feature ID from the queue and run:
+
+```
+/recipe F-001
+```
+
+Generates a machine-checkable spec with acceptance criteria, tasks, and test harness definition. Updates the registry: `F-001` moves to `speced`, `specRef` is set.
+
+---
+
+### 5. Morning check
+
+```
+/status
+```
+
+Shows a dashboard: gates, open client questions (and what they block), stale specs, and recommended next action. Useful at the start of any session to reorient.
+
+For a full maintenance report (billing evidence, SLA log):
+
+```
+/status --report
+```
+
+---
+
+## Full command reference
+
+| Command | Behavior |
+|---------|----------|
+| `/order` | Generate or update brief artifacts (auto-detects mode) |
+| `/order --approve` | Pass the brief gate after reviewing client-questions.md |
+| `/prep` | Smart reconcile if brief changed, else use existing queue |
+| `/prep --fresh` | Force re-extraction, ignore existing registry |
+| `/prep F-001` | Deep impact analysis for a specific feature |
+| `/prep --approve` | Pass the queue gate before running /recipe |
+| `/recipe F-001` | Generate spec for a feature |
+| `/status` | Morning-check dashboard |
+| `/status --report` | Full maintenance/SLA report from journal |
+
+---
+
+## Registry (single source of truth)
+
+The registry lives in `.sandwich/registry/` and is committed to git. It never loses state between re-runs.
+
+| File | Purpose |
+|------|---------|
+| `project.json` | Project metadata, brief hashes, gate states |
+| `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides, spec links |
+| `questions.json` | Client questions ↔ answers ↔ what they unblock |
+| `decisions.json` | ADR-lite scope/architecture decisions |
+| `journal.jsonl` | Append-only audit trail — every gate, reconciliation, drift event |
+
+**Rendered views** (`.sandwich/views/`) are git-ignored — generated fresh each run from the registry.
+
+### Stable feature IDs
+
+A feature keeps its ID (`F-001`, `F-002`, …) across re-runs even if the brief rewrites its title, because matching uses a content fingerprint — not position or exact text. Human overrides (pinned priority, pinned lifecycle) survive every reconciliation.
+
+### Gate system
+
+Two explicit human checkpoints protect the pipeline:
+
+| Gate | Set by | Auto-cleared when |
+|------|--------|-------------------|
+| `briefApproved` | `/order --approve` | Brief is regenerated |
+| `queueApproved` | `/prep --approve` | Brief changes materially |
+
+`/recipe` will warn (soft) if `queueApproved` hasn't been passed.
+
+---
+
+## Pipeline diagram
+
+```
+/order  ──→  brief artifacts  ──→  /order --approve
+                                          │
+                                          ▼
+                                        /prep  ──→  feature-queue.md
+                                                          │
+                                          ┌───────────────┘
+                                          ▼
+                                   /prep --approve
+                                          │
+                                          ▼
+                                    /recipe F-001  ──→  spec + registry update
+                                          │
+                                          ▼
+                                   Superpowers (execution)
+```
+
+Human makes decisions at every gate. AI automates analysis and record-keeping.
+
+---
 
 ## Reconciliation
 
-When brief changes after `/prep` has run:
+When brief changes mid-project:
 
 ```
-/order --refine → brief artifacts update
-        ↓
-/prep → detects brief change
-        ↓
-    Reconciles:
-      • New features → add to queue
-      • Removed features → flag for review
-      • Changed features → mark "needs-reanalysis"
-        ↓
-    Output: "3 added, 1 removed, 2 affected"
+/order  →  brief artifacts update
+               ↓
+           /prep  →  detects brief change
+               ↓
+           Reconciles:
+             • New features → added to registry with new ID
+             • Missing features → flagged as orphaned (never deleted if in-progress)
+             • Changed features → flagged needsReanalysis, stale spec flagged
+               ↓
+           Output: "3 added, 1 orphaned, 2 stale specs"
 ```
 
-**Protection:** Features marked `in-progress` are never auto-removed, even if removed from brief.
+---
 
-## Validation Layer
+## Validation layer
 
 Every agent output passes through:
 
@@ -116,23 +216,6 @@ Agent output → JSON parse → Zod schema → Confidence check
                retry (3x)     retry (3x)      block + warn
 ```
 
-### Schema validation
-
-Every agent has a zod schema defining valid output:
-
-```typescript
-const FeatureSchema = z.object({
-  id: z.string().regex(/^F-\d{3}$/),
-  title: z.string().min(1).max(120),
-  confidence: z.enum(["stated", "discussed", "inferred", "assumed"]),
-  // ...
-});
-```
-
-### Confidence scoring
-
-Features are marked with confidence levels:
-
 | Marker | Weight | Meaning |
 |--------|--------|---------|
 | `[stated]` | 1.0 | Explicitly stated in brief |
@@ -140,26 +223,33 @@ Features are marked with confidence levels:
 | `[inferred]` | 0.5 | Logical inference |
 | `[assumed]` | 0.2 | Assumption without evidence |
 
-### Blocking thresholds
-
 | Condition | Threshold | Action |
 |-----------|-----------|--------|
 | Average confidence | < 0.4 | Block, require human review |
 | Assumed features | > 30% | Block, ask for clarification |
-| Validation failure | 3 retries | Block, show error |
+
+### Priority scoring
+
+The model never computes a priority number. It supplies four dimension scores:
+
+| Dimension | What it measures |
+|-----------|-----------------|
+| `impact` | Business/user value (1–10) |
+| `effort` | Relative dev cost (1–10) |
+| `risk` | Technical uncertainty (1–10) |
+| `urgency` | Time pressure factor (1.0 / 1.5 / 2.0) |
+
+Priority is computed deterministically in code: `(impact × urgency × (10 − risk)) ÷ effort`, normalized to 0–100. Same inputs always produce the same ranking — no LLM variance.
+
+Human overrides (pin a priority, force a lifecycle) survive every re-run.
+
+---
 
 ## Output directories
 
 | Directory | Git | Purpose |
 |-----------|-----|---------|
 | `docs/sandwich/brief/` | tracked | Brief artifacts (client-facing) |
-| `.sandwich/` | ignored | Execution state (internal workflow) |
-| `.sandwich/specs/` | ignored | Machine-checkable specs |
-
-## Brief Modes
-
-| Mode | Trigger | What happens |
-|------|---------|--------------|
-| **New** | No `docs/sandwich/brief/` exists | Creates all four artifacts from scratch |
-| **Refine** | Brief exists + you add new input | Updates all artifacts, marks changed sections |
-| **Answer** | Brief exists + you paste client answers | Integrates answers, moves resolved questions |
+| `.sandwich/registry/` | tracked | Pipeline state (source of truth) |
+| `.sandwich/views/` | ignored | Rendered projections (generated each run) |
+| `.sandwich/specs/` | tracked | Machine-checkable specs |
