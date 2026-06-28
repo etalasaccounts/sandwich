@@ -453,7 +453,7 @@ export function writeFeatureQueue(
   // Needs Re-analysis (brief changed)
   if (needsReanalysis.length > 0) {
     lines.push("## Needs Re-analysis\n");
-    lines.push("Brief requirements changed for these features. Re-run `/plan` to update scores.\n");
+    lines.push("Brief requirements changed for these features. Re-run `/prep` to update scores.\n");
     needsReanalysis.forEach((f) => {
       lines.push(`### ${f.id}: ${f.title}`);
       lines.push(`**Status:** ⚠️ needs-reanalysis`);

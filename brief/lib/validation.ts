@@ -249,7 +249,7 @@ export function validateBriefForPlanning(artifacts: {
     return {
       ready: false,
       reason: `Missing required artifacts: ${validation.errors.join(", ")}`,
-      actions: ["Run /brief to generate missing artifacts"],
+      actions: ["Run /order to generate missing artifacts"],
     };
   }
   
@@ -260,7 +260,7 @@ export function validateBriefForPlanning(artifacts: {
       actions: [
         "Add more detail to client input",
         "Answer questions in client-questions.md",
-        "Run /brief --refine with additional context",
+        "Run /order --refine with additional context",
       ],
     };
   }

@@ -19,41 +19,62 @@ import { execSync } from "node:child_process";
 import { createHash } from "crypto";
 import {
   getPlanPaths,
-  ensurePlanDir,
   readBriefArtifacts,
-  readPlanArtifacts,
-  parseExistingFeatures,
-  writeFeatureQueue,
   writeImpactAnalysis,
   writePlanContext,
   getGitState,
-  matchFeatures,
-  applyReconciliation,
-  type Feature,
-  type FeatureScore,
   type ImpactAnalysis,
-  type ReconciledChange,
 } from "../lib/plan-lib.js";
 import {
   validateExtraction,
   validateDependencies,
   validateScores,
-  validateReconciliation,
 } from "../lib/validation.js";
 import {
   runAgentWithValidation,
   checkConfidenceThreshold,
-  hashOutput,
-  hasOutputChanged,
   enhancePromptWithSchema,
   type RepairContext,
 } from "../lib/agent-wrapper.js";
+import {
+  matchByFingerprint,
+  mergeExtraction,
+  applyRipple,
+  attachScores,
+  effectivePriority,
+  fingerprint,
+  passGate,
+  resetGate,
+  parseClientQuestions,
+  type Feature as RegistryFeature,
+  type ExtractedFeature,
+  type RippleReport,
+} from "../../registry/registry-lib.ts";
+import {
+  readProject,
+  writeProject,
+  initProject,
+  readFeatures,
+  writeFeatures,
+  writeQuestions,
+  appendJournal,
+  renderFeatureQueue,
+  ensureSandwichGitignore,
+} from "../../registry/registry-io.ts";
 
 function withRepair(prompt: string, repair?: RepairContext): string {
   if (!repair) return prompt;
   return `${prompt}\n\n## REPAIR REQUIRED\n\nYour previous output was rejected. Fix the specific issues below and output ONLY corrected JSON.\n\nPrevious output:\n\`\`\`\n${repair.previousOutput.slice(0, 2000)}\n\`\`\`\n\nErrors:\n${repair.errors.map(e => `- ${e}`).join("\n")}`;
 }
-import { ExtractionOutputSchema, DependencyOutputSchema, ScoreOutputSchema, ReconciliationOutputSchema } from "../lib/validation.js";
+
+function deriveProjectName(prd: string | null | undefined): string {
+  const m = prd?.match(/^#\s+(.+)$/m);
+  if (!m) return "Project";
+  const parts = m[1].split("—");
+  return (parts[1] ?? parts[0]).trim() || "Project";
+}
+
+import { ExtractionOutputSchema, DependencyOutputSchema, ScoreOutputSchema } from "../lib/validation.js";
 
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
@@ -78,54 +99,66 @@ const featureIdArg = argv.find((a) => a.startsWith("F-"));
 const impactOnly = argv.includes("--impact-only");
 const queueOnly = argv.includes("--queue-only");
 const forceFresh = argv.includes("--fresh");
+const approve = argv.includes("--approve");
 
 // ==================== PHASE 1: READ ====================
 phase("Read");
 const briefArtifacts = readBriefArtifacts(projectRoot);
 
 if (!briefArtifacts.prd && !briefArtifacts.userFlows) {
-  throw new Error("No brief artifacts found. Run /brief first.");
+  throw new Error("No brief artifacts found. Run /order first.");
 }
 
 log(`Brief: prd.md ${briefArtifacts.prd ? "✓" : "✗"} | user-flows.md ${briefArtifacts.userFlows?.length ?? 0} chars`);
 
+const now = new Date().toISOString();
 const gitState = getGitState(projectRoot);
-const existingFeatures = parseExistingFeatures(getPlanPaths(projectRoot).featureQueue);
-const previousContextPath = getPlanPaths(projectRoot).planContext;
 
-log(`Git: ${gitState.branches.length} branches | Queue: ${existingFeatures.length} existing features`);
+// The registry is the source of truth — read prior state from it, never from
+// the rendered markdown (which is now a disposable projection).
+let project = readProject(projectRoot) ?? initProject(deriveProjectName(briefArtifacts.prd), now);
+const existingFeatures: RegistryFeature[] = readFeatures(projectRoot);
 
-// Compute brief hash for change detection
-const briefHash = createHash("sha256")
-  .update(briefArtifacts.prd || "")
-  .update(briefArtifacts.userFlows || "")
-  .update(briefArtifacts.technicalNotes || "")
-  .digest("hex")
-  .slice(0, 16);
+log(`Git: ${gitState.branches.length} branches | Registry: ${existingFeatures.length} existing features`);
 
-let previousHash: string | null = null;
-if (existsSync(previousContextPath)) {
-  try {
-    const prev = JSON.parse(readFileSync(previousContextPath, "utf8"));
-    previousHash = prev.briefHash;
-  } catch {}
+// Approve the current queue — a deliberate human gate, no re-extraction.
+if (approve) {
+  if (existingFeatures.length === 0) {
+    log("Nothing to approve — run /prep first to build the queue.");
+    throw new Error("SKIP");
+  }
+  project = passGate(project, "queueApproved", "user", now);
+  writeProject(projectRoot, project);
+  appendJournal(projectRoot, { ts: now, actor: "user", type: "gate-passed", summary: "Queue approved" });
+  renderFeatureQueue(projectRoot, existingFeatures, project);
+  log("✓ Queue approved. You can now run /recipe <F-id> to spec a feature.");
+  throw new Error("SKIP");
 }
 
-const briefChanged = previousHash !== briefHash;
-log(`Brief hash: ${briefHash} ${briefChanged ? "(changed)" : "(unchanged)"}`);
+// Per-artifact hashes so drift detection knows exactly which brief file moved.
+const hashFile = (s: string | null | undefined): string | null =>
+  s ? createHash("sha256").update(s).digest("hex").slice(0, 16) : null;
+const currentHashes = {
+  prd: hashFile(briefArtifacts.prd),
+  userFlows: hashFile(briefArtifacts.userFlows),
+  technicalNotes: hashFile(briefArtifacts.technicalNotes),
+  clientQuestions: hashFile(briefArtifacts.clientQuestions),
+};
+const hashFor = (file: string): string => {
+  if (/user.?flow/i.test(file)) return currentHashes.userFlows ?? "";
+  if (/tech/i.test(file)) return currentHashes.technicalNotes ?? "";
+  if (/question/i.test(file)) return currentHashes.clientQuestions ?? "";
+  return currentHashes.prd ?? "";
+};
 
-// Skip extraction if nothing changed
+const briefChanged = JSON.stringify(currentHashes) !== JSON.stringify(project.briefHashes);
+log(`Brief ${briefChanged ? "changed since last run" : "unchanged"}`);
+
+// Skip extraction if nothing changed — just re-render the view from the registry.
 if (!forceFresh && !briefChanged && existingFeatures.length > 0) {
-  log("\nBrief unchanged. Use --fresh to force re-extraction.\n");
-  log("Existing queue preserved. Run `/prep --fresh` to regenerate.");
-
-  // Still show recommendation from previous run
-  const prevQueue = readPlanArtifacts(projectRoot).featureQueue;
-  if (prevQueue) {
-    log("\nCurrent queue preview:");
-    const lines = prevQueue.split("\n").slice(0, 20);
-    lines.forEach(l => log(`  ${l}`));
-  }
+  log("\nBrief unchanged. Re-rendering view from registry. Use --fresh to force re-extraction.\n");
+  renderFeatureQueue(projectRoot, existingFeatures, project);
+  log("✓ .sandwich/feature-queue.md (from registry)");
   throw new Error("SKIP");
 }
 
@@ -230,64 +263,41 @@ if (confidenceCheck.blocked) {
   log("\nCannot proceed with scoring. Options:");
   log("  1. Add more detail to brief");
   log("  2. Answer questions in client-questions.md");
-  log("  3. Run /brief --refine with additional context\n");
+  log("  3. Run /order --refine with additional context\n");
   throw new Error("Extraction confidence too low. Human review required.");
 }
 
-// ==================== PHASE 4: RECONCILE ====================
-let featuresToScore = features;
-let reconciliation: ReconciledChange | null = null;
+// ==================== PHASE 4: RECONCILE (deterministic) ====================
+// Identity is resolved in code by fingerprint, not by an LLM. Matched features
+// keep their stable ID, lifecycle, overrides, score, spec link, and commits.
+phase("Reconcile");
 
-if (existingFeatures.length > 0 && !forceFresh) {
-  phase("Reconcile");
-  
-  const reconcilePrompt = enhancePromptWithSchema(
-    readAgent("05-reconcile-queue.md"),
-    ReconciliationOutputSchema
-  );
-  
-  let reconcileResult;
-  try {
-    reconcileResult = await runAgentWithValidation(
-      (repair) => agent(
-        `${withRepair(reconcilePrompt, repair)}\n\nContext:\n${JSON.stringify(
-          {
-            newFeatures: features.slice(0, 50).map(f => ({ id: f.id, title: f.title, module: f.module })),
-            existingQueue: existingFeatures.map(f => ({
-              id: f.id,
-              title: f.title,
-              status: f.status || "queued",
-            })),
-            inProgressBranches: gitState.branches.filter(b =>
-              b.includes("feature/") || b.includes("F-")
-            ),
-          },
-          null,
-          2
-        )}`,
-        { label: "reconcile-queue", phase: "Reconcile" }
-      ),
-      validateReconciliation,
-      { maxRetries: 2 }
-    );
-    reconciliation = reconcileResult.result;
-  } catch (e) {
-    log(`⚠ Reconciliation failed, using new extraction: ${e instanceof Error ? e.message : String(e)}`);
-    reconciliation = null;
-  }
-  
-  if (reconciliation) {
-    log(`Added: ${reconciliation.added.length} | Removed: ${reconciliation.removed.length} | Affected: ${reconciliation.affected.length}`);
-    
-    if (reconciliation.removed.some(r => r.action === "preserve_and_flag")) {
-      log("  ⚠ In-progress features preserved despite brief removal:");
-      reconciliation.removed.filter(r => r.action === "preserve_and_flag").forEach(r => {
-        log(`    - ${r.id}: ${r.title}`);
-      });
-    }
+const extractedFeatures: ExtractedFeature[] = features.map((f) => ({
+  title: f.title,
+  module: f.module,
+  description: f.description,
+  type: f.type,
+  confidence: f.confidence,
+  source: f.source,
+  dependsOn: f.dependsOn,
+  blocks: f.blocks,
+}));
 
-    ({ features: featuresToScore } = applyReconciliation(featuresToScore, existingFeatures, reconciliation, []));
-  }
+const match = matchByFingerprint(extractedFeatures, existingFeatures);
+let registryFeatures: RegistryFeature[] = mergeExtraction(match, hashFor, now);
+
+// Ripple: cascade the brief change into re-review / stale-spec / orphan flags.
+let rippleReport: RippleReport;
+({ features: registryFeatures, report: rippleReport } = applyRipple(registryFeatures, match, hashFor));
+
+// Features present in this extraction (matched + added) — i.e. not dropped.
+const missingIds = new Set(match.missing.map((m) => m.id));
+const currentFeatures = (): RegistryFeature[] =>
+  registryFeatures.filter((f) => !missingIds.has(f.id));
+
+log(`Matched ${match.matched.length} | New ${match.added.length} | Missing ${match.missing.length}`);
+if (rippleReport.changed.length || rippleReport.orphaned.length) {
+  log(`Ripple: ${rippleReport.changed.length} changed | ${rippleReport.staleSpecs.length} stale specs | ${rippleReport.orphaned.length} orphaned`);
 }
 
 // ==================== PHASE 5: ANALYZE DEPENDENCIES ====================
@@ -304,7 +314,7 @@ try {
     (repair) => agent(
       `${withRepair(depsPrompt, repair)}\n\nContext:\n${JSON.stringify(
         {
-          features: featuresToScore.slice(0, 50).map(f => ({ id: f.id, title: f.title, module: f.module })),
+          features: currentFeatures().slice(0, 50).map(f => ({ id: f.id, title: f.title, module: f.module })),
           modules,
           technicalNotes: briefArtifacts.technicalNotes?.slice(0, 3000),
         },
@@ -328,16 +338,10 @@ try {
 
 const deps = depsResult.result;
 
-// Apply dependencies to features
+// Apply dependencies to the registry features (by stable ID).
 deps.dependencies?.forEach((d) => {
-  const f = featuresToScore.find((x) => x.id === d.feature);
+  const f = registryFeatures.find((x) => x.id === d.feature);
   if (f) f.dependsOn = d.dependsOn;
-});
-
-// Mark blocked features
-deps.blockedFeatures?.forEach((id: string) => {
-  const f = featuresToScore.find((x) => x.id === id);
-  if (f) f.status = "blocked";
 });
 
 log(`✓ Dependencies: ${deps.dependencies?.length ?? 0} | Blocked: ${deps.blockedFeatures?.length ?? 0}`);
@@ -356,7 +360,7 @@ try {
     (repair) => agent(
       `${withRepair(scorePrompt, repair)}\n\nContext:\n${JSON.stringify(
         {
-          features: featuresToScore.slice(0, 50).map(f => ({
+          features: currentFeatures().slice(0, 50).map(f => ({
             id: f.id,
             title: f.title,
             module: f.module,
@@ -379,29 +383,92 @@ try {
   throw new Error("Feature scoring failed after retries.");
 }
 
-const scores: FeatureScore[] = scoreResult.result.scores;
+const scores = scoreResult.result.scores;
 const recommendation = scoreResult.result.recommendation;
+
+// Stamp the deterministic scores onto the registry features.
+registryFeatures = attachScores(registryFeatures, scores, now);
 
 log(`✓ Scored ${scores.length} features`);
 
-// Verify top recommendation isn't blocked
-const topUnblocked = scores
-  .filter(s => !featuresToScore.find(f => f.id === s.id)?.status?.includes("blocked"))
-  .sort((a, b) => b.priority - a.priority)
+// Questions: parse client-questions.md → registry and wire blockedBy so a
+// feature gated by an open question is flagged blocked (and never recommended).
+const questions = briefArtifacts.clientQuestions
+  ? parseClientQuestions(briefArtifacts.clientQuestions)
+  : [];
+const openByFeature = new Map<string, string[]>();
+questions
+  .filter((q) => q.status === "open")
+  .forEach((q) => q.unblocks.forEach((fid) => openByFeature.set(fid, [...(openByFeature.get(fid) ?? []), q.id])));
+registryFeatures = registryFeatures.map((f) => ({ ...f, blockedBy: openByFeature.get(f.id) ?? [] }));
+const openCount = questions.filter((q) => q.status === "open").length;
+log(`Questions: ${questions.length} parsed (${openCount} open) | blocking ${openByFeature.size} feature(s)`);
+
+// Top unblocked candidates, drawn from features still in the brief.
+const topUnblocked = currentFeatures()
+  .filter((f) => f.blockedBy.length === 0)
+  .sort((a, b) => effectivePriority(b) - effectivePriority(a))
   .slice(0, 3);
 
 // ==================== PHASE 7: RECOMMEND ====================
 phase("Recommend");
 
-writeFeatureQueue(projectRoot, featuresToScore, scores);
+// Persist the registry — the source of truth — then render the view from it.
+ensureSandwichGitignore(projectRoot);
+project = { ...project, briefHashes: currentHashes, updatedAt: now };
+
+// A material change to the queue invalidates any prior queue approval — the
+// human must re-approve what they're now looking at.
+const materialChange =
+  briefChanged ||
+  match.added.length > 0 ||
+  rippleReport.changed.length > 0 ||
+  rippleReport.orphaned.length > 0;
+if (materialChange && project.gates.queueApproved.passed) {
+  project = resetGate(project, "queueApproved", now);
+  log("ℹ Queue changed — prior approval cleared. Review and run /prep --approve.");
+}
+
+writeFeatures(projectRoot, registryFeatures);
+writeProject(projectRoot, project);
+writeQuestions(projectRoot, questions);
+
+// Journal the committed outcome (after writes succeed, so the log reflects truth).
+match.added.forEach((a) => {
+  const id = registryFeatures.find((x) => x.fingerprint === fingerprint(a.title, a.module))?.id;
+  appendJournal(projectRoot, { ts: now, actor: "system", type: "feature-added", target: id, summary: `New feature from brief: ${a.title}` });
+});
+appendJournal(projectRoot, {
+  ts: now,
+  actor: "system",
+  type: "reconciled",
+  summary: `${match.matched.length} matched, ${match.added.length} added, ${match.missing.length} missing`,
+  data: {
+    matched: match.matched.length,
+    added: match.added.length,
+    missing: match.missing.length,
+    changed: rippleReport.changed.length,
+    staleSpecs: rippleReport.staleSpecs.length,
+    orphaned: rippleReport.orphaned.length,
+  },
+});
+
+// One drift event per stale spec — these are the build-blocking signals.
+rippleReport.staleSpecs.forEach((id) =>
+  appendJournal(projectRoot, { ts: now, actor: "system", type: "drift-detected", target: id, summary: `Spec for ${id} is stale — brief moved after it was generated` })
+);
+rippleReport.orphaned.forEach((id) =>
+  appendJournal(projectRoot, { ts: now, actor: "system", type: "drift-detected", target: id, summary: `${id} dropped from brief — preserved for review` })
+);
+
+renderFeatureQueue(projectRoot, registryFeatures, project, recommendation, rippleReport);
+
 writePlanContext(projectRoot, {
-  briefHash,
-  extraction: { features, modules, confidence: extractionValidation.confidence },
-  deps,
-  scored: { scores, recommendation },
-  reconciliation,
-  validated: true,
-  validatedAt: new Date().toISOString(),
+  briefHashes: currentHashes,
+  extraction: { count: features.length, modules: modules.length, confidence: extractionValidation.confidence },
+  reconcile: { matched: match.matched.length, added: match.added.length, missing: match.missing.length },
+  recommendation,
+  validatedAt: now,
 });
 
 // Present output
@@ -412,12 +479,14 @@ log("├────────────────────────
 log("│ Priority 1 (Recommended)                    │");
 log("│                                             │");
 
-topUnblocked.slice(0, 3).forEach((s) => {
-  const f = featuresToScore.find(x => x.id === s.id);
-  log(`│ ${s.id}: ${(f?.title || "").slice(0, 35).padEnd(35)}│`);
-  log(`│   Impact: ${s.impact.score}/10 | Effort: ${s.effort.score}/10 | Risk: ${s.risk.score}/10  │`);
-  log(`│   Priority Score: ${String(s.priority).padEnd(28)}│`);
-  if (f?.dependsOn?.length) {
+topUnblocked.forEach((f) => {
+  const sc = f.score;
+  log(`│ ${f.id}: ${(f.title || "").slice(0, 35).padEnd(35)}│`);
+  if (sc) {
+    log(`│   Impact: ${sc.impact.score}/10 | Effort: ${sc.effort.score}/10 | Risk: ${sc.risk.score}/10  │`);
+    log(`│   Priority Score: ${String(effectivePriority(f)).padEnd(28)}│`);
+  }
+  if (f.dependsOn.length) {
     log(`│   Depends on: ${f.dependsOn.join(", ").slice(0, 30).padEnd(30)}│`);
   }
   log("│                                             │");

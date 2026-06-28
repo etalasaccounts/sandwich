@@ -64,7 +64,7 @@ Output goes to `.sandwich/specs/`:
 ## Relationship to other commands
 
 ```
-/order → /prep → User picks F-001 → /recipe F-001 → /build → Superpowers
+/order → /prep → User picks F-001 → /recipe F-001 → Superpowers (execution)
                                           │
                                           └─→ specs/F-001.json
 ```

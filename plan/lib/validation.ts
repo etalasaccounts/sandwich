@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { computePriority } from "../../registry/registry-lib.ts";
 
 // --- Schemas ---
 
@@ -60,8 +61,9 @@ export const ScoreSchema = z.object({
     score: z.number().min(1).max(10),
     factors: z.array(z.string()).min(1),
   }),
-  // Urgency is an explicit emitted factor, not a hidden constant — so the
-  // validator can re-derive priority and catch an inconsistent score.
+  // Urgency is an explicit emitted factor, not a hidden constant. The model
+  // supplies it as one of the four dimensions; code combines the dimensions
+  // into the final priority. The model never supplies `priority` itself.
   urgency: z.object({
     factor: z.union([
       z.literal(0.8),
@@ -71,7 +73,6 @@ export const ScoreSchema = z.object({
     ]),
     reason: z.string(),
   }),
-  priority: z.number().min(0).max(100),
 });
 
 export const ScoreOutputSchema = z.object({
@@ -274,13 +275,28 @@ export function validateDependencies(output: unknown): ValidationResult<z.infer<
   };
 }
 
-export function validateScores(output: unknown): ValidationResult<z.infer<typeof ScoreOutputSchema>> {
+/** A score after code has stamped the deterministic priority onto it. */
+export interface ScoredFeature {
+  id: string;
+  impact: { score: number; factors: string[] };
+  effort: { score: number; factors: string[]; hours?: string };
+  risk: { score: number; factors: string[] };
+  urgency: { factor: 0.8 | 1.0 | 1.2 | 1.5; reason: string };
+  priority: number;
+}
+
+export interface ScoredOutput {
+  scores: ScoredFeature[];
+  recommendation: { top: string[]; reasoning: string };
+}
+
+export function validateScores(output: unknown): ValidationResult<ScoredOutput> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  let data: z.infer<typeof ScoreOutputSchema> | undefined;
+  let parsed: z.infer<typeof ScoreOutputSchema> | undefined;
   try {
-    data = ScoreOutputSchema.parse(output);
+    parsed = ScoreOutputSchema.parse(output);
   } catch (e) {
     if (e instanceof z.ZodError) {
       errors.push(...e.errors.map(err => `${err.path.join(".")}: ${err.message}`));
@@ -288,24 +304,27 @@ export function validateScores(output: unknown): ValidationResult<z.infer<typeof
     return { valid: false, errors, warnings, confidence: { score: 0, level: "assumed", blockers: ["Schema validation failed"] } };
   }
 
-  // Verify priority formula consistency:
-  //   priority = (impact × urgency × (10 - risk)) ÷ effort, normalized to 0-100.
-  // Raw formula peaks at 10 × 1.5 × 9 ÷ 1 = 135, so divide by 1.35.
-  data.scores.forEach(s => {
-    const raw = (s.impact.score * s.urgency.factor * (10 - s.risk.score)) / s.effort.score;
-    const expectedPriority = Math.round(raw / 1.35);
-    // Allow 20% variance (or ±5 absolute for low scores where 20% is tiny)
-    const tolerance = Math.max(expectedPriority * 0.2, 5);
-    if (Math.abs(s.priority - expectedPriority) > tolerance) {
-      warnings.push(`${s.id} priority ${s.priority} differs from formula ~${expectedPriority} (impact ${s.impact.score} × urgency ${s.urgency.factor} × (10-${s.risk.score}) ÷ effort ${s.effort.score})`);
-    }
-  });
+  // Priority is computed here, in code, from the model's dimension scores —
+  // never taken from the model. computePriority() is the single authority, so
+  // the documented formula and the actual ranking can no longer diverge. Any
+  // `priority` the model happened to emit was stripped by the schema parse.
+  const scored: ScoredFeature[] = parsed.scores.map(s => ({
+    ...s,
+    priority: computePriority({
+      impact: s.impact.score,
+      effort: s.effort.score,
+      risk: s.risk.score,
+      urgency: s.urgency.factor,
+    }),
+  }));
 
-  // Check recommendation matches top scores
-  const topByPriority = [...data.scores].sort((a, b) => b.priority - a.priority).slice(0, 3).map(s => s.id);
+  const data: ScoredOutput = { scores: scored, recommendation: parsed.recommendation };
+
+  // Check the model's recommendation matches the top computed priorities.
+  const topByPriority = [...scored].sort((a, b) => b.priority - a.priority).slice(0, 3).map(s => s.id);
   data.recommendation.top.forEach(id => {
     if (!topByPriority.includes(id)) {
-      warnings.push(`Recommended ${id} not in top 3 by priority`);
+      warnings.push(`Recommended ${id} not in top 3 by computed priority`);
     }
   });
 
