@@ -44,13 +44,7 @@ Produces four artifacts in `docs/sandwich/brief/`:
 | `technical-notes.md` | Tech lead's architecture notes — decisions, risks |
 | `client-questions.md` | Prioritized questions to send the client before starting |
 
-Review `client-questions.md`. When it's ready to share with the client:
-
-```
-/order --approve
-```
-
-This sets the brief gate so downstream steps know the brief has been reviewed.
+Share `client-questions.md` with the client and wait for answers before running `/prep`.
 
 ---
 
@@ -63,8 +57,6 @@ Paste the client's answers alongside `/order`. The skill detects `answer` mode a
 [paste client's answers here]
 ```
 
-> **Note:** Regenerating the brief clears the prior approval. You'll need to re-run `/order --approve` after reviewing the updated questions.
-
 ---
 
 ### 3. Prioritize features
@@ -76,14 +68,6 @@ Paste the client's answers alongside `/order`. The skill detects `answer` mode a
 Reads the brief, extracts all features, scores them (impact × urgency × risk ÷ effort), and writes the registry. On re-run it reconciles — new features are added, dropped features are flagged, and any feature that was in-progress is never auto-removed.
 
 **The registry** (`.sandwich/registry/`) is committed to git — it's the source of truth that survives across re-runs. A rendered view (`feature-queue.md`) is generated each run but git-ignored.
-
-Review the queue. When priorities look right:
-
-```
-/prep --approve
-```
-
-This sets the queue gate — required before `/recipe` will run.
 
 ---
 
@@ -120,11 +104,9 @@ For a full maintenance report (billing evidence, SLA log):
 | Command | Behavior |
 |---------|----------|
 | `/order` | Generate or update brief artifacts (auto-detects mode) |
-| `/order --approve` | Pass the brief gate after reviewing client-questions.md |
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
 | `/prep F-001` | Deep impact analysis for a specific feature |
-| `/prep --approve` | Pass the queue gate before running /recipe |
 | `/recipe F-001` | Generate spec for a feature |
 | `/status` | Morning-check dashboard |
 | `/status --report` | Full maintenance/SLA report from journal |
@@ -149,36 +131,19 @@ The registry lives in `.sandwich/registry/` and is committed to git. It never lo
 
 A feature keeps its ID (`F-001`, `F-002`, …) across re-runs even if the brief rewrites its title, because matching uses a content fingerprint — not position or exact text. Human overrides (pinned priority, pinned lifecycle) survive every reconciliation.
 
-### Gate system
-
-Two explicit human checkpoints protect the pipeline:
-
-| Gate | Set by | Auto-cleared when |
-|------|--------|-------------------|
-| `briefApproved` | `/order --approve` | Brief is regenerated |
-| `queueApproved` | `/prep --approve` | Brief changes materially |
-
-`/recipe` will warn (soft) if `queueApproved` hasn't been passed.
-
----
-
 ## Pipeline diagram
 
 ```
-/order  ──→  brief artifacts  ──→  /order --approve
-                                          │
-                                          ▼
-                                        /prep  ──→  feature-queue.md
-                                                          │
-                                          ┌───────────────┘
-                                          ▼
-                                   /prep --approve
-                                          │
-                                          ▼
-                                    /recipe F-001  ──→  spec + registry update
-                                          │
-                                          ▼
-                                   Superpowers (execution)
+/order  ──→  brief artifacts
+                   │
+                   ▼
+                 /prep  ──→  feature-queue.md
+                                   │
+                                   ▼
+                            /recipe F-001  ──→  spec + registry update
+                                   │
+                                   ▼
+                            Superpowers (execution)
 ```
 
 Human makes decisions at every gate. AI automates analysis and record-keeping.
