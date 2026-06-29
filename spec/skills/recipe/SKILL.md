@@ -71,6 +71,71 @@ Output goes to `docs/sandwich/specs/` (committed, shareable):
 
 The spec is the handoff document. Once generated, execution is deterministic.
 
+## Output file schemas (MANDATORY)
+
+**Use these field names and types exactly. Do NOT invent field names.**
+
+### Spec JSON — `docs/sandwich/specs/F-001.json`
+
+```json
+{
+  "featureId": "F-001",
+  "title": "User authentication flow",
+  "summary": "OAuth2 login with Google and email/password",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-001",
+      "given": "User is on the login page",
+      "when": "User clicks Google Sign-In",
+      "then": "User is authenticated and redirected to dashboard",
+      "testable": true,
+      "testCommand": "npm test -- --grep 'Google OAuth'"
+    }
+  ],
+  "scope": {
+    "inScope": ["OAuth2 integration", "Session management"],
+    "outOfScope": ["Password recovery", "2FA"]
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "description": "Create OAuth module",
+      "files": ["src/auth/oauth.ts"],
+      "acceptanceCriteria": ["AC-001"],
+      "estimatedMinutes": 30
+    }
+  ],
+  "harness": {
+    "setup": ["npm install"],
+    "testsToWrite": ["src/auth/__tests__/oauth.test.ts"],
+    "validators": ["npm run build", "npm test", "npm run lint"]
+  }
+}
+```
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `acceptanceCriteria[].id` | string | `AC-001`, `AC-002`, ... |
+| `tasks[].id` | string | `T-001`, `T-002`, ... |
+| `tasks[].acceptanceCriteria` | string[] | Must reference existing AC IDs |
+| `tasks[].estimatedMinutes` | number | 1–60 (tasks must be atomic) |
+| `harness.validators` | string[] | At least one command required |
+
+### Registry update — after writing the spec
+
+Update the feature in `.sandwich/registry/features.json`:
+- Set `lifecycle` to `"speced"` (only if currently `"proposed"` or `"queued"`)
+- Set `specRef` to `"docs/sandwich/specs/F-001.json"`
+- Set `flags.stale` to `false`
+- Set `updatedAt` to current ISO timestamp
+
+Append to `.sandwich/registry/journal.jsonl`:
+```
+{"ts":"2026-06-29T12:00:00.000Z","actor":"system","type":"spec-generated","target":"F-001","summary":"Spec generated for User auth flow"}
+```
+
+Journal field names: `ts` (NOT `timestamp`), `actor` (NOT `agent`), `type` (NOT `action`), `summary` (NOT `details`).
+
 ## Style rules
 
 - Acceptance criteria use Given/When/Then
