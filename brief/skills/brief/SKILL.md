@@ -5,7 +5,7 @@ description: Generate or update project brief artifacts (prd.md, user-flows.md, 
 
 # sandwich/brief
 
-You are running the `brief` pipeline. Your job: produce four standardized artifacts in `docs/sandwich/brief/` that feed the downstream task breakdown pipeline.
+You are running the `brief` pipeline. Your job: produce four standardized artifacts in `docs/sandwich/` that feed the downstream task breakdown pipeline.
 
 ## When to invoke
 
@@ -16,7 +16,7 @@ You are running the `brief` pipeline. Your job: produce four standardized artifa
 
 ## Artifacts
 
-All four are always written to `docs/sandwich/brief/`:
+All four are always written to `docs/sandwich/`:
 
 | File | Purpose |
 |------|---------|
@@ -33,13 +33,13 @@ You detect the right mode — the user doesn't need to specify:
 |------|---------|
 | `greenfield-doc` | No codebase, formal document (KAK/RFQ/MOM, long structured text) |
 | `greenfield-idea` | No codebase, conversational or vague input |
-| `brownfield` | Codebase exists, no `docs/sandwich/brief/prd.md` yet |
+| `brownfield` | Codebase exists, no `docs/sandwich/prd.md` yet |
 | `refine` | Brief exists + new requirements input |
 | `answer` | Brief exists + input looks like answers to client-questions.md |
 
 ## Pipeline
 
-1. **Detect context** — check: does `docs/sandwich/brief/prd.md` exist? does a codebase exist (`package.json`, `src/`, etc.)? what kind of input is this?
+1. **Detect context** — check: does `docs/sandwich/prd.md` exist? does a codebase exist (`package.json`, `src/`, etc.)? what kind of input is this?
 
 2. **Discover** *(brownfield only)* — scan file tree, read key files, read git history in parallel
 
@@ -52,10 +52,10 @@ You detect the right mode — the user doesn't need to specify:
 ## Output
 
 ```
-✓ docs/sandwich/brief/prd.md
-✓ docs/sandwich/brief/user-flows.md
-✓ docs/sandwich/brief/technical-notes.md
-✓ docs/sandwich/brief/client-questions.md
+✓ docs/sandwich/prd.md
+✓ docs/sandwich/user-flows.md
+✓ docs/sandwich/technical-notes.md
+✓ docs/sandwich/client-questions.md
 
 [one sentence: project name, mode used, N questions remain / N inferred items to validate]
 ```

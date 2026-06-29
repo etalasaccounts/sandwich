@@ -27,13 +27,13 @@ Consumes brief artifacts and produces a prioritized feature queue with:
 
 ## Output
 
-All output goes to `.sandwich/` (git-ignored):
+Output is split between committed views and machine state:
 
-| File | Purpose |
-|------|---------|
-| `feature-queue.md` | Ordered list of features with status, dependencies, scores |
-| `impact-analysis.md` | Deep dive on a specific feature |
-| `.plan-context.json` | Raw extraction output for debugging |
+| File | Location | Git | Purpose |
+|------|----------|-----|---------|
+| `feature-queue.md` | `docs/sandwich/` | tracked | Ordered feature list — shareable with PMs |
+| `impact-analysis.md` | `.sandwich/` | ignored | Deep dive on a specific feature |
+| `.plan-context.json` | `.sandwich/` | ignored | Raw extraction output for debugging |
 
 ## Pipeline
 
@@ -71,7 +71,7 @@ Where urgency_factor:
 ```
 /order → /prep → User picks → /recipe → Superpowers (execution)
            │
-           └─→ .sandwich/registry/ (source of truth) → feature-queue.md (view)
+           └─→ .sandwich/registry/ (source of truth) → docs/sandwich/feature-queue.md
 ```
 
-The feature queue is git-ignored because it's derivative work from brief. Can be regenerated at any time from brief + git state.
+The feature queue is committed to `docs/sandwich/` so PMs can see it. It can be regenerated at any time from the registry.

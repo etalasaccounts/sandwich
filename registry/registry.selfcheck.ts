@@ -359,7 +359,7 @@ try {
     writeFileSync(join(rogueReg, "project.json"), JSON.stringify({
       name: "SwissBelhotel Maintenance",
       slug: "swissbelhotel",
-      brief_path: "docs/sandwich/brief",
+      brief_path: "docs/sandwich",
       brief_hashes: { "prd.md": "v1" },
       mode: "maintenance",
       gates: { brief_complete: true, questions_answered: false },

@@ -17,8 +17,8 @@ You are running the `plan` pipeline. Your job: produce prioritization data that 
 ## What it produces
 
 Output is split into the **committed registry** (the source of truth) and
-**git-ignored views** (disposable projections). A `.sandwich/.gitignore` is
-written automatically to enforce this posture.
+**committed views** (shareable projections in `docs/sandwich/`). A `.sandwich/.gitignore` is
+written automatically to keep machine state hidden.
 
 **Committed — `.sandwich/registry/`:**
 
@@ -30,13 +30,18 @@ written automatically to enforce this posture.
 | `decisions.json` | ADR-lite scope/architecture decisions |
 | `journal.jsonl` | Append-only audit trail of every change |
 
-**Git-ignored — rendered each run:**
+**Committed views — rendered each run to `docs/sandwich/`:**
 
 | File | Purpose |
 |------|---------|
-| `feature-queue.md` | Human-readable projection of the registry |
-| `impact-analysis.md` | Deep dive on a specific feature (on demand) |
-| `.plan-context.json` | Validation/debug context |
+| `feature-queue.md` | Human-readable projection of the registry (shareable with PMs) |
+
+**Git-ignored (machine state):**
+
+| File | Purpose |
+|------|---------|
+| `.sandwich/impact-analysis.md` | Deep dive on a specific feature (on demand) |
+| `.sandwich/.plan-context.json` | Validation/debug context |
 
 Feature identity is stable: a feature keeps its ID (and its spec, commits, and
 human overrides) across re-runs even if the brief rewore its title, because
@@ -166,7 +171,7 @@ When brief changes after initial `/prep`:
            └─→ feature-queue.md (execution state)
 ```
 
-The feature queue is git-ignored because it's derivative work from brief. Can be regenerated at any time.
+The feature queue is committed to `docs/sandwich/` — shareable with PMs. It can be regenerated at any time from the registry.
 
 ## Style rules
 

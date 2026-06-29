@@ -14,7 +14,7 @@ You are running the `spec` pipeline. Your job: turn a feature into a precise, ex
 
 ## What it produces
 
-Output goes to `.sandwich/specs/`:
+Output goes to `docs/sandwich/specs/` (committed, shareable):
 
 | File | Purpose |
 |------|---------|
@@ -49,8 +49,8 @@ Output goes to `.sandwich/specs/`:
 │   ✓ npm run lint                            │
 └─────────────────────────────────────────────┘
 
-✓ .sandwich/specs/F-001.json
-✓ .sandwich/specs/F-001.md
+✓ docs/sandwich/specs/F-001.json
+✓ docs/sandwich/specs/F-001.md
 ```
 
 ## Key principles

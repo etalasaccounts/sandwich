@@ -35,7 +35,7 @@ Paste a KAK, RFQ, MOM, meeting notes, or just describe the project. The skill de
 /order
 ```
 
-Produces four artifacts in `docs/sandwich/brief/`:
+Produces four artifacts in `docs/sandwich/`:
 
 | File | Purpose |
 |------|---------|
@@ -67,7 +67,7 @@ Paste the client's answers alongside `/order`. The skill detects `answer` mode a
 
 Reads the brief, extracts all features, scores them (impact × urgency × risk ÷ effort), and writes the registry. On re-run it reconciles — new features are added, dropped features are flagged, and any feature that was in-progress is never auto-removed.
 
-**The registry** (`.sandwich/registry/`) is committed to git — it's the source of truth that survives across re-runs. A rendered view (`feature-queue.md`) is generated each run but git-ignored.
+**The registry** (`.sandwich/registry/`) is committed to git — it's the source of truth that survives across re-runs. A rendered view (`docs/sandwich/feature-queue.md`) is generated each run and committed alongside the brief artifacts.
 
 ---
 
@@ -125,7 +125,7 @@ The registry lives in `.sandwich/registry/` and is committed to git. It never lo
 | `decisions.json` | ADR-lite scope/architecture decisions |
 | `journal.jsonl` | Append-only audit trail — every gate, reconciliation, drift event |
 
-**Rendered views** (`.sandwich/views/`) are git-ignored — generated fresh each run from the registry.
+**Rendered views** (`docs/sandwich/feature-queue.md`) are committed — generated fresh each run from the registry, shareable with PMs.
 
 ### Stable feature IDs
 
@@ -146,7 +146,7 @@ A feature keeps its ID (`F-001`, `F-002`, …) across re-runs even if the brief 
                             Superpowers (execution)
 ```
 
-Human makes decisions at every gate. AI automates analysis and record-keeping.
+Human picks features. AI automates analysis and record-keeping.
 
 ---
 
@@ -214,7 +214,7 @@ Human overrides (pin a priority, force a lifecycle) survive every re-run.
 
 | Directory | Git | Purpose |
 |-----------|-----|---------|
-| `docs/sandwich/brief/` | tracked | Brief artifacts (client-facing) |
+| `docs/sandwich/` | tracked | Brief artifacts, feature queue, specs — everything shareable |
+| `docs/sandwich/specs/` | tracked | Machine-checkable specs |
+| `docs/sandwich/intake/` | tracked | Raw PM inputs (KAK, MOM, meeting notes) |
 | `.sandwich/registry/` | tracked | Pipeline state (source of truth) |
-| `.sandwich/views/` | ignored | Rendered projections (generated each run) |
-| `.sandwich/specs/` | tracked | Machine-checkable specs |

@@ -104,12 +104,13 @@ export interface ReconciledChange {
 
 export function getPlanPaths(projectRoot: string): PlanPaths {
   const root = join(projectRoot, ".sandwich");
+  const docsDir = join(projectRoot, "docs", "sandwich");
   return {
     root,
-    featureQueue: join(root, "feature-queue.md"),
+    featureQueue: join(docsDir, "feature-queue.md"),
     impactAnalysis: join(root, "impact-analysis.md"),
     planContext: join(root, ".plan-context.json"),
-    specsDir: join(root, "specs"),
+    specsDir: join(docsDir, "specs"),
   };
 }
 
@@ -361,7 +362,7 @@ export function writeFeatureQueue(
   const lines: string[] = [
     `# Feature Queue`,
     `Generated: ${new Date().toISOString().split("T")[0]}`,
-    `Source: docs/sandwich/brief/`,
+    `Source: docs/sandwich/`,
     "",
     "## Status Legend",
     "🟡 queued | 🔵 in-progress | 🔴 blocked | ✅ done | ⚠️ needs-reanalysis | ❌ brief-removed",

@@ -52,7 +52,7 @@ function hasConfidenceMarker(item: string): boolean {
 // --- Paths ---
 
 export function getBriefPaths(projectRoot: string): BriefPaths {
-  const root = join(projectRoot, "docs", "sandwich", "brief");
+  const root = join(projectRoot, "docs", "sandwich");
   return {
     root,
     prd: join(root, "prd.md"),
