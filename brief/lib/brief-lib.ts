@@ -6,6 +6,12 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import type {
+  PrdDoc,
+  UserFlowsDoc,
+  TechNotesDoc,
+  ClientQuestionsDoc,
+} from "./brief-schemas.js";
 
 export type BriefMode =
   | "greenfield-doc"
@@ -28,6 +34,10 @@ export interface BriefPaths {
   technicalNotes: string;
   clientQuestions: string;
   contextDraft: string;
+  prdJson: string;
+  userFlowsJson: string;
+  technicalNotesJson: string;
+  clientQuestionsJson: string;
 }
 
 export interface BriefArtifacts {
@@ -60,6 +70,10 @@ export function getBriefPaths(projectRoot: string): BriefPaths {
     technicalNotes: join(root, "technical-notes.md"),
     clientQuestions: join(root, "client-questions.md"),
     contextDraft: join(root, ".brief-context.json"),
+    prdJson: join(root, "prd.json"),
+    userFlowsJson: join(root, "user-flows.json"),
+    technicalNotesJson: join(root, "technical-notes.json"),
+    clientQuestionsJson: join(root, "client-questions.json"),
   };
 }
 
@@ -248,4 +262,59 @@ export function writeBriefContext(projectRoot: string, context: unknown): void {
   const paths = getBriefPaths(projectRoot);
   ensureBriefDir(projectRoot);
   writeFileSync(paths.contextDraft, JSON.stringify(context, null, 2), "utf8");
+}
+
+const JSON_PATH_KEY = {
+  prd: "prdJson",
+  userFlows: "userFlowsJson",
+  technicalNotes: "technicalNotesJson",
+  clientQuestions: "clientQuestionsJson",
+} as const;
+
+const MD_PATH_KEY = {
+  prd: "prd",
+  userFlows: "userFlows",
+  technicalNotes: "technicalNotes",
+  clientQuestions: "clientQuestions",
+} as const;
+
+export type BriefDocKind = keyof typeof JSON_PATH_KEY;
+
+function readJsonIfExists<T>(path: string): T | undefined {
+  if (!existsSync(path)) return undefined;
+  try {
+    return JSON.parse(readFileSync(path, "utf8")) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+export function readBriefDocs(projectRoot: string): {
+  prd?: PrdDoc;
+  userFlows?: UserFlowsDoc;
+  technicalNotes?: TechNotesDoc;
+  clientQuestions?: ClientQuestionsDoc;
+} {
+  const p = getBriefPaths(projectRoot);
+  return {
+    prd: readJsonIfExists<PrdDoc>(p.prdJson),
+    userFlows: readJsonIfExists<UserFlowsDoc>(p.userFlowsJson),
+    technicalNotes: readJsonIfExists<TechNotesDoc>(p.technicalNotesJson),
+    clientQuestions: readJsonIfExists<ClientQuestionsDoc>(p.clientQuestionsJson),
+  };
+}
+
+export function writeBriefArtifact(
+  projectRoot: string,
+  kind: BriefDocKind,
+  doc: unknown,
+  rendered: string,
+): { json: string; md: string } {
+  ensureBriefDir(projectRoot);
+  const paths = getBriefPaths(projectRoot);
+  const jsonPath = paths[JSON_PATH_KEY[kind]];
+  const mdPath = paths[MD_PATH_KEY[kind]];
+  writeFileSync(jsonPath, JSON.stringify(doc, null, 2), "utf8");
+  writeFileSync(mdPath, rendered, "utf8");
+  return { json: jsonPath, md: mdPath };
 }

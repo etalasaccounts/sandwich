@@ -114,4 +114,25 @@ check("renderPrd appends a changelog only when prev differs", () => {
   assert.ok(renderPrd(changed, VALID_PRD).includes("## Changes since last run"));
 });
 
+import { mkdtempSync, rmSync, readFileSync as rf, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join as pj } from "node:path";
+import { getBriefPaths, readBriefDocs, writeBriefArtifact } from "./brief-lib.ts";
+
+check("writeBriefArtifact writes json + md and readBriefDocs reads it back", () => {
+  const dir = mkdtempSync(pj(tmpdir(), "brief-io-"));
+  try {
+    const paths = getBriefPaths(dir);
+    assert.ok(paths.prdJson.endsWith("prd.json"));
+    const out = writeBriefArtifact(dir, "prd", VALID_PRD, "# rendered");
+    assert.ok(existsSync(out.json) && existsSync(out.md));
+    assert.equal(rf(out.md, "utf8"), "# rendered");
+    const back = readBriefDocs(dir);
+    assert.equal(back.prd?.projectName, "Acme");
+    assert.equal(back.userFlows, undefined);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 console.log(`\n${n} brief checks passed.`);
