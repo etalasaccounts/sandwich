@@ -16,6 +16,41 @@ const DEFAULT_CONFIG: RetryConfig = {
   timeoutMs: 60000,
 };
 
+// Pull the most-likely JSON payload out of a model response. Small models
+// wrap output in ```json fences or add preamble; strict JSON.parse on the
+// raw string would throw and burn a retry. Extract leniently, validate strictly.
+export function extractJson(raw: string): string {
+  const text = raw.trim();
+
+  // 1. Fenced block: ```json ... ``` or ``` ... ```
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence && fence[1].trim()) return fence[1].trim();
+
+  // 2. First balanced { ... } (object) — scan respecting strings/escapes.
+  const start = text.indexOf("{");
+  if (start !== -1) {
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+    for (let i = start; i < text.length; i++) {
+      const ch = text[i];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (ch === "\\") esc = true;
+        else if (ch === '"') inStr = false;
+      } else if (ch === '"') inStr = true;
+      else if (ch === "{") depth++;
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0) return text.slice(start, i + 1);
+      }
+    }
+  }
+
+  // 3. Give up gracefully — return the trimmed text for JSON.parse to report.
+  return text;
+}
+
 // --- Agent wrapper with validation and retry ---
 
 export interface RepairContext {
@@ -52,10 +87,10 @@ export async function runAgentWithValidation<T>(
 
       lastRawOutput = rawOutput;
 
-      // Parse JSON
+      // Parse JSON (lenient extraction, strict parse)
       let parsed: unknown;
       try {
-        parsed = JSON.parse(rawOutput);
+        parsed = JSON.parse(extractJson(rawOutput));
       } catch (e) {
         throw new Error(`JSON parse failed: ${e instanceof Error ? e.message : String(e)}`);
       }
