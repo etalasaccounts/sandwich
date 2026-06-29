@@ -24,4 +24,53 @@ check("extractJson passes through clean JSON", () => {
   assert.deepEqual(JSON.parse(extractJson("{\"a\":3}")), { a: 3 });
 });
 
+import {
+  validatePrdDoc,
+  validateUserFlowsDoc,
+  validateTechNotesDoc,
+  validateClientQuestionsDoc,
+  type PrdDoc,
+} from "./brief-schemas.ts";
+
+const VALID_PRD: PrdDoc = {
+  projectName: "Acme",
+  mode: "create",
+  overview: "A thing.",
+  projectState: { phase: "greenfield", hasExistingCodebase: false, briefSource: "Conversation" },
+  actors: [{ name: "User", role: "buys", confidence: "stated" }],
+  modules: [{ name: "Auth", status: "planned", description: "Login", features: [{ text: "OAuth", confidence: "stated" }] }],
+  integrations: [],
+  constraints: [],
+  stakeholders: [],
+  timeline: null,
+  openQuestionsCount: 0,
+};
+
+check("validatePrdDoc accepts a well-formed PRD", () => {
+  const r = validatePrdDoc(VALID_PRD);
+  assert.equal(r.valid, true);
+  assert.equal(r.data?.actors[0].confidence, "stated");
+});
+check("validatePrdDoc rejects empty modules", () => {
+  const r = validatePrdDoc({ ...VALID_PRD, modules: [] });
+  assert.equal(r.valid, false);
+});
+check("validatePrdDoc rejects a bad confidence enum", () => {
+  const bad = { ...VALID_PRD, actors: [{ name: "U", role: "r", confidence: "maybe" }] };
+  assert.equal(validatePrdDoc(bad).valid, false);
+});
+check("validateUserFlowsDoc requires UF-### ids and >=1 step", () => {
+  assert.equal(validateUserFlowsDoc({ flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated" }] }).valid, true);
+  assert.equal(validateUserFlowsDoc({ flows: [{ id: "F1", title: "t", actor: "a", trigger: "x", steps: [], outcome: "o", confidence: "stated" }] }).valid, false);
+});
+check("validateTechNotesDoc requires stack or architectureNotes", () => {
+  assert.equal(validateTechNotesDoc({ stack: [{ layer: "db", choice: "pg", rationale: "ok" }], architectureNotes: [], risks: [], openDecisions: [] }).valid, true);
+  assert.equal(validateTechNotesDoc({ stack: [], architectureNotes: [], risks: [], openDecisions: [] }).valid, false);
+});
+check("validateClientQuestionsDoc accepts empty questions and Q-### ids", () => {
+  assert.equal(validateClientQuestionsDoc({ questions: [] }).valid, true);
+  assert.equal(validateClientQuestionsDoc({ questions: [{ id: "Q-001", question: "q", why: "w", blocks: [], priority: "high" }] }).valid, true);
+  assert.equal(validateClientQuestionsDoc({ questions: [{ id: "1", question: "q", why: "w", blocks: [], priority: "nope" }] }).valid, false);
+});
+
 console.log(`\n${n} brief checks passed.`);
