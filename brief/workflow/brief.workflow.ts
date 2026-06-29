@@ -138,7 +138,7 @@ const validation = validateRequirements(requirements);
 if (!validation.valid) {
   log(`EXTRACTION FAILED — cannot proceed:`);
   validation.errors.forEach((e) => log(`  ✗ ${e}`));
-  log(`Inspect docs/sandwich/brief/.brief-context.json for the raw extraction output.`);
+  log(`Inspect docs/sandwich/.brief-context.json for the raw extraction output.`);
   writeBriefContext(projectRoot, { context, requirements, validation });
   throw new Error(`Brief extraction failed: ${validation.errors.join("; ")}`);
 }

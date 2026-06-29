@@ -3,7 +3,7 @@
  *
  * Pure schema and merge logic live in registry-lib.ts. This file is the only
  * place that touches disk: it reads and writes the committed registry files
- * under `.sandwich/registry/`, and renders the git-ignored markdown views.
+ * under `.sandwich/registry/`, and renders the committed markdown views.
  *
  * Reads are *defensive*: if an LLM bypassed the workflow and wrote raw JSON
  * (wrong field names, wrapper objects, missing computed fields), the read path
@@ -67,9 +67,7 @@ export function getRegistryPaths(projectRoot: string): RegistryPaths {
     questions: join(registryDir, "questions.json"),
     decisions: join(registryDir, "decisions.json"),
     journal: join(registryDir, "journal.jsonl"),
-    // The human-facing queue stays at its familiar path but is now a pure
-    // projection of the registry, not the store.
-    featureQueueView: join(sandwichDir, "feature-queue.md"),
+    featureQueueView: join(projectRoot, "docs", "sandwich", "feature-queue.md"),
   };
 }
 
@@ -91,7 +89,6 @@ export function ensureSandwichGitignore(projectRoot: string): void {
   const body = [
     "# sandwich: registry/ is the committed source of truth — do not ignore it.",
     "# Everything below is a regenerable projection or debug output.",
-    "feature-queue.md",
     "impact-analysis.md",
     "views/",
     ".plan-context.json",
@@ -415,7 +412,8 @@ export function renderFeatureQueue(
   report?: RippleReport
 ): void {
   const paths = getRegistryPaths(projectRoot);
-  mkdirSync(paths.sandwichDir, { recursive: true });
+  const docsDir = join(projectRoot, "docs", "sandwich");
+  mkdirSync(docsDir, { recursive: true });
 
   const byId = new Map(features.map((f) => [f.id, f]));
   const label = (id: string) => `${id} (${byId.get(id)?.title ?? "?"})`;

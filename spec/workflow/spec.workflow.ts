@@ -139,7 +139,7 @@ const updated = features.map((f) => {
   return {
     ...f,
     lifecycle: advance ? ("speced" as const) : f.lifecycle,
-    specRef: `specs/${featureId}.json`,
+    specRef: `docs/sandwich/specs/${featureId}.json`,
     flags: { ...f.flags, stale: false },
     updatedAt: now,
   };

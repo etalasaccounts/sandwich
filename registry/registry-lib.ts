@@ -4,7 +4,7 @@
  * Every ingredient (brief, prep, recipe) reads from and writes to this registry.
  * The markdown artifacts (feature-queue.md, etc.) become *projections* of this
  * data, not the store. The registry is committed to git; the rendered views are
- * git-ignored.
+ * committed to docs/sandwich/.
  *
  * Design rules this file enforces:
  *   1. Stable identity — a feature's ID is assigned once via a content

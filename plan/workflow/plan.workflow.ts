@@ -141,7 +141,7 @@ log(`Brief ${briefChanged ? "changed since last run" : "unchanged"}`);
 if (!forceFresh && !briefChanged && existingFeatures.length > 0) {
   log("\nBrief unchanged. Re-rendering view from registry. Use --fresh to force re-extraction.\n");
   renderFeatureQueue(projectRoot, existingFeatures, project);
-  log("✓ .sandwich/feature-queue.md (from registry)");
+  log("✓ docs/sandwich/feature-queue.md (from registry)");
   throw new Error("SKIP");
 }
 
@@ -476,5 +476,5 @@ const reasoning = recommendation.reasoning?.slice(0, 80) ?? "Start with highest 
 log(`│ ${reasoning.padEnd(43)}│`);
 log("└─────────────────────────────────────────────┘");
 log("");
-log("✓ .sandwich/feature-queue.md");
+log("✓ docs/sandwich/feature-queue.md");
 log("✓ All phases validated with confidence checks");
