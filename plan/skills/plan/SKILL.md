@@ -178,6 +178,13 @@ The feature queue is committed to `docs/sandwich/` — shareable with PMs. It ca
 **These are exact schemas. Use these field names and types precisely.**
 **Do NOT invent field names. Do NOT wrap arrays in objects.**
 
+> **A deterministic gate validates every registry write.** Writes to
+> `.sandwich/registry/*` are checked against these schemas in code before they
+> land: the priority number is recomputed from your dimension scores (you never
+> set it), recoverable mistakes are auto-corrected, and anything that can't be
+> validated is rejected with the exact errors to fix. Follow the schema and the
+> write succeeds on the first try.
+
 Registry files go in `.sandwich/registry/`. Create the directory if it doesn't exist.
 
 ### features.json — bare JSON array
