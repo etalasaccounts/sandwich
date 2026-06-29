@@ -73,4 +73,23 @@ check("validateClientQuestionsDoc accepts empty questions and Q-### ids", () => 
   assert.equal(validateClientQuestionsDoc({ questions: [{ id: "1", question: "q", why: "w", blocks: [], priority: "nope" }] }).valid, false);
 });
 
+import { renderPrd, renderUserFlows, renderTechNotes, renderClientQuestions } from "./brief-render.ts";
+
+check("renderPrd is deterministic for identical input", () => {
+  const a = renderPrd(VALID_PRD);
+  const b = renderPrd(VALID_PRD);
+  assert.equal(a, b);
+});
+check("renderPrd emits the confidence marker, not a raw enum word", () => {
+  const md = renderPrd(VALID_PRD);
+  assert.ok(md.includes("`[stated]` OAuth"), "feature should render with `[stated]` marker");
+  assert.ok(md.includes("# Acme — Product Requirements Document"));
+});
+check("renderUserFlows lists numbered steps", () => {
+  const md = renderUserFlows({ flows: [{ id: "UF-001", title: "Login", actor: "User", trigger: "click", steps: ["open", "submit"], outcome: "in", confidence: "stated" }] });
+  assert.ok(md.includes("### UF-001 — Login"));
+  assert.ok(md.includes("1. open"));
+  assert.ok(md.includes("2. submit"));
+});
+
 console.log(`\n${n} brief checks passed.`);
