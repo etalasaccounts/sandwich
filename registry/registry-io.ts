@@ -168,13 +168,18 @@ function normalizeFeature(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const obj = camelCaseKeys(raw as Record<string, unknown>);
 
+  const validLifecycles = ["proposed", "queued", "speced", "building", "review", "done", "deferred", "rejected"];
   // LLMs often wrap lifecycle in an object: { status: "blocked", blocked_by: [...] }
   if (obj.lifecycle && typeof obj.lifecycle === "object") {
     const lc = obj.lifecycle as Record<string, unknown>;
     const status = lc.status as string | undefined;
-    const valid = ["proposed", "queued", "speced", "building", "review", "done", "deferred", "rejected"];
-    obj.lifecycle = valid.includes(status ?? "") ? status : "proposed";
+    obj.lifecycle = validLifecycles.includes(status ?? "") ? status : "proposed";
   }
+  // LLMs also use "status" instead of "lifecycle"
+  if (!obj.lifecycle && obj.status && typeof obj.status === "string") {
+    obj.lifecycle = validLifecycles.includes(obj.status) ? obj.status : "proposed";
+  }
+  if (!obj.lifecycle) obj.lifecycle = "proposed";
 
   if (!obj.type) obj.type = "feature";
   if (!obj.module && typeof obj.module !== "string") obj.module = "General";
@@ -182,6 +187,11 @@ function normalizeFeature(raw: unknown): unknown {
     obj.fingerprint = computeFingerprint(String(obj.title), String(obj.module));
   }
 
+  // Extract confidence from source sub-object if not at top level
+  if (!obj.confidence && obj.source && typeof obj.source === "object") {
+    const src = obj.source as Record<string, unknown>;
+    if (src.confidence) obj.confidence = src.confidence;
+  }
   // Map confidence_marker / confidence number to the enum string
   if (obj.confidenceMarker && !obj.confidence) obj.confidence = obj.confidenceMarker;
   if (typeof obj.confidence === "number") {
@@ -217,11 +227,12 @@ function normalizeQuestion(raw: unknown): unknown {
   const obj = camelCaseKeys(raw as Record<string, unknown>);
   if (obj.question && !obj.text) obj.text = obj.question;
   if (obj.whyNeeded && !obj.text) obj.text = obj.whyNeeded;
-  if (!obj.status) obj.status = "open";
+  if (!obj.status || obj.status === "unanswered" || obj.status === "pending") obj.status = "open";
   if (obj.answer === null || obj.answer === undefined) delete obj.answer;
   if (obj.answeredAt === null) delete obj.answeredAt;
   if (obj.answeredBy !== undefined) delete obj.answeredBy;
   if (obj.blocks && !obj.unblocks) obj.unblocks = obj.blocks;
+  if (obj.blocking && !obj.unblocks) obj.unblocks = obj.blocking;
   return obj;
 }
 
