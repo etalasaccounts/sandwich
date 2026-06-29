@@ -73,7 +73,7 @@ check("validateClientQuestionsDoc accepts empty questions and Q-### ids", () => 
   assert.equal(validateClientQuestionsDoc({ questions: [{ id: "1", question: "q", why: "w", blocks: [], priority: "nope" }] }).valid, false);
 });
 
-import { renderPrd, renderUserFlows, renderTechNotes, renderClientQuestions } from "./brief-render.ts";
+import { renderPrd, renderUserFlows, renderTechNotes, renderClientQuestions, diffBriefDoc, renderChangelog } from "./brief-render.ts";
 
 check("renderPrd is deterministic for identical input", () => {
   const a = renderPrd(VALID_PRD);
@@ -90,6 +90,28 @@ check("renderUserFlows lists numbered steps", () => {
   assert.ok(md.includes("### UF-001 — Login"));
   assert.ok(md.includes("1. open"));
   assert.ok(md.includes("2. submit"));
+});
+
+check("diffBriefDoc reports a changed leaf with its path", () => {
+  const a = { overview: "x", openQuestionsCount: 0 };
+  const b = { overview: "y", openQuestionsCount: 0 };
+  assert.deepEqual(diffBriefDoc(a, b), ["changed overview"]);
+});
+check("diffBriefDoc reports added/removed array items", () => {
+  const a = { modules: [{ name: "A" }] };
+  const b = { modules: [{ name: "A" }, { name: "B" }] };
+  assert.deepEqual(diffBriefDoc(a, b), ["added modules[1]"]);
+});
+check("diffBriefDoc returns empty for identical docs", () => {
+  assert.deepEqual(diffBriefDoc(VALID_PRD, VALID_PRD), []);
+});
+check("renderChangelog is empty when nothing changed", () => {
+  assert.equal(renderChangelog([]), "");
+});
+check("renderPrd appends a changelog only when prev differs", () => {
+  assert.ok(!renderPrd(VALID_PRD).includes("Changes since last run"));
+  const changed = { ...VALID_PRD, overview: "different" };
+  assert.ok(renderPrd(changed, VALID_PRD).includes("## Changes since last run"));
 });
 
 console.log(`\n${n} brief checks passed.`);
