@@ -24,16 +24,40 @@ import {
   writeBriefArtifacts,
   writeBriefContext,
   getBriefPaths,
+  readBriefDocs,
+  writeBriefArtifact,
 } from "../lib/brief-lib.js";
 import {
   validateBriefArtifacts,
   validateBriefForPlanning,
 } from "../lib/validation.js";
+import {
+  validatePrdDoc,
+  validateUserFlowsDoc,
+  validateTechNotesDoc,
+  validateClientQuestionsDoc,
+  type PrdDoc,
+  type UserFlowsDoc,
+  type TechNotesDoc,
+  type ClientQuestionsDoc,
+} from "../lib/brief-schemas.js";
+import {
+  renderPrd,
+  renderUserFlows,
+  renderTechNotes,
+  renderClientQuestions,
+} from "../lib/brief-render.js";
+import { runAgentWithValidation, type RepairContext } from "../../spec/lib/agent-wrapper.js";
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
 
 function readAgent(name: string): string {
   return readFileSync(join(agentsDir, name), "utf8");
+}
+
+function withRepair(prompt: string, repair?: RepairContext): string {
+  if (!repair) return prompt;
+  return `${prompt}\n\n## REPAIR REQUIRED\n\nYour previous output was rejected. Fix the issues and output ONLY corrected JSON.\n\nPrevious output:\n\`\`\`\n${repair.previousOutput.slice(0, 2000)}\n\`\`\`\n\nErrors:\n${repair.errors.map((e) => `- ${e}`).join("\n")}`;
 }
 
 function tryExec(cmd: string, cwd: string): string {
@@ -152,67 +176,55 @@ if (validation.warnings.length > 0) {
 log(summarizeRequirements(requirements));
 writeBriefContext(projectRoot, { context, requirements, validation });
 
-// Phase 5: Generate (parallel)
+// Phase 5: Generate (each artifact: validated JSON → render → write json+md)
 phase("Generate");
-const [prd, userFlows, technicalNotes, clientQuestions] = await parallel([
-  () =>
-    agent(
-      `${readAgent("02-write-prd.md")}\n\nContext:\n${JSON.stringify(
-        { context, requirements, existingPrd: existingArtifacts.prd ?? null },
-        null,
-        2
-      )}`,
-      { label: "write-prd", phase: "Generate" }
-    ),
-  () =>
-    agent(
-      `${readAgent("03-write-user-flows.md")}\n\nContext:\n${JSON.stringify(
-        { context, requirements, existingUserFlows: existingArtifacts.userFlows ?? null },
-        null,
-        2
-      )}`,
-      { label: "write-user-flows", phase: "Generate" }
-    ),
-  () =>
-    agent(
-      `${readAgent("04-write-technical-notes.md")}\n\nContext:\n${JSON.stringify(
-        { context, requirements, existingTechnicalNotes: existingArtifacts.technicalNotes ?? null },
-        null,
-        2
-      )}`,
-      { label: "write-technical-notes", phase: "Generate" }
-    ),
-  () =>
-    agent(
-      `${readAgent("05-write-client-questions.md")}\n\nContext:\n${JSON.stringify(
-        {
-          context,
-          requirements,
-          existingClientQuestions: existingArtifacts.clientQuestions ?? null,
-          existingPrd: existingArtifacts.prd ?? null,
-          existingTechnicalNotes: existingArtifacts.technicalNotes ?? null,
-        },
-        null,
-        2
-      )}`,
-      { label: "write-client-questions", phase: "Generate" }
-    ),
+const prevDocs = readBriefDocs(projectRoot);
+
+async function generateDoc<T>(
+  file: string,
+  validator: (o: unknown) => import("../../spec/lib/validation.js").ValidationResult<T>,
+  contextObj: unknown,
+  label: string,
+): Promise<T> {
+  const prompt = readAgent(file);
+  const res = await runAgentWithValidation<T>(
+    (repair) =>
+      agent(
+        `${withRepair(prompt, repair)}\n\nContext:\n${JSON.stringify(contextObj, null, 2)}`,
+        { label, phase: "Generate" },
+      ),
+    validator,
+    { maxRetries: 3, timeoutMs: 90000 },
+  );
+  return res.result;
+}
+
+const [prdDoc, flowsDoc, techDoc, questionsDoc] = await Promise.all([
+  generateDoc<PrdDoc>("02-write-prd.md", validatePrdDoc,
+    { context, requirements, existingPrd: prevDocs.prd ?? null }, "write-prd"),
+  generateDoc<UserFlowsDoc>("03-write-user-flows.md", validateUserFlowsDoc,
+    { context, requirements, existingUserFlows: prevDocs.userFlows ?? null }, "write-user-flows"),
+  generateDoc<TechNotesDoc>("04-write-technical-notes.md", validateTechNotesDoc,
+    { context, requirements, existingTechnicalNotes: prevDocs.technicalNotes ?? null }, "write-technical-notes"),
+  generateDoc<ClientQuestionsDoc>("05-write-client-questions.md", validateClientQuestionsDoc,
+    { context, requirements, existingClientQuestions: prevDocs.clientQuestions ?? null,
+      existingPrd: existingArtifacts.prd ?? null, existingTechnicalNotes: existingArtifacts.technicalNotes ?? null },
+    "write-client-questions"),
 ]);
 
+const w1 = writeBriefArtifact(projectRoot, "prd", prdDoc, renderPrd(prdDoc, prevDocs.prd));
+const w2 = writeBriefArtifact(projectRoot, "userFlows", flowsDoc, renderUserFlows(flowsDoc, prevDocs.userFlows));
+const w3 = writeBriefArtifact(projectRoot, "technicalNotes", techDoc, renderTechNotes(techDoc, prevDocs.technicalNotes));
+const w4 = writeBriefArtifact(projectRoot, "clientQuestions", questionsDoc, renderClientQuestions(questionsDoc, prevDocs.clientQuestions));
+
 const after = {
-  prd: prd ?? "",
-  userFlows: userFlows ?? "",
-  technicalNotes: technicalNotes ?? "",
-  clientQuestions: clientQuestions ?? "",
+  prd: renderPrd(prdDoc, prevDocs.prd),
+  userFlows: renderUserFlows(flowsDoc, prevDocs.userFlows),
+  technicalNotes: renderTechNotes(techDoc, prevDocs.technicalNotes),
+  clientQuestions: renderClientQuestions(questionsDoc, prevDocs.clientQuestions),
 };
 
-writeBriefArtifacts(projectRoot, after);
-
-const paths = getBriefPaths(projectRoot);
-log(`✓ ${paths.prd}`);
-log(`✓ ${paths.userFlows}`);
-log(`✓ ${paths.technicalNotes}`);
-log(`✓ ${paths.clientQuestions}`);
+[w1, w2, w3, w4].forEach((w) => { log(`✓ ${w.json}`); log(`✓ ${w.md}`); });
 
 // Post-generation validation
 const artifactValidation = validateBriefArtifacts({

@@ -16,7 +16,7 @@
     "url": "https://github.com/etalasaccounts/sandwich.git"
   },
   "scripts": {
-    "test": "node --experimental-strip-types plan/lib/validation.selfcheck.ts && node --experimental-strip-types registry/registry.selfcheck.ts"
+    "test": "node --experimental-strip-types plan/lib/validation.selfcheck.ts && node --experimental-strip-types registry/registry.selfcheck.ts && node --experimental-strip-types brief/lib/validation.selfcheck.ts"
   },
   "dependencies": {
     "zod": "^3.25.76"
