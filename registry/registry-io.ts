@@ -5,8 +5,10 @@
  * place that touches disk: it reads and writes the committed registry files
  * under `.sandwich/registry/`, and renders the git-ignored markdown views.
  *
- * Every read validates against the zod schema, so a hand-edited or corrupted
- * registry fails loudly instead of silently feeding garbage downstream.
+ * Reads are *defensive*: if an LLM bypassed the workflow and wrote raw JSON
+ * (wrong field names, wrapper objects, missing computed fields), the read path
+ * normalizes common mistakes, parses item-by-item, and returns whatever is
+ * salvageable — never crashes the pipeline on corrupt input. Writes stay strict.
  */
 
 import {
@@ -25,6 +27,7 @@ import {
   QuestionSchema,
   DecisionSchema,
   JournalEventSchema,
+  fingerprint as computeFingerprint,
   effectivePriority,
   effectiveLifecycle,
   type Project,
@@ -98,6 +101,142 @@ export function ensureSandwichGitignore(projectRoot: string): void {
 }
 
 // ---------------------------------------------------------------------------
+// Normalization — fix common LLM mistakes before schema validation.
+// These run on the read path only; the write path stays strict.
+// ---------------------------------------------------------------------------
+
+function unwrapArray(raw: unknown): unknown[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>;
+    const arrays = Object.values(obj).filter(Array.isArray);
+    if (arrays.length === 1) return arrays[0] as unknown[];
+  }
+  return [];
+}
+
+function renameKeys(obj: Record<string, unknown>, map: Record<string, string>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[map[k] ?? k] = v;
+  }
+  return out;
+}
+
+const snakeToCamel = (s: string) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+
+function camelCaseKeys(obj: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[snakeToCamel(k)] = v;
+  }
+  return out;
+}
+
+function normalizeProject(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object") return raw;
+  const obj = camelCaseKeys(raw as Record<string, unknown>);
+  if (!obj.schemaVersion) obj.schemaVersion = REGISTRY_SCHEMA_VERSION;
+  if (!obj.createdAt && obj.createdAt !== "") obj.createdAt = obj.updatedAt ?? new Date().toISOString();
+  if (!obj.updatedAt && obj.updatedAt !== "") obj.updatedAt = obj.createdAt;
+  if (!obj.briefHashes || typeof obj.briefHashes !== "object") {
+    obj.briefHashes = { prd: null, userFlows: null, technicalNotes: null, clientQuestions: null };
+  } else {
+    const bh = obj.briefHashes as Record<string, unknown>;
+    obj.briefHashes = {
+      prd: bh.prd ?? bh["prd.md"] ?? null,
+      userFlows: bh.userFlows ?? bh.user_flows ?? bh["user-flows.md"] ?? null,
+      technicalNotes: bh.technicalNotes ?? bh.technical_notes ?? bh["technical-notes.md"] ?? null,
+      clientQuestions: bh.clientQuestions ?? bh.client_questions ?? bh["client-questions.md"] ?? null,
+    };
+  }
+  if (!obj.gates || typeof obj.gates !== "object") {
+    obj.gates = { briefApproved: { passed: false }, queueApproved: { passed: false } };
+  } else {
+    const g = camelCaseKeys(obj.gates as Record<string, unknown>);
+    const isGateObj = (v: unknown) => v && typeof v === "object" && "passed" in (v as Record<string, unknown>);
+    if (!isGateObj(g.briefApproved))
+      g.briefApproved = { passed: false };
+    if (!isGateObj(g.queueApproved))
+      g.queueApproved = { passed: false };
+    obj.gates = g;
+  }
+  return obj;
+}
+
+function normalizeFeature(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object") return raw;
+  const obj = camelCaseKeys(raw as Record<string, unknown>);
+
+  // LLMs often wrap lifecycle in an object: { status: "blocked", blocked_by: [...] }
+  if (obj.lifecycle && typeof obj.lifecycle === "object") {
+    const lc = obj.lifecycle as Record<string, unknown>;
+    const status = lc.status as string | undefined;
+    const valid = ["proposed", "queued", "speced", "building", "review", "done", "deferred", "rejected"];
+    obj.lifecycle = valid.includes(status ?? "") ? status : "proposed";
+  }
+
+  if (!obj.type) obj.type = "feature";
+  if (!obj.module && typeof obj.module !== "string") obj.module = "General";
+  if (!obj.fingerprint && obj.title && obj.module) {
+    obj.fingerprint = computeFingerprint(String(obj.title), String(obj.module));
+  }
+
+  // Map confidence_marker / confidence number to the enum string
+  if (obj.confidenceMarker && !obj.confidence) obj.confidence = obj.confidenceMarker;
+  if (typeof obj.confidence === "number") {
+    if (obj.confidence >= 0.8) obj.confidence = "stated";
+    else if (obj.confidence >= 0.6) obj.confidence = "discussed";
+    else if (obj.confidence >= 0.4) obj.confidence = "inferred";
+    else obj.confidence = "assumed";
+  }
+  if (typeof obj.confidence === "string") {
+    obj.confidence = obj.confidence.replace(/^\[|\]$/g, "").toLowerCase();
+  }
+
+  // source → provenance
+  if (obj.source && !obj.provenance) {
+    const src = camelCaseKeys(obj.source as Record<string, unknown>);
+    const lr = src.lineRange as number[] | undefined;
+    obj.provenance = {
+      file: src.file ?? "unknown",
+      briefHash: src.briefHash ?? "unknown",
+      ...(lr ? { lines: `${lr[0]}-${lr[1]}` } : src.line ? { lines: String(src.line) } : {}),
+    };
+  }
+  if (!obj.provenance) obj.provenance = { file: "unknown", briefHash: "unknown" };
+
+  if (!obj.createdAt) obj.createdAt = obj.updatedAt ?? new Date().toISOString();
+  if (!obj.updatedAt) obj.updatedAt = obj.createdAt;
+
+  return obj;
+}
+
+function normalizeQuestion(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object") return raw;
+  const obj = camelCaseKeys(raw as Record<string, unknown>);
+  if (obj.question && !obj.text) obj.text = obj.question;
+  if (obj.whyNeeded && !obj.text) obj.text = obj.whyNeeded;
+  if (!obj.status) obj.status = "open";
+  if (obj.answer === null || obj.answer === undefined) delete obj.answer;
+  if (obj.answeredAt === null) delete obj.answeredAt;
+  if (obj.answeredBy !== undefined) delete obj.answeredBy;
+  if (obj.blocks && !obj.unblocks) obj.unblocks = obj.blocks;
+  return obj;
+}
+
+function normalizeJournalEvent(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object") return raw;
+  const obj = raw as Record<string, unknown>;
+  return renameKeys(obj, {
+    timestamp: "ts",
+    action: "type",
+    agent: "actor",
+    details: "summary",
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Project
 // ---------------------------------------------------------------------------
 
@@ -123,7 +262,13 @@ export function initProject(name: string, now: string): Project {
 export function readProject(projectRoot: string): Project | null {
   const p = getRegistryPaths(projectRoot).project;
   if (!existsSync(p)) return null;
-  return ProjectSchema.parse(JSON.parse(readFileSync(p, "utf8")));
+  const raw = JSON.parse(readFileSync(p, "utf8"));
+  const result = ProjectSchema.safeParse(raw);
+  if (result.success) return result.data;
+  const normalized = normalizeProject(raw);
+  const retry = ProjectSchema.safeParse(normalized);
+  if (retry.success) return retry.data;
+  return null;
 }
 
 export function writeProject(projectRoot: string, project: Project): void {
@@ -140,12 +285,28 @@ export function writeProject(projectRoot: string, project: Project): void {
 // Collections (features / questions / decisions)
 // ---------------------------------------------------------------------------
 
-// Generic over the schema so input (pre-default) and output (post-default) types
-// stay distinct: callers pass the parsed/output shape, parse fills any defaults.
-function readArray<S extends z.ZodTypeAny>(path: string, schema: S): z.infer<S>[] {
+function readArray<S extends z.ZodTypeAny>(
+  path: string,
+  schema: S,
+  normalize?: (item: unknown) => unknown
+): z.infer<S>[] {
   if (!existsSync(path)) return [];
   const raw = JSON.parse(readFileSync(path, "utf8"));
-  return z.array(schema).parse(raw);
+  const items = unwrapArray(raw);
+
+  const full = z.array(schema).safeParse(items);
+  if (full.success) return full.data;
+
+  const results: z.infer<S>[] = [];
+  for (const item of items) {
+    const direct = schema.safeParse(item);
+    if (direct.success) { results.push(direct.data); continue; }
+    if (normalize) {
+      const fixed = schema.safeParse(normalize(item));
+      if (fixed.success) { results.push(fixed.data); continue; }
+    }
+  }
+  return results;
 }
 
 function writeArray<S extends z.ZodTypeAny>(path: string, schema: S, items: z.input<S>[]): void {
@@ -154,7 +315,7 @@ function writeArray<S extends z.ZodTypeAny>(path: string, schema: S, items: z.in
 }
 
 export function readFeatures(projectRoot: string): Feature[] {
-  return readArray(getRegistryPaths(projectRoot).features, FeatureSchema);
+  return readArray(getRegistryPaths(projectRoot).features, FeatureSchema, normalizeFeature);
 }
 
 export function writeFeatures(projectRoot: string, features: Feature[]): void {
@@ -163,7 +324,7 @@ export function writeFeatures(projectRoot: string, features: Feature[]): void {
 }
 
 export function readQuestions(projectRoot: string): Question[] {
-  return readArray(getRegistryPaths(projectRoot).questions, QuestionSchema);
+  return readArray(getRegistryPaths(projectRoot).questions, QuestionSchema, normalizeQuestion);
 }
 
 export function writeQuestions(projectRoot: string, questions: Question[]): void {
@@ -197,10 +358,17 @@ export function appendJournal(projectRoot: string, event: JournalEvent): void {
 export function readJournal(projectRoot: string): JournalEvent[] {
   const p = getRegistryPaths(projectRoot).journal;
   if (!existsSync(p)) return [];
-  return readFileSync(p, "utf8")
-    .split("\n")
-    .filter((l) => l.trim())
-    .map((l) => JournalEventSchema.parse(JSON.parse(l)));
+  const results: JournalEvent[] = [];
+  for (const line of readFileSync(p, "utf8").split("\n")) {
+    if (!line.trim()) continue;
+    let raw: unknown;
+    try { raw = JSON.parse(line); } catch { continue; }
+    const direct = JournalEventSchema.safeParse(raw);
+    if (direct.success) { results.push(direct.data); continue; }
+    const fixed = JournalEventSchema.safeParse(normalizeJournalEvent(raw));
+    if (fixed.success) results.push(fixed.data);
+  }
+  return results;
 }
 
 // ---------------------------------------------------------------------------
