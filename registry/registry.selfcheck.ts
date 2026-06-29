@@ -30,6 +30,8 @@ import {
   appendJournal,
   readJournal,
   renderStatus,
+  canonicalizeRegistryContent,
+  gateRegistryWrite,
 } from "./registry-io.ts";
 
 let n = 0;
@@ -421,5 +423,109 @@ try {
 } finally {
   rmSync(roguedir, { recursive: true, force: true });
 }
+
+// ---------------------------------------------------------------------------
+// Write gate — the deterministic guarantee for runtimes (Pi) that write the
+// registry directly without executing the validated workflow. Pure, no disk.
+// ---------------------------------------------------------------------------
+
+check("gate recomputes feature priority from dimensions, ignoring the model's number", () => {
+  const raw = JSON.stringify([
+    {
+      id: "F-001",
+      title: "User auth flow",
+      module: "Auth",
+      confidence: "stated",
+      status: "ready", // wrong: not a lifecycle value
+      scores: { impact: 9, effort: 5, risk: 3, urgency: 1.5 }, // wrong: plural key, flat dims
+      priorityScore: 999, // bogus number the model invented
+    },
+  ]);
+  const res = canonicalizeRegistryContent("features.json", raw);
+  assert.equal(res.ok, true);
+  const parsed = JSON.parse((res as { content: string }).content);
+  assert.equal(parsed[0].lifecycle, "proposed");
+  assert.equal(parsed[0].score.priority, computePriority({ impact: 9, effort: 5, risk: 3, urgency: 1.5 }));
+  assert.notEqual(parsed[0].score.priority, 999);
+  assert.equal(parsed[0].score.formulaVersion, 1);
+});
+
+check("gate unwraps a { features: [...] } wrapper object", () => {
+  const raw = JSON.stringify({
+    features: [{ id: "F-002", title: "Export", module: "Reports", confidence: "inferred" }],
+  });
+  const res = canonicalizeRegistryContent("features.json", raw);
+  assert.equal(res.ok, true);
+  const parsed = JSON.parse((res as { content: string }).content);
+  assert.equal(parsed.length, 1);
+  assert.equal(parsed[0].id, "F-002");
+});
+
+check("gate blocks an out-of-domain urgency factor with a precise error", () => {
+  const raw = JSON.stringify([
+    {
+      id: "F-001",
+      title: "User auth",
+      module: "Auth",
+      confidence: "stated",
+      score: { impact: 9, effort: 5, risk: 3, urgency: 10 }, // 10 is not a valid multiplier
+    },
+  ]);
+  const res = canonicalizeRegistryContent("features.json", raw);
+  assert.equal(res.ok, false);
+  assert.ok((res as { errors: string[] }).errors.some((e) => /urgency|factor/i.test(e)));
+});
+
+check("gate blocks a feature with no title and names the file", () => {
+  const raw = JSON.stringify([{ id: "F-001", module: "Auth", confidence: "stated" }]);
+  const res = canonicalizeRegistryContent("features.json", raw);
+  assert.equal(res.ok, false);
+  assert.ok((res as { errors: string[] }).errors.some((e) => e.includes("features.json")));
+});
+
+check("gate normalizes question id, question→text, blocksFeature→unblocks", () => {
+  const raw = JSON.stringify([
+    { id: "Q-001", question: "What is the deadline?", priority: 1, blocksFeature: ["F-005"] },
+  ]);
+  const res = canonicalizeRegistryContent("questions.json", raw);
+  assert.equal(res.ok, true);
+  const parsed = JSON.parse((res as { content: string }).content);
+  assert.equal(parsed[0].id, "Q1");
+  assert.equal(parsed[0].text, "What is the deadline?");
+  assert.deepEqual(parsed[0].unblocks, ["F-005"]);
+  assert.equal(parsed[0].status, "open");
+});
+
+check("gate normalizes journal field names, blocks lines it cannot salvage", () => {
+  const good = JSON.stringify({ timestamp: "2026-06-29T00:00:00.000Z", action: "feature-added", agent: "system", details: "ok" });
+  const okRes = canonicalizeRegistryContent("journal.jsonl", good + "\n");
+  assert.equal(okRes.ok, true);
+  assert.ok((okRes as { content: string }).content.includes('"ts"'));
+  assert.ok((okRes as { content: string }).content.includes('"type":"feature-added"'));
+
+  const bad = canonicalizeRegistryContent("journal.jsonl", good + "\nnot-json\n");
+  assert.equal(bad.ok, false);
+});
+
+check("gateRegistryWrite passes through non-registry paths untouched", () => {
+  const d = gateRegistryWrite("docs/sandwich/prd.md", "# Hello");
+  assert.equal(d.action, "allow");
+});
+
+check("gateRegistryWrite rewrites a registry path to canonical content", () => {
+  const content = JSON.stringify([
+    { id: "F-001", title: "Auth", module: "Auth", confidence: "stated", scores: { impact: 8, effort: 2, risk: 2, urgency: 1.0 } },
+  ]);
+  const d = gateRegistryWrite("/proj/.sandwich/registry/features.json", content);
+  assert.equal(d.action, "rewrite");
+  const parsed = JSON.parse((d as { content: string }).content);
+  assert.equal(parsed[0].score.priority, computePriority({ impact: 8, effort: 2, risk: 2, urgency: 1.0 }));
+});
+
+check("gateRegistryWrite blocks an unsalvageable registry write", () => {
+  const d = gateRegistryWrite("/proj/.sandwich/registry/features.json", "{ not json");
+  assert.equal(d.action, "block");
+  assert.ok((d as { reason: string }).reason.includes("features.json"));
+});
 
 console.log(`\n${n} checks passed.`);

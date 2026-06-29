@@ -28,6 +28,8 @@ import {
   DecisionSchema,
   JournalEventSchema,
   fingerprint as computeFingerprint,
+  computePriority,
+  PRIORITY_FORMULA_VERSION,
   effectivePriority,
   effectiveLifecycle,
   type Project,
@@ -165,6 +167,9 @@ function normalizeFeature(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const obj = camelCaseKeys(raw as Record<string, unknown>);
 
+  // Weaker models pluralize the score key and stash the number alongside it.
+  if (obj.scores && !obj.score) { obj.score = obj.scores; delete obj.scores; }
+
   const validLifecycles = ["proposed", "queued", "speced", "building", "review", "done", "deferred", "rejected"];
   // LLMs often wrap lifecycle in an object: { status: "blocked", blocked_by: [...] }
   if (obj.lifecycle && typeof obj.lifecycle === "object") {
@@ -177,6 +182,15 @@ function normalizeFeature(raw: unknown): unknown {
     obj.lifecycle = validLifecycles.includes(obj.status) ? obj.status : "proposed";
   }
   if (!obj.lifecycle) obj.lifecycle = "proposed";
+  // An invalid lifecycle string ("ready"/"blocked" etc.) is recovered from a
+  // valid `status` sibling when present, else falls back to "proposed".
+  // Blocked-ness is orthogonal (tracked in blockedBy), never a lifecycle value.
+  if (typeof obj.lifecycle === "string" && !validLifecycles.includes(obj.lifecycle)) {
+    obj.lifecycle =
+      typeof obj.status === "string" && validLifecycles.includes(obj.status)
+        ? obj.status
+        : "proposed";
+  }
 
   if (!obj.type) obj.type = "feature";
   if (!obj.module && typeof obj.module !== "string") obj.module = "General";
@@ -216,12 +230,66 @@ function normalizeFeature(raw: unknown): unknown {
   if (!obj.createdAt) obj.createdAt = obj.updatedAt ?? new Date().toISOString();
   if (!obj.updatedAt) obj.updatedAt = obj.createdAt;
 
+  // Score: coerce flat LLM shapes to the schema's nested form. Weaker models
+  // emit `{ impact: 9 }` instead of `{ impact: { score: 9, factors: [...] } }`.
+  // This is purely structural — the priority NUMBER is recomputed in code (see
+  // canonicalizeRegistryContent), never trusted from the model.
+  if (obj.score && typeof obj.score === "object") {
+    const s = camelCaseKeys(obj.score as Record<string, unknown>);
+    const coerceDim = (d: unknown): unknown => {
+      if (typeof d === "number") return { score: d, factors: ["(normalized)"] };
+      if (d && typeof d === "object") {
+        const o = d as Record<string, unknown>;
+        const score = typeof o.score === "number" ? o.score
+          : typeof o.value === "number" ? o.value : undefined;
+        if (score === undefined) return d;
+        const factors = Array.isArray(o.factors) && o.factors.length ? o.factors : ["(normalized)"];
+        return { score, factors };
+      }
+      return d;
+    };
+    if ("impact" in s) s.impact = coerceDim(s.impact);
+    if ("effort" in s) s.effort = coerceDim(s.effort);
+    if ("risk" in s) s.risk = coerceDim(s.risk);
+    if (typeof s.urgency === "number") {
+      s.urgency = { factor: s.urgency, reason: "(normalized)" };
+    } else if (s.urgency && typeof s.urgency === "object") {
+      const u = camelCaseKeys(s.urgency as Record<string, unknown>);
+      if (typeof u.factor !== "number" && typeof u.value === "number") u.factor = u.value;
+      if (!u.reason) u.reason = "(normalized)";
+      s.urgency = u;
+    }
+    obj.score = s;
+  }
+
   return obj;
+}
+
+/**
+ * Read-path salvage: normalize a feature, and if the result is invalid *only*
+ * because of an unsalvageable score (e.g. an out-of-domain urgency a weak model
+ * invented), drop the score so the feature itself survives the read. The write
+ * gate is strict and blocks such input; reads stay resilient and never crash.
+ */
+function salvageFeatureForRead(raw: unknown): unknown {
+  const f = normalizeFeature(raw);
+  if (f && typeof f === "object" && (f as Record<string, unknown>).score) {
+    if (!FeatureSchema.safeParse(f).success) {
+      const { score, ...rest } = f as Record<string, unknown>;
+      if (FeatureSchema.safeParse(rest).success) return rest;
+    }
+  }
+  return f;
 }
 
 function normalizeQuestion(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const obj = camelCaseKeys(raw as Record<string, unknown>);
+  // Normalize id forms like "Q-001" / "Q-7" to the schema's "Q1" / "Q7".
+  if (typeof obj.id === "string") {
+    const m = obj.id.match(/(\d+)/);
+    if (m) obj.id = "Q" + parseInt(m[1], 10);
+  }
   if (obj.question && !obj.text) obj.text = obj.question;
   if (obj.whyNeeded && !obj.text) obj.text = obj.whyNeeded;
   if (!obj.status || obj.status === "unanswered" || obj.status === "pending") obj.status = "open";
@@ -230,6 +298,7 @@ function normalizeQuestion(raw: unknown): unknown {
   if (obj.answeredBy !== undefined) delete obj.answeredBy;
   if (obj.blocks && !obj.unblocks) obj.unblocks = obj.blocks;
   if (obj.blocking && !obj.unblocks) obj.unblocks = obj.blocking;
+  if (obj.blocksFeature && !obj.unblocks) obj.unblocks = obj.blocksFeature;
   return obj;
 }
 
@@ -242,6 +311,173 @@ function normalizeJournalEvent(raw: unknown): unknown {
     agent: "actor",
     details: "summary",
   });
+}
+
+// ---------------------------------------------------------------------------
+// Write gate — the deterministic guarantee for runtimes that DON'T execute the
+// workflow (e.g. Pi only surfaces SKILL.md; the validated write path never
+// runs). A rogue/weak LLM writing a registry file directly is intercepted here:
+// content is normalized structurally, the priority number is RECOMPUTED in
+// code, and the result is validated against the same Zod schemas the workflow
+// uses. Invalid-beyond-repair input is rejected with precise errors so the LLM
+// can retry — never silently accepted, never silently guessed.
+//
+// Pure and I/O-free so it is identical across runtimes and fully unit-testable.
+// The Pi extensions call gateRegistryWrite() from their tool_call interceptor.
+// ---------------------------------------------------------------------------
+
+const REGISTRY_FILES = new Set([
+  "project.json",
+  "features.json",
+  "questions.json",
+  "decisions.json",
+  "journal.jsonl",
+]);
+
+/** Recompute a feature's priority from its dimensions. The LLM never owns this
+ *  number — code does — so a ranking is always reproducible from its inputs. */
+function recomputeFeaturePriority(feature: Record<string, unknown>): void {
+  const s = feature.score as Record<string, unknown> | undefined;
+  if (!s || typeof s !== "object") return;
+  const dim = (d: unknown): number | undefined => {
+    if (typeof d === "number") return d;
+    if (d && typeof d === "object" && typeof (d as Record<string, unknown>).score === "number") {
+      return (d as Record<string, unknown>).score as number;
+    }
+    return undefined;
+  };
+  const impact = dim(s.impact);
+  const effort = dim(s.effort);
+  const risk = dim(s.risk);
+  const urgency = typeof s.urgency === "number"
+    ? s.urgency
+    : s.urgency && typeof s.urgency === "object"
+      ? ((s.urgency as Record<string, unknown>).factor as number | undefined)
+      : undefined;
+  if ([impact, effort, risk, urgency].every((n) => typeof n === "number") && (effort as number) !== 0) {
+    s.priority = computePriority({
+      impact: impact as number,
+      effort: effort as number,
+      risk: risk as number,
+      urgency: urgency as number,
+    });
+    s.formulaVersion = PRIORITY_FORMULA_VERSION;
+  }
+}
+
+export type CanonicalizeResult =
+  | { ok: true; content: string }
+  | { ok: false; errors: string[] };
+
+const zodErrors = (e: z.ZodError, prefix = ""): string[] =>
+  e.errors.map((err) => `${prefix}${err.path.join(".") || "(root)"}: ${err.message}`);
+
+/**
+ * Validate and canonicalize the content destined for a registry file. Returns
+ * the schema-valid, pretty-printed content to write, or the precise errors that
+ * make it unwritable. `filename` is the basename (e.g. "features.json").
+ */
+export function canonicalizeRegistryContent(
+  filename: string,
+  rawContent: string
+): CanonicalizeResult {
+  // journal.jsonl — one JSON event per line, append-only audit trail.
+  if (filename === "journal.jsonl") {
+    const lines = rawContent.split("\n").map((l) => l.trim()).filter(Boolean);
+    const events: JournalEvent[] = [];
+    const errors: string[] = [];
+    lines.forEach((line, i) => {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(line);
+      } catch {
+        errors.push(`line ${i + 1}: not valid JSON`);
+        return;
+      }
+      const r = JournalEventSchema.safeParse(normalizeJournalEvent(parsed));
+      if (r.success) events.push(r.data);
+      else errors.push(...zodErrors(r.error, `line ${i + 1} `));
+    });
+    if (errors.length) return { ok: false, errors };
+    return { ok: true, content: events.map((e) => JSON.stringify(e)).join("\n") + "\n" };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawContent);
+  } catch {
+    return { ok: false, errors: [`${filename}: not valid JSON`] };
+  }
+
+  if (filename === "project.json") {
+    const r = ProjectSchema.safeParse(parsed);
+    const project = r.success ? r.data : ProjectSchema.safeParse(normalizeProject(parsed));
+    if (r.success) return { ok: true, content: JSON.stringify(r.data, null, 2) };
+    if (project.success) return { ok: true, content: JSON.stringify(project.data, null, 2) };
+    return { ok: false, errors: zodErrors(project.error) };
+  }
+
+  // Array collections — features / questions / decisions. Validate every item;
+  // a single bad item blocks the whole write (writes stay strict, unlike reads
+  // which salvage what they can).
+  const items = unwrapArray(parsed);
+  const normalizer =
+    filename === "features.json" ? normalizeFeature
+    : filename === "questions.json" ? normalizeQuestion
+    : undefined;
+  const schema =
+    filename === "features.json" ? FeatureSchema
+    : filename === "questions.json" ? QuestionSchema
+    : filename === "decisions.json" ? DecisionSchema
+    : null;
+  if (!schema) return { ok: false, errors: [`${filename}: not a known registry file`] };
+
+  const out: unknown[] = [];
+  const errors: string[] = [];
+  items.forEach((item, i) => {
+    let candidate: unknown = item;
+    if (normalizer) candidate = normalizer(item);
+    if (filename === "features.json" && candidate && typeof candidate === "object") {
+      recomputeFeaturePriority(candidate as Record<string, unknown>);
+    }
+    const r = schema.safeParse(candidate);
+    if (r.success) out.push(r.data);
+    else errors.push(...zodErrors(r.error, `item ${i} (${filename}) `));
+  });
+  if (errors.length) return { ok: false, errors };
+  return { ok: true, content: JSON.stringify(out, null, 2) };
+}
+
+export type GateDecision =
+  | { action: "allow" }
+  | { action: "rewrite"; content: string }
+  | { action: "block"; reason: string };
+
+/**
+ * Decide what to do with a write to `path` carrying `content`. Non-registry
+ * paths pass through untouched. Registry paths are canonicalized: valid content
+ * is rewritten to its canonical form (priority recomputed, fields validated);
+ * unsalvageable content is blocked with precise, actionable errors.
+ */
+export function gateRegistryWrite(path: string, content: string): GateDecision {
+  const norm = path.replace(/\\/g, "/");
+  const idx = norm.indexOf(".sandwich/registry/");
+  if (idx === -1) return { action: "allow" };
+  const filename = norm.slice(idx + ".sandwich/registry/".length);
+  if (!REGISTRY_FILES.has(filename)) return { action: "allow" };
+
+  const result = canonicalizeRegistryContent(filename, content);
+  if (!result.ok) {
+    return {
+      action: "block",
+      reason:
+        `Refused to write ${filename}: it does not match the registry schema.\n` +
+        result.errors.map((e) => `  • ${e}`).join("\n") +
+        `\nSee the registry schema in the /prep skill and rewrite the full file.`,
+    };
+  }
+  if (result.content === content) return { action: "allow" };
+  return { action: "rewrite", content: result.content };
 }
 
 // ---------------------------------------------------------------------------
@@ -323,7 +559,7 @@ function writeArray<S extends z.ZodTypeAny>(path: string, schema: S, items: z.in
 }
 
 export function readFeatures(projectRoot: string): Feature[] {
-  return readArray(getRegistryPaths(projectRoot).features, FeatureSchema, normalizeFeature);
+  return readArray(getRegistryPaths(projectRoot).features, FeatureSchema, salvageFeatureForRead);
 }
 
 export function writeFeatures(projectRoot: string, features: Feature[]): void {
