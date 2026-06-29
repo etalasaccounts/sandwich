@@ -2,7 +2,7 @@
 // Run: node --experimental-strip-types registry/registry.selfcheck.ts
 // Plain asserts, no framework. Exits non-zero on first failure.
 import { strict as assert } from "node:assert";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -26,6 +26,7 @@ import {
   writeProject,
   readFeatures,
   writeFeatures,
+  readQuestions,
   appendJournal,
   readJournal,
   renderStatus,
@@ -294,6 +295,131 @@ try {
   });
 } finally {
   rmSync(dir, { recursive: true, force: true });
+}
+
+// --- Defensive reads: normalization of rogue LLM output ---
+const roguedir = mkdtempSync(join(tmpdir(), "sandwich-rogue-"));
+const rogueReg = join(roguedir, ".sandwich", "registry");
+mkdirSync(rogueReg, { recursive: true });
+
+try {
+  check("readFeatures unwraps { features: [...] } wrapper", () => {
+    writeFileSync(join(rogueReg, "features.json"), JSON.stringify({
+      features: [
+        {
+          id: "F-001", fingerprint: "abc123", title: "Test Feature", type: "feature",
+          module: "Core", confidence: "stated", lifecycle: "proposed",
+          provenance: { file: "prd.md", briefHash: "hash1" },
+          createdAt: now, updatedAt: now,
+        },
+      ],
+    }));
+    const result = readFeatures(roguedir);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].id, "F-001");
+  });
+
+  check("readFeatures normalizes LLM-invented field names and fills defaults", () => {
+    writeFileSync(join(rogueReg, "features.json"), JSON.stringify([
+      {
+        id: "F-002", title: "Add Sentry", confidence_marker: "[inferred]",
+        lifecycle: { status: "blocked", blocked_by: ["Q2"] },
+        source: { file: "technical-notes.md", line_range: [118, 125], context: "no crash reporting" },
+        scores: { impact: 8, effort: 3, risk: 3, urgency: 7 },
+      },
+    ]));
+    const result = readFeatures(roguedir);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].id, "F-002");
+    assert.equal(result[0].lifecycle, "proposed");
+    assert.equal(result[0].confidence, "inferred");
+    assert.equal(result[0].module, "General");
+    assert.equal(result[0].type, "feature");
+    assert.ok(result[0].fingerprint.length > 0);
+    assert.equal(result[0].provenance.file, "technical-notes.md");
+    assert.equal(result[0].provenance.lines, "118-125");
+  });
+
+  check("readFeatures skips items that cannot be salvaged", () => {
+    writeFileSync(join(rogueReg, "features.json"), JSON.stringify({
+      features: [
+        { id: "F-001", title: "Good", type: "feature", module: "X", confidence: "stated",
+          lifecycle: "proposed", fingerprint: "fp1", provenance: { file: "a.md", briefHash: "h" },
+          createdAt: now, updatedAt: now },
+        { garbage: true },
+        42,
+      ],
+    }));
+    const result = readFeatures(roguedir);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].id, "F-001");
+  });
+
+  check("readProject normalizes snake_case LLM project and fills schema defaults", () => {
+    writeFileSync(join(rogueReg, "project.json"), JSON.stringify({
+      name: "SwissBelhotel Maintenance",
+      slug: "swissbelhotel",
+      brief_path: "docs/sandwich/brief",
+      brief_hashes: { "prd.md": "v1" },
+      mode: "maintenance",
+      gates: { brief_complete: true, questions_answered: false },
+      created_at: "2026-06-29T00:00:00.000Z",
+    }));
+    const result = readProject(roguedir);
+    assert.ok(result !== null);
+    assert.equal(result!.name, "SwissBelhotel Maintenance");
+    assert.equal(result!.schemaVersion, 1);
+    assert.equal(result!.gates.briefApproved.passed, false);
+    assert.equal(result!.gates.queueApproved.passed, false);
+    assert.equal(result!.createdAt, "2026-06-29T00:00:00.000Z");
+  });
+
+  check("readProject returns null for completely unsalvageable data", () => {
+    writeFileSync(join(rogueReg, "project.json"), JSON.stringify({ garbage: true }));
+    const result = readProject(roguedir);
+    assert.equal(result, null);
+  });
+
+  check("readQuestions normalizes question→text, blocks→unblocks, null answers", () => {
+    writeFileSync(join(rogueReg, "questions.json"), JSON.stringify({
+      questions: [
+        { id: "Q1", priority: 1, question: "Warranty end date?", blocks: ["F-001"],
+          answer: null, answered_at: null, answered_by: null },
+      ],
+    }));
+    const result = readQuestions(roguedir);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].text, "Warranty end date?");
+    assert.equal(result[0].status, "open");
+    assert.deepEqual(result[0].unblocks, ["F-001"]);
+    assert.equal(result[0].answer, undefined);
+  });
+
+  check("readJournal normalizes timestamp→ts, action→type, agent→actor, details→summary", () => {
+    writeFileSync(join(rogueReg, "journal.jsonl"), [
+      JSON.stringify({ timestamp: now, action: "feature-added", agent: "prep", details: "Added F-001" }),
+      JSON.stringify({ timestamp: now, action: "reconciled", agent: "system", details: "3 matched" }),
+    ].join("\n") + "\n");
+    const result = readJournal(roguedir);
+    assert.equal(result.length, 2);
+    assert.equal(result[0].ts, now);
+    assert.equal(result[0].actor, "prep");
+    assert.equal(result[0].type, "feature-added");
+    assert.equal(result[0].summary, "Added F-001");
+  });
+
+  check("readJournal skips lines that cannot be normalized", () => {
+    writeFileSync(join(rogueReg, "journal.jsonl"), [
+      JSON.stringify({ ts: now, actor: "system", type: "feature-added", summary: "good" }),
+      JSON.stringify({ garbage: true }),
+      "not-json",
+    ].join("\n") + "\n");
+    const result = readJournal(roguedir);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].summary, "good");
+  });
+} finally {
+  rmSync(roguedir, { recursive: true, force: true });
 }
 
 console.log(`\n${n} checks passed.`);
