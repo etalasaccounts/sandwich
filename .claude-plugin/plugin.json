@@ -2,11 +2,11 @@
   "name": "sandwich",
   "version": "0.1.0",
   "description": "Composable agent stack for software agencies",
-  "skills": ["./order/skills", "./plan/skills/plan", "./plan/skills/status", "./spec/skills/recipe"],
+  "skills": ["./order/skills", "./prep/skills/prep", "./prep/skills/status", "./recipe/skills/recipe"],
   "workflows": [
     "./order/workflow/order.workflow.ts",
-    "./plan/workflow/plan.workflow.ts",
-    "./plan/workflow/status.workflow.ts",
-    "./spec/workflow/spec.workflow.ts"
+    "./prep/workflow/prep.workflow.ts",
+    "./prep/workflow/status.workflow.ts",
+    "./recipe/workflow/recipe.workflow.ts"
   ]
 }

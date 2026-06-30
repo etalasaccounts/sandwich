@@ -1,5 +1,5 @@
 export const meta = {
-  name: "plan",
+  name: "prep",
   description: "Tech lead-level prioritization and impact analysis from brief artifacts",
   phases: [
     { title: "Read", detail: "load brief artifacts and execution state" },
@@ -18,13 +18,13 @@ import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
 import { createHash } from "crypto";
 import {
-  getPlanPaths,
+  getPrepPaths,
   readBriefArtifacts,
   writeImpactAnalysis,
   writePlanContext,
   getGitState,
   type ImpactAnalysis,
-} from "../lib/plan-lib.js";
+} from "../lib/prep-lib.js";
 import {
   validateExtraction,
   validateDependencies,

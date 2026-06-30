@@ -46,7 +46,7 @@ import {
   renderTechNotes,
   renderClientQuestions,
 } from "../lib/order-render.js";
-import { runAgentWithValidation, type RepairContext } from "../../spec/lib/agent-wrapper.js";
+import { runAgentWithValidation, type RepairContext } from "../../recipe/lib/agent-wrapper.js";
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
 
@@ -181,7 +181,7 @@ const prevDocs = readOrderDocs(projectRoot);
 
 async function generateDoc<T>(
   file: string,
-  validator: (o: unknown) => import("../../spec/lib/validation.js").ValidationResult<T>,
+  validator: (o: unknown) => import("../../recipe/lib/validation.js").ValidationResult<T>,
   contextObj: unknown,
   label: string,
 ): Promise<T> {

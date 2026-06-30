@@ -1,5 +1,5 @@
 export const meta = {
-  name: "spec",
+  name: "recipe",
   description: "Generate a machine-checkable spec (acceptance criteria, atomic tasks, validation harness) for one feature from the plan queue",
   phases: [
     { title: "Load", detail: "read feature queue, impact analysis, brief, codebase" },
@@ -17,7 +17,7 @@ import {
   readBriefArtifacts,
   writeSpec,
   type Spec,
-} from "../../plan/lib/plan-lib.js";
+} from "../../prep/lib/prep-lib.js";
 import { validateSpec } from "../lib/validation.js";
 import { runAgentWithValidation, type RepairContext } from "../lib/agent-wrapper.js";
 import {

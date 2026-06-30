@@ -5,9 +5,9 @@ import { registerRegistryGate } from "../../registry/pi-gate.ts";
 
 const extensionDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(extensionDir, "../..");
-const skillsDir = resolve(packageRoot, "plan/skills");
+const skillsDir = resolve(packageRoot, "recipe/skills/recipe");
 
-export default function planPiExtension(pi: ExtensionAPI) {
+export default function recipePiExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", async () => ({
     skillPaths: [skillsDir],
   }));
