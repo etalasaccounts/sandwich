@@ -23,16 +23,6 @@ export const RequirementsSchema = z.object({
   extractedAt: z.string().optional(),
 });
 
-// --- Brief Artifact Schemas ---
-
-export const PrdSchema = z.string().min(100, "PRD too short");
-
-export const UserFlowsSchema = z.string().min(50, "User flows too short");
-
-export const TechnicalNotesSchema = z.string().min(50, "Technical notes too short");
-
-export const ClientQuestionsSchema = z.string().min(20, "Client questions too short");
-
 // --- Validation Result ---
 
 export interface BriefValidationResult {
@@ -119,86 +109,6 @@ function calculateBriefConfidence(artifacts: {
 }
 
 // --- Validators ---
-
-export function validateRequirements(requirements: unknown): BriefValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  
-  // Schema validation
-  let data: z.infer<typeof RequirementsSchema> | undefined;
-  try {
-    data = RequirementsSchema.parse(requirements);
-  } catch (e) {
-    if (e instanceof z.ZodError) {
-      errors.push(...e.errors.map(err => `${err.path.join(".")}: ${err.message}`));
-    }
-    return {
-      valid: false,
-      errors,
-      warnings,
-      confidence: { score: 0, level: "assumed", blockers: ["Schema validation failed"] },
-    };
-  }
-  
-  // Check for confidence markers in actors/modules
-  const hasMarkers = (items: string[]) =>
-    items.some(item => CONFIDENCE_MARKERS.some(m => item.startsWith(m)));
-
-  if (!hasMarkers(data.actors)) {
-    warnings.push("Actors missing confidence markers");
-  }
-
-  if (data.constraints && !hasMarkers(data.constraints)) {
-    warnings.push("Constraints missing confidence markers");
-  }
-
-  // Check for ambiguities
-  if (data.ambiguities && data.ambiguities.length > 5) {
-    warnings.push(`Many ambiguities (${data.ambiguities.length}). Consider resolving before planning.`);
-  }
-
-  // Score based on actual marker distribution across all extractable text
-  const weights: Record<string, number> = {
-    "[stated]": 1.0,
-    "[discussed]": 0.8,
-    "[inferred]": 0.5,
-    "[assumed]": 0.2,
-  };
-  const allItems = [
-    ...data.actors,
-    ...(data.constraints ?? []),
-    ...(data.integrations ?? []),
-    ...(data.currentState ?? []),
-    ...data.modules.flatMap(m => m.features),
-  ];
-  let total = 0;
-  let weightedSum = 0;
-  for (const item of allItems) {
-    for (const [marker, weight] of Object.entries(weights)) {
-      if (item.startsWith(marker)) {
-        total++;
-        weightedSum += weight;
-        break;
-      }
-    }
-  }
-  const score = total > 0 ? weightedSum / total : 0.5;
-  const blockers: string[] = [];
-  const assumedCount = allItems.filter(i => i.startsWith("[assumed]")).length;
-  if (total > 0 && assumedCount / total > 0.3) {
-    blockers.push(`${Math.round((assumedCount / total) * 100)}% assumed — requires clarification`);
-  }
-  const level: "confirmed" | "provisional" | "assumed" =
-    blockers.length > 0 ? "assumed" : score >= 0.7 ? "confirmed" : score >= 0.4 ? "provisional" : "assumed";
-
-  return {
-    valid: errors.length === 0,
-    data,
-    errors,
-    warnings,
-    confidence: { score, level, blockers },
-  };
-}
 
 export function validateBriefArtifacts(artifacts: {
   prd: string | null;
