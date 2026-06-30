@@ -3,9 +3,9 @@ name: prep
 description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use when you need to decide what to build next.
 ---
 
-# sandwich/plan
+# sandwich/prep
 
-You are running the `plan` pipeline. Your job: produce prioritization data that helps humans decide what to build next.
+You are running the `prep` pipeline. Your job: produce prioritization data that helps humans decide what to build next.
 
 ## When to invoke
 
@@ -63,7 +63,15 @@ matching is by content fingerprint — never by position or exact text.
 
 7. **Score features** — the agent supplies four dimension scores (impact, effort, risk, urgency); code computes the priority deterministically as `(impact × urgency × (10 − risk)) ÷ effort`, normalized to 0-100. The model never supplies the number, so the ranking is always reproducible.
 
-8. **Present recommendation** — top 3 candidates with validation status
+8. **Write registry files** — write `features.json`, `project.json`, `questions.json`, `decisions.json`, and append to `journal.jsonl`. The pi-gate validates each write against the schema; if validation fails it prints the exact errors — fix the field and retry.
+
+9. **Run the deterministic renderer** — after all registry files are written, run:
+   ```bash
+   node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/render.ts
+   ```
+   `SANDWICH_ROOT` is injected into your context at session start. The script reads the registry, renders `docs/sandwich/feature-queue.md`, and exits 1 with exact errors if the registry is invalid. Fix any errors and re-run.
+
+10. **Present recommendation** — top 3 candidates with validation status
 
 ## Validation layer
 
