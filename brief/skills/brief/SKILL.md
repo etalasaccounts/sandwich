@@ -49,7 +49,11 @@ You detect the right mode — the user doesn't need to specify:
 
 4. **Generate all four artifacts** — for each artifact, in parallel:
    a. Write the JSON document to `docs/sandwich/<artifact>.json` (exact schema below — your JSON must match it precisely)
-   b. Run the deterministic renderer: `node --experimental-strip-types brief/scripts/render.ts <kind>`
+   b. Run the deterministic renderer:
+      ```bash
+      node --experimental-strip-types $SANDWICH_ROOT/brief/scripts/render.ts <kind>
+      ```
+      `SANDWICH_ROOT` is injected into your context at session start.
 
    The script validates your JSON and writes the `.md`. If validation fails, it prints the exact errors — fix your JSON and re-run.
 
