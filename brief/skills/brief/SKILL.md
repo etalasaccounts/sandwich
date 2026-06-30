@@ -1,11 +1,11 @@
 ---
 name: order
-description: Generate or update project brief artifacts (prd.md, user-flows.md, technical-notes.md, client-questions.md). Use ONLY when explicitly invoked with /order, or when the user asks to document/brief a project. Do NOT invoke during active development, coding tasks, or general conversation.
+description: Take a project order and produce the kitchen brief — four standardized documents (prd.md, user-flows.md, technical-notes.md, client-questions.md) that the rest of the pipeline needs to cook. Use ONLY when explicitly invoked with /order, or when the user asks to document/brief a project. Do NOT invoke during active development, coding tasks, or general conversation.
 ---
 
-# sandwich/brief
+# /order
 
-You are running the `brief` pipeline. Your job: produce four standardized artifacts in `docs/sandwich/` that feed the downstream task breakdown pipeline.
+You are taking an order. Your job: produce four standardized documents in `docs/sandwich/` that feed the downstream pipeline.
 
 ## When to invoke
 

@@ -21,7 +21,6 @@ import {
   validateRequirements,
   summarizeRequirements,
   readBriefArtifacts,
-  writeBriefArtifacts,
   writeBriefContext,
   getBriefPaths,
   readBriefDocs,

@@ -249,15 +249,6 @@ export function readBriefArtifacts(projectRoot: string): Partial<BriefArtifacts>
   };
 }
 
-export function writeBriefArtifacts(projectRoot: string, artifacts: Partial<BriefArtifacts>): void {
-  const paths = getBriefPaths(projectRoot);
-  ensureBriefDir(projectRoot);
-  if (artifacts.prd !== undefined) writeFileSync(paths.prd, artifacts.prd, "utf8");
-  if (artifacts.userFlows !== undefined) writeFileSync(paths.userFlows, artifacts.userFlows, "utf8");
-  if (artifacts.technicalNotes !== undefined) writeFileSync(paths.technicalNotes, artifacts.technicalNotes, "utf8");
-  if (artifacts.clientQuestions !== undefined) writeFileSync(paths.clientQuestions, artifacts.clientQuestions, "utf8");
-}
-
 export function writeBriefContext(projectRoot: string, context: unknown): void {
   const paths = getBriefPaths(projectRoot);
   ensureBriefDir(projectRoot);
