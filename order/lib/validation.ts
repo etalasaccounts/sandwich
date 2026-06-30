@@ -110,7 +110,7 @@ function calculateBriefConfidence(artifacts: {
 
 // --- Validators ---
 
-export function validateBriefArtifacts(artifacts: {
+export function validateOrderArtifacts(artifacts: {
   prd: string | null;
   userFlows: string | null;
   technicalNotes: string | null;
@@ -146,14 +146,14 @@ export function validateBriefArtifacts(artifacts: {
   };
 }
 
-export function validateBriefForPlanning(artifacts: {
+export function validateOrderForPlanning(artifacts: {
   prd: string | null;
   userFlows: string | null;
   technicalNotes: string | null;
   clientQuestions: string | null;
 }): { ready: boolean; reason: string; actions: string[] } {
   
-  const validation = validateBriefArtifacts(artifacts);
+  const validation = validateOrderArtifacts(artifacts);
   
   if (!validation.valid) {
     return {
