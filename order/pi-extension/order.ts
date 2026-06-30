@@ -4,7 +4,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const extensionDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(extensionDir, "../..");
-const skillsDir = resolve(packageRoot, "order/skills");
+const skillsDir = resolve(packageRoot, "order/skills/order");
 
 const MARKER = "SANDWICH_ROOT=";
 

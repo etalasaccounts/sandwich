@@ -2,7 +2,7 @@
 // Run: node --experimental-strip-types order/lib/validation.selfcheck.ts
 // Plain asserts, no framework. Exits non-zero on first failure.
 import { strict as assert } from "node:assert";
-import { extractJson } from "../../spec/lib/agent-wrapper.ts";
+import { extractJson } from "../../recipe/lib/agent-wrapper.ts";
 
 let n = 0;
 const check = (name: string, fn: () => void) => {

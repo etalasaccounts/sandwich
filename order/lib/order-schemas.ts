@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ValidationResult } from "../../spec/lib/validation.js";
+import type { ValidationResult } from "../../recipe/lib/validation.js";
 
 export const ConfidenceSchema = z.enum(["stated", "discussed", "inferred", "assumed"]);
 export type Confidence = z.infer<typeof ConfidenceSchema>;

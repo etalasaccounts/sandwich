@@ -1,5 +1,5 @@
 // Self-check for the plan validation layer — the package's core promise.
-// Run: node --experimental-strip-types plan/lib/validation.selfcheck.ts
+// Run: node --experimental-strip-types prep/lib/validation.selfcheck.ts
 // No framework: plain asserts. Exits non-zero on first failure.
 import { strict as assert } from "node:assert";
 import {
@@ -8,7 +8,7 @@ import {
   validateScores,
   validateReconciliation,
 } from "./validation.ts";
-import { validateSpec } from "../../spec/lib/validation.ts";
+import { validateSpec } from "../../recipe/lib/validation.ts";
 import { zodToJsonSchema } from "./agent-wrapper.ts";
 
 let n = 0;

@@ -58,7 +58,7 @@ export interface ImpactAnalysis {
   }>;
 }
 
-export interface PlanPaths {
+export interface PrepPaths {
   root: string;
   featureQueue: string;
   impactAnalysis: string;
@@ -66,7 +66,7 @@ export interface PlanPaths {
   specsDir: string;
 }
 
-export interface PlanArtifacts {
+export interface PrepArtifacts {
   featureQueue: string;
   impactAnalysis?: string;
 }
@@ -102,7 +102,7 @@ export interface ReconciledChange {
 
 // --- Paths ---
 
-export function getPlanPaths(projectRoot: string): PlanPaths {
+export function getPrepPaths(projectRoot: string): PrepPaths {
   const root = join(projectRoot, ".sandwich");
   const docsDir = join(projectRoot, "docs", "sandwich");
   return {
@@ -325,13 +325,13 @@ export function getGitState(projectRoot: string): {
 
 // --- I/O ---
 
-export function ensurePlanDir(projectRoot: string): void {
-  const paths = getPlanPaths(projectRoot);
+export function ensurePrepDir(projectRoot: string): void {
+  const paths = getPrepPaths(projectRoot);
   mkdirSync(paths.root, { recursive: true });
 }
 
-export function readPlanArtifacts(projectRoot: string): Partial<PlanArtifacts> {
-  const paths = getPlanPaths(projectRoot);
+export function readPrepArtifacts(projectRoot: string): Partial<PrepArtifacts> {
+  const paths = getPrepPaths(projectRoot);
   return {
     featureQueue: existsSync(paths.featureQueue)
       ? readFileSync(paths.featureQueue, "utf8")
@@ -347,8 +347,8 @@ export function writeFeatureQueue(
   features: Feature[],
   scores: FeatureScore[]
 ): void {
-  const paths = getPlanPaths(projectRoot);
-  ensurePlanDir(projectRoot);
+  const paths = getPrepPaths(projectRoot);
+  ensurePrepDir(projectRoot);
 
   const statusEmoji: Record<string, string> = {
     queued: "🟡",
@@ -491,8 +491,8 @@ export function writeImpactAnalysis(
   featureId: string,
   analysis: ImpactAnalysis
 ): void {
-  const paths = getPlanPaths(projectRoot);
-  ensurePlanDir(projectRoot);
+  const paths = getPrepPaths(projectRoot);
+  ensurePrepDir(projectRoot);
 
   const lines: string[] = [
     `# Impact Analysis: ${featureId}`,
@@ -555,7 +555,7 @@ export interface Spec {
 }
 
 export function writeSpec(projectRoot: string, spec: Spec): { json: string; md: string } {
-  const paths = getPlanPaths(projectRoot);
+  const paths = getPrepPaths(projectRoot);
   mkdirSync(paths.specsDir, { recursive: true });
 
   const jsonPath = join(paths.specsDir, `${spec.featureId}.json`);
@@ -604,8 +604,8 @@ export function writeSpec(projectRoot: string, spec: Spec): { json: string; md: 
 }
 
 export function writePlanContext(projectRoot: string, context: unknown): void {
-  const paths = getPlanPaths(projectRoot);
-  ensurePlanDir(projectRoot);
+  const paths = getPrepPaths(projectRoot);
+  ensurePrepDir(projectRoot);
   writeFileSync(paths.planContext, JSON.stringify(context, null, 2), "utf8");
 }
 
