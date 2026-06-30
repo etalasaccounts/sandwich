@@ -12,7 +12,7 @@ You are taking an order. Your job: produce four standardized documents in `docs/
 - User runs `/order`
 - User pastes a KAK, RFQ, MOM, or meeting notes
 - User says "brief this" / "buat brief" / "document this project" / "generate prd"
-- User is onboarding onto a project with no brief yet
+- User is onboarding onto a project with no order yet
 
 ## Artifacts
 
@@ -51,7 +51,7 @@ You detect the right mode — the user doesn't need to specify:
    a. Write the JSON document to `docs/sandwich/<artifact>.json` (exact schema below — your JSON must match it precisely)
    b. Run the deterministic renderer:
       ```bash
-      node --experimental-strip-types $SANDWICH_ROOT/brief/scripts/render.ts <kind>
+      node --experimental-strip-types $SANDWICH_ROOT/order/scripts/render.ts <kind>
       ```
       `SANDWICH_ROOT` is injected into your context at session start.
 
@@ -93,7 +93,7 @@ You detect the right mode — the user doesn't need to specify:
 **Do NOT invent field names. Do NOT add extra wrappers.**
 **Each JSON file must start with `{` — no markdown fences, no preamble.**
 
-> A deterministic renderer (`brief/scripts/render.ts`) validates every JSON you write. Validation errors print the exact field and message — follow the schema and the first write succeeds.
+> A deterministic renderer (`order/scripts/render.ts`) validates every JSON you write. Validation errors print the exact field and message — follow the schema and the first write succeeds.
 
 ### prd.json
 
@@ -105,7 +105,7 @@ You detect the right mode — the user doesn't need to specify:
   "projectState": {
     "phase": "planning",
     "hasExistingCodebase": false,
-    "briefSource": "KAK document"
+    "orderSource": "KAK document"
   },
   "actors": [
     { "name": "End User", "role": "Primary consumer of the platform", "confidence": "stated" }

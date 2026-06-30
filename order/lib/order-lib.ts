@@ -11,23 +11,23 @@ import type {
   UserFlowsDoc,
   TechNotesDoc,
   ClientQuestionsDoc,
-} from "./brief-schemas.js";
+} from "./order-schemas.js";
 
-export type BriefMode =
+export type OrderMode =
   | "greenfield-doc"
   | "greenfield-idea"
   | "brownfield"
   | "refine"
   | "answer";
 
-export interface BriefContext {
-  mode: BriefMode;
+export interface OrderContext {
+  mode: OrderMode;
   hasCodebase: boolean;
-  hasBrief: boolean;
+  hasOrder: boolean;
   hasInput: boolean;
 }
 
-export interface BriefPaths {
+export interface OrderPaths {
   root: string;
   prd: string;
   userFlows: string;
@@ -40,7 +40,7 @@ export interface BriefPaths {
   clientQuestionsJson: string;
 }
 
-export interface BriefArtifacts {
+export interface OrderArtifacts {
   prd: string;
   userFlows: string;
   technicalNotes: string;
@@ -61,7 +61,7 @@ function hasConfidenceMarker(item: string): boolean {
 
 // --- Paths ---
 
-export function getBriefPaths(projectRoot: string): BriefPaths {
+export function getOrderPaths(projectRoot: string): OrderPaths {
   const root = join(projectRoot, "docs", "sandwich");
   return {
     root,
@@ -69,7 +69,7 @@ export function getBriefPaths(projectRoot: string): BriefPaths {
     userFlows: join(root, "user-flows.md"),
     technicalNotes: join(root, "technical-notes.md"),
     clientQuestions: join(root, "client-questions.md"),
-    contextDraft: join(root, ".brief-context.json"),
+    contextDraft: join(root, ".order-context.json"),
     prdJson: join(root, "prd.json"),
     userFlowsJson: join(root, "user-flows.json"),
     technicalNotesJson: join(root, "technical-notes.json"),
@@ -89,13 +89,13 @@ export function detectCodebase(projectRoot: string): boolean {
   return srcDirs.some((d) => existsSync(join(projectRoot, d)));
 }
 
-export function detectContext(projectRoot: string, input: string): BriefContext {
-  const hasBrief = existsSync(getBriefPaths(projectRoot).prd);
+export function detectContext(projectRoot: string, input: string): OrderContext {
+  const hasOrder = existsSync(getOrderPaths(projectRoot).prd);
   const hasCodebase = detectCodebase(projectRoot);
   const hasInput = input.trim().length > 0;
 
-  let mode: BriefMode;
-  if (hasBrief && hasInput) {
+  let mode: OrderMode;
+  if (hasOrder && hasInput) {
     const looksLikeAnswers =
       input.length < 2000 &&
       (input.includes("ya,") ||
@@ -105,9 +105,9 @@ export function detectContext(projectRoot: string, input: string): BriefContext 
         input.includes("no,") ||
         /Q\d+/.test(input));
     mode = looksLikeAnswers ? "answer" : "refine";
-  } else if (!hasBrief && hasCodebase) {
+  } else if (!hasOrder && hasCodebase) {
     mode = "brownfield";
-  } else if (!hasBrief && hasInput) {
+  } else if (!hasOrder && hasInput) {
     const looksLikeFormalDoc =
       input.length > 3000 ||
       /KAK|RFQ|MOM|Kerangka Acuan|Terms of Reference|Ruang Lingkup|Scope of Work/i.test(input);
@@ -116,7 +116,7 @@ export function detectContext(projectRoot: string, input: string): BriefContext 
     mode = "greenfield-idea";
   }
 
-  return { mode, hasCodebase, hasBrief, hasInput };
+  return { mode, hasCodebase, hasOrder, hasInput };
 }
 
 // --- Deterministic key file discovery (no LLM) ---
@@ -235,12 +235,12 @@ export function summarizeRequirements(requirements: Record<string, unknown>): st
 
 // --- I/O ---
 
-export function ensureBriefDir(projectRoot: string): void {
-  mkdirSync(getBriefPaths(projectRoot).root, { recursive: true });
+export function ensureOrderDir(projectRoot: string): void {
+  mkdirSync(getOrderPaths(projectRoot).root, { recursive: true });
 }
 
-export function readBriefArtifacts(projectRoot: string): Partial<BriefArtifacts> {
-  const paths = getBriefPaths(projectRoot);
+export function readOrderArtifacts(projectRoot: string): Partial<OrderArtifacts> {
+  const paths = getOrderPaths(projectRoot);
   return {
     prd: existsSync(paths.prd) ? readFileSync(paths.prd, "utf8") : undefined,
     userFlows: existsSync(paths.userFlows) ? readFileSync(paths.userFlows, "utf8") : undefined,
@@ -249,9 +249,9 @@ export function readBriefArtifacts(projectRoot: string): Partial<BriefArtifacts>
   };
 }
 
-export function writeBriefContext(projectRoot: string, context: unknown): void {
-  const paths = getBriefPaths(projectRoot);
-  ensureBriefDir(projectRoot);
+export function writeOrderContext(projectRoot: string, context: unknown): void {
+  const paths = getOrderPaths(projectRoot);
+  ensureOrderDir(projectRoot);
   writeFileSync(paths.contextDraft, JSON.stringify(context, null, 2), "utf8");
 }
 
@@ -269,7 +269,7 @@ const MD_PATH_KEY = {
   clientQuestions: "clientQuestions",
 } as const;
 
-export type BriefDocKind = keyof typeof JSON_PATH_KEY;
+export type OrderDocKind = keyof typeof JSON_PATH_KEY;
 
 function readJsonIfExists<T>(path: string): T | undefined {
   if (!existsSync(path)) return undefined;
@@ -280,13 +280,13 @@ function readJsonIfExists<T>(path: string): T | undefined {
   }
 }
 
-export function readBriefDocs(projectRoot: string): {
+export function readOrderDocs(projectRoot: string): {
   prd?: PrdDoc;
   userFlows?: UserFlowsDoc;
   technicalNotes?: TechNotesDoc;
   clientQuestions?: ClientQuestionsDoc;
 } {
-  const p = getBriefPaths(projectRoot);
+  const p = getOrderPaths(projectRoot);
   return {
     prd: readJsonIfExists<PrdDoc>(p.prdJson),
     userFlows: readJsonIfExists<UserFlowsDoc>(p.userFlowsJson),
@@ -295,14 +295,14 @@ export function readBriefDocs(projectRoot: string): {
   };
 }
 
-export function writeBriefArtifact(
+export function writeOrderArtifact(
   projectRoot: string,
-  kind: BriefDocKind,
+  kind: OrderDocKind,
   doc: unknown,
   rendered: string,
 ): { json: string; md: string } {
-  ensureBriefDir(projectRoot);
-  const paths = getBriefPaths(projectRoot);
+  ensureOrderDir(projectRoot);
+  const paths = getOrderPaths(projectRoot);
   const jsonPath = paths[JSON_PATH_KEY[kind]];
   const mdPath = paths[MD_PATH_KEY[kind]];
   writeFileSync(jsonPath, JSON.stringify(doc, null, 2), "utf8");

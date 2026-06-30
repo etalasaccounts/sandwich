@@ -1,6 +1,6 @@
 export const meta = {
-  name: "brief",
-  description: "Generate or update project brief artifacts for any project state: greenfield doc, greenfield idea, brownfield codebase, mid-project refine, or client answer integration",
+  name: "order",
+  description: "Take a project order and produce the kitchen documents for any project state: greenfield doc, greenfield idea, brownfield codebase, mid-project refine, or client answer integration",
   phases: [
     { title: "Detect", detail: "determine mode and project context" },
     { title: "Discover", detail: "scan codebase deterministically (brownfield only)" },
@@ -20,15 +20,15 @@ import {
   findKeyFiles,
   validateRequirements,
   summarizeRequirements,
-  readBriefArtifacts,
-  writeBriefContext,
-  getBriefPaths,
-  readBriefDocs,
-  writeBriefArtifact,
-} from "../lib/brief-lib.js";
+  readOrderArtifacts,
+  writeOrderContext,
+  getOrderPaths,
+  readOrderDocs,
+  writeOrderArtifact,
+} from "../lib/order-lib.js";
 import {
-  validateBriefArtifacts,
-  validateBriefForPlanning,
+  validateOrderArtifacts,
+  validateOrderForPlanning,
 } from "../lib/validation.js";
 import {
   validatePrdDoc,
@@ -39,13 +39,13 @@ import {
   type UserFlowsDoc,
   type TechNotesDoc,
   type ClientQuestionsDoc,
-} from "../lib/brief-schemas.js";
+} from "../lib/order-schemas.js";
 import {
   renderPrd,
   renderUserFlows,
   renderTechNotes,
   renderClientQuestions,
-} from "../lib/brief-render.js";
+} from "../lib/order-render.js";
 import { runAgentWithValidation, type RepairContext } from "../../spec/lib/agent-wrapper.js";
 const workflowDir = dirname(fileURLToPath(import.meta.url));
 const agentsDir = resolve(workflowDir, "../agents");
@@ -73,9 +73,9 @@ const input: string = args ?? "";
 // Phase 1: Detect
 phase("Detect");
 const context = detectContext(projectRoot, input);
-log(`Mode: ${context.mode} | codebase: ${context.hasCodebase} | brief: ${context.hasBrief}`);
+log(`Mode: ${context.mode} | codebase: ${context.hasCodebase} | order: ${context.hasOrder}`);
 
-const existingArtifacts = readBriefArtifacts(projectRoot);
+const existingArtifacts = readOrderArtifacts(projectRoot);
 
 // Phase 2: Discover — deterministic key file read, no agent guessing
 phase("Discover");
@@ -161,8 +161,8 @@ const validation = validateRequirements(requirements);
 if (!validation.valid) {
   log(`EXTRACTION FAILED — cannot proceed:`);
   validation.errors.forEach((e) => log(`  ✗ ${e}`));
-  log(`Inspect docs/sandwich/.brief-context.json for the raw extraction output.`);
-  writeBriefContext(projectRoot, { context, requirements, validation });
+  log(`Inspect docs/sandwich/.order-context.json for the raw extraction output.`);
+  writeOrderContext(projectRoot, { context, requirements, validation });
   throw new Error(`Brief extraction failed: ${validation.errors.join("; ")}`);
 }
 
@@ -173,11 +173,11 @@ if (validation.warnings.length > 0) {
 }
 
 log(summarizeRequirements(requirements));
-writeBriefContext(projectRoot, { context, requirements, validation });
+writeOrderContext(projectRoot, { context, requirements, validation });
 
 // Phase 5: Generate (each artifact: validated JSON → render → write json+md)
 phase("Generate");
-const prevDocs = readBriefDocs(projectRoot);
+const prevDocs = readOrderDocs(projectRoot);
 
 async function generateDoc<T>(
   file: string,
@@ -211,10 +211,10 @@ const [prdDoc, flowsDoc, techDoc, questionsDoc] = await Promise.all([
     "write-client-questions"),
 ]);
 
-const w1 = writeBriefArtifact(projectRoot, "prd", prdDoc, renderPrd(prdDoc, prevDocs.prd));
-const w2 = writeBriefArtifact(projectRoot, "userFlows", flowsDoc, renderUserFlows(flowsDoc, prevDocs.userFlows));
-const w3 = writeBriefArtifact(projectRoot, "technicalNotes", techDoc, renderTechNotes(techDoc, prevDocs.technicalNotes));
-const w4 = writeBriefArtifact(projectRoot, "clientQuestions", questionsDoc, renderClientQuestions(questionsDoc, prevDocs.clientQuestions));
+const w1 = writeOrderArtifact(projectRoot, "prd", prdDoc, renderPrd(prdDoc, prevDocs.prd));
+const w2 = writeOrderArtifact(projectRoot, "userFlows", flowsDoc, renderUserFlows(flowsDoc, prevDocs.userFlows));
+const w3 = writeOrderArtifact(projectRoot, "technicalNotes", techDoc, renderTechNotes(techDoc, prevDocs.technicalNotes));
+const w4 = writeOrderArtifact(projectRoot, "clientQuestions", questionsDoc, renderClientQuestions(questionsDoc, prevDocs.clientQuestions));
 
 const after = {
   prd: renderPrd(prdDoc, prevDocs.prd),
@@ -226,7 +226,7 @@ const after = {
 [w1, w2, w3, w4].forEach((w) => { log(`✓ ${w.json}`); log(`✓ ${w.md}`); });
 
 // Post-generation validation
-const artifactValidation = validateBriefArtifacts({
+const artifactValidation = validateOrderArtifacts({
   prd: after.prd,
   userFlows: after.userFlows,
   technicalNotes: after.technicalNotes,
@@ -238,7 +238,7 @@ if (artifactValidation.warnings.length > 0) {
   artifactValidation.warnings.slice(0, 3).forEach(w => log(`  ⚠ ${w}`));
 }
 
-const planningReadiness = validateBriefForPlanning({
+const planningReadiness = validateOrderForPlanning({
   prd: after.prd,
   userFlows: after.userFlows,
   technicalNotes: after.technicalNotes,

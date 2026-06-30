@@ -11,12 +11,12 @@ const MarkedItem = z.object({
 
 export const PrdDocSchema = z.object({
   projectName: z.string().min(1),
-  mode: z.string().min(1), // mirrors the brief BriefMode; render-only, no enum coupling
+  mode: z.string().min(1), // mirrors the OrderMode; render-only, no enum coupling
   overview: z.string().min(1),
   projectState: z.object({
     phase: z.string().min(1),
     hasExistingCodebase: z.boolean(),
-    briefSource: z.string().min(1),
+    orderSource: z.string().min(1),
   }),
   actors: z.array(z.object({
     name: z.string().min(1),

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Deterministic renderer for brief artifacts.
-// Usage: node --experimental-strip-types brief/scripts/render.ts <kind> [project-root]
+// Deterministic renderer for order artifacts.
+// Usage: node --experimental-strip-types order/scripts/render.ts <kind> [project-root]
 //
 // kind: prd | user-flows | technical-notes | client-questions
 //
@@ -17,14 +17,14 @@ import {
   validateUserFlowsDoc,
   validateTechNotesDoc,
   validateClientQuestionsDoc,
-} from "../lib/brief-schemas.ts";
+} from "../lib/order-schemas.ts";
 import {
   renderPrd,
   renderUserFlows,
   renderTechNotes,
   renderClientQuestions,
-} from "../lib/brief-render.ts";
-import { getBriefPaths } from "../lib/brief-lib.ts";
+} from "../lib/order-render.ts";
+import { getOrderPaths } from "../lib/order-lib.ts";
 
 const KINDS = ["prd", "user-flows", "technical-notes", "client-questions"] as const;
 type Kind = (typeof KINDS)[number];
@@ -39,7 +39,7 @@ if (!KINDS.includes(kind)) {
   process.exit(1);
 }
 
-const paths = getBriefPaths(projectRoot);
+const paths = getOrderPaths(projectRoot);
 
 const JSON_PATH: Record<Kind, string> = {
   "prd": paths.prdJson,
