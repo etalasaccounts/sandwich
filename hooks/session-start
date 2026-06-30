@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# SessionStart hook — injects SANDWICH_ROOT into context so the model can
+# call brief/scripts/render.ts regardless of which project it's working in.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SANDWICH_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+context="SANDWICH_ROOT=${SANDWICH_ROOT}"
+
+# Claude Code expects hookSpecificOutput; Copilot CLI / others use additionalContext.
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$context"
+else
+  printf '{"additionalContext":"%s"}\n' "$context"
+fi
