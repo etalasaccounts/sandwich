@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Composable agent stack for software agencies",
   "skills": ["./brief/skills", "./plan/skills/plan", "./plan/skills/status", "./spec/skills/recipe"],
-  "hooks": "./brief/hooks/hooks.json",
   "workflows": [
     "./brief/workflow/brief.workflow.ts",
     "./plan/workflow/plan.workflow.ts",

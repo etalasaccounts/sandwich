@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SANDWICH_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SANDWICH_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 context="SANDWICH_ROOT=${SANDWICH_ROOT}"
 
