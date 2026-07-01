@@ -1,6 +1,19 @@
 import { z } from "zod";
 import { createHash } from "crypto";
-import type { ValidationResult } from "./validation.js";
+
+// --- Validation result ---
+
+export interface ValidationResult<T> {
+  valid: boolean;
+  data?: T;
+  errors: string[];
+  warnings: string[];
+  confidence: {
+    score: number;
+    level: "confirmed" | "provisional" | "assumed";
+    blockers: string[];
+  };
+}
 
 // --- Retry configuration ---
 
@@ -87,7 +100,6 @@ export async function runAgentWithValidation<T>(
 
       lastRawOutput = rawOutput;
 
-      // Parse JSON (lenient extraction, strict parse)
       let parsed: unknown;
       try {
         parsed = JSON.parse(extractJson(rawOutput));
@@ -95,12 +107,10 @@ export async function runAgentWithValidation<T>(
         throw new Error(`JSON parse failed: ${e instanceof Error ? e.message : String(e)}`);
       }
 
-      // Validate
       const validation = validator(parsed);
 
       if (!validation.valid) {
         lastValidation = validation;
-
         const errorSummary = [
           ...validation.errors.slice(0, 3),
           ...validation.confidence.blockers.slice(0, 2),
@@ -116,23 +126,17 @@ export async function runAgentWithValidation<T>(
         throw new Error(`Validation failed after ${cfg.maxRetries} attempts: ${errorSummary}`);
       }
 
-      // Success
       if (validation.warnings.length > 0) {
         console.log(`[Validation] ${validation.warnings.length} warnings`);
         validation.warnings.slice(0, 3).forEach(w => console.log(`  ⚠ ${w}`));
       }
 
       console.log(`[Validation] Confidence: ${validation.confidence.score.toFixed(2)} (${validation.confidence.level})`);
-      
-      return { 
-        result: validation.data!, 
-        attempts: attempt, 
-        validated: true 
-      };
+
+      return { result: validation.data!, attempts: attempt, validated: true };
 
     } catch (e) {
       lastError = e instanceof Error ? e : new Error(String(e));
-      
       if (attempt < cfg.maxRetries) {
         console.log(`[Attempt ${attempt}/${cfg.maxRetries}] Error: ${lastError.message}`);
         await sleep(cfg.backoffMs * attempt);
@@ -140,11 +144,10 @@ export async function runAgentWithValidation<T>(
     }
   }
 
-  // All retries exhausted
-  const errorDetail = lastValidation 
+  const errorDetail = lastValidation
     ? `Validation errors: ${lastValidation.errors.join("; ")}`
     : lastError?.message || "Unknown error";
-  
+
   throw new Error(`Agent failed after ${cfg.maxRetries} attempts. ${errorDetail}`);
 }
 
@@ -160,14 +163,9 @@ export function checkConfidenceThreshold<T>(
       reason: `Confidence score ${validation.confidence.score.toFixed(2)} below threshold ${threshold}. ${validation.confidence.blockers.join("; ")}`,
     };
   }
-  
   if (validation.confidence.level === "assumed") {
-    return {
-      blocked: true,
-      reason: `Low confidence: ${validation.confidence.blockers.join("; ")}`,
-    };
+    return { blocked: true, reason: `Low confidence: ${validation.confidence.blockers.join("; ")}` };
   }
-  
   return { blocked: false, reason: "" };
 }
 
@@ -180,55 +178,12 @@ export function hashOutput(data: unknown): string {
     .slice(0, 16);
 }
 
-export function hasOutputChanged(
-  current: unknown, 
-  previousHash: string | null
-): boolean {
+export function hasOutputChanged(current: unknown, previousHash: string | null): boolean {
   if (!previousHash) return true;
   return hashOutput(current) !== previousHash;
 }
 
-// --- Sleep utility ---
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// --- Agent prompt enhancer ---
-
-export function enhancePromptWithSchema(basePrompt: string, schema: z.ZodType): string {
-  // Extract schema shape for documentation
-  const schemaStr = JSON.stringify(
-    zodToJsonSchema(schema),
-    null,
-    2
-  );
-
-  return `${basePrompt}
-
-## Output Schema (MUST match exactly)
-
-\`\`\`json
-${schemaStr}
-\`\`\`
-
-## Validation rules
-
-1. Output MUST be valid JSON matching this schema
-2. Invalid output will be rejected and you must retry
-3. All required fields must be present
-4. Enum values must match exactly (case-sensitive)
-
-## On validation failure
-
-If your output is rejected, you will receive the error message. Fix the specific issues and output ONLY the corrected JSON.`;
-}
-
-// Simple Zod to JSON Schema converter (minimal implementation).
-// Takes a ZodType and reads its `._def` internally — `_def.shape` is a thunk
-// in zod 3.x, and a field's optionality lives on the wrapper's typeName.
-// ponytail: covers the subset of zod used by this package's schemas.
-// add when: a schema starts using records, tuples, intersections, etc.
+// Simple Zod to JSON Schema converter (covers the subset used by this package).
 export function zodToJsonSchema(schema: unknown): unknown {
   const d = (schema as { _def?: Record<string, unknown> })?._def;
   if (!d) return {};
@@ -266,4 +221,8 @@ export function zodToJsonSchema(schema: unknown): unknown {
     default:
       return {};
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

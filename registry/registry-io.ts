@@ -677,7 +677,7 @@ export function renderFeatureQueue(
     }
     if (report.staleSpecs.length) {
       lines.push("**Specs now stale (regenerate before building):**");
-      report.staleSpecs.forEach((id) => lines.push(`- ${label(id)} — run \`/recipe ${id}\` again`));
+      report.staleSpecs.forEach((id) => lines.push(`- ${label(id)} — re-run Superpowers brainstorming for this feature`));
       lines.push("");
     }
     if (report.orphaned.length) {
@@ -792,7 +792,7 @@ export function renderStatus(
   if (changed.length)
     todos.push(`Re-review ${changed.length} feature(s) whose brief text moved: ${changed.map((f) => f.id).join(", ")}`);
   if (stale.length)
-    todos.push(`Regenerate ${stale.length} stale spec(s): ${stale.map((f) => `/recipe ${f.id}`).join(", ")}`);
+    todos.push(`Re-run Superpowers brainstorming for ${stale.length} stale spec(s): ${stale.map((f) => f.id).join(", ")}`);
   if (orphaned.length)
     todos.push(`Confirm removal of ${orphaned.length} orphaned feature(s): ${orphaned.map((f) => f.id).join(", ")}`);
   if (!project.gates.queueApproved.passed && features.length)

@@ -24,14 +24,12 @@
   "pi": {
     "extensions": [
       "./order/pi-extension/order.ts",
-      "./prep/pi-extension/prep.ts",
-      "./recipe/pi-extension/recipe.ts"
+      "./prep/pi-extension/prep.ts"
     ],
     "skills": [
       "./order/skills",
       "./prep/skills/prep",
-      "./prep/skills/status",
-      "./recipe/skills/recipe"
+      "./prep/skills/status"
     ]
   },
   "devDependencies": {

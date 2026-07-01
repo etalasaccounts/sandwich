@@ -174,7 +174,7 @@ When brief changes after initial `/prep`:
 ## Relationship to other ingredients
 
 ```
-/order → /prep → User picks → /recipe → Superpowers (execution)
+/order → /prep → User picks → Superpowers brainstorming → execution
            │
            └─→ feature-queue.md (execution state)
 ```

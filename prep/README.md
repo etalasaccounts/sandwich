@@ -69,7 +69,7 @@ Where urgency_factor:
 ## Relationship to other ingredients
 
 ```
-/order → /prep → User picks → /recipe → Superpowers (execution)
+/order → /prep → User picks → Superpowers brainstorming → execution
            │
            └─→ .sandwich/registry/ (source of truth) → docs/sandwich/feature-queue.md
 ```

@@ -1,6 +1,12 @@
 # sandwich
 
-Composable agent stack for software agencies. **All outputs validated with zod schemas and confidence checks.**
+> **Alpha — expect bugs.** APIs and file formats may change without notice. Use in production at your own risk.
+
+Composable agent stack for software agencies. Turns messy client input into a validated, scored feature registry — then hands off to [Superpowers](https://github.com/obra/Superpowers) for execution.
+
+All outputs validated with Zod schemas. The model never computes priority numbers — code does.
+
+---
 
 ## Install
 
@@ -14,20 +20,23 @@ Composable agent stack for software agencies. **All outputs validated with zod s
 claude install https://github.com/etalasaccounts/sandwich.git
 ```
 
-## Ingredients
+After installing, restart your AI session so the skills are discovered.
+
+---
+
+## Commands
 
 | Command | Role |
 |---------|------|
 | `/order` | Turn any client input into four standardized brief artifacts |
 | `/prep` | Tech lead prioritization — score features, build the queue |
-| `/recipe` | Generate a machine-checkable spec for one feature |
 | `/status` | Morning-check dashboard — what's blocking, what's next |
 
 ---
 
-## How to use it (daily flow)
+## Daily flow
 
-### 1. Brief a project
+### 1. Take the order
 
 Paste a KAK, RFQ, MOM, meeting notes, or just describe the project. The skill detects the context automatically.
 
@@ -46,18 +55,14 @@ Produces four artifacts in `docs/sandwich/`:
 
 Share `client-questions.md` with the client and wait for answers before running `/prep`.
 
----
+### 2. Refine the brief
 
-### 2. Refine the brief (when client answers arrive)
-
-Paste the client's answers alongside `/order`. The skill detects `answer` mode and integrates them — resolved questions are cleared, affected features are updated.
+Paste the client's answers alongside `/order`. The skill detects answer mode and integrates them — resolved questions are cleared, affected features are updated.
 
 ```
 /order
 [paste client's answers here]
 ```
-
----
 
 ### 3. Prioritize features
 
@@ -65,23 +70,42 @@ Paste the client's answers alongside `/order`. The skill detects `answer` mode a
 /prep
 ```
 
-Reads the brief, extracts all features, scores them (impact × urgency × risk ÷ effort), and writes the registry. On re-run it reconciles — new features are added, dropped features are flagged, and any feature that was in-progress is never auto-removed.
+Reads the brief, extracts all features, scores them, and writes the registry. On re-run it reconciles — new features are added, dropped features are flagged, and any feature that was in-progress is never auto-removed.
 
-**The registry** (`.sandwich/registry/`) is committed to git — it's the source of truth that survives across re-runs. A rendered view (`docs/sandwich/feature-queue.md`) is generated each run and committed alongside the brief artifacts.
+Produces `docs/sandwich/feature-queue.md` — shareable with PMs.
 
----
+### 4. Pick a feature and hand off to Superpowers
 
-### 4. Spec a feature
+Sandwich stops at the feature queue. For design, implementation planning, and execution, use **[Superpowers](https://github.com/obra/Superpowers)** — it's more mature and purpose-built for that phase.
 
-Pick a feature ID from the queue and run:
+**Install Superpowers first if you haven't:**
+
+```bash
+# Pi
+\pi install https://github.com/obra/Superpowers.git
+
+# Claude Code
+claude install https://github.com/obra/Superpowers.git
+```
+
+**Then hand off from the queue:**
+
+Pick a feature from `docs/sandwich/feature-queue.md` and start a brainstorming session. Paste the feature details so Superpowers has full context:
 
 ```
-/recipe F-001
+/brainstorm
+
+Feature: F-001 — User authentication flow
+Priority score: 85 | Module: Auth | Confidence: stated
+Description: OAuth2 login with Google and email/password
+Depends on: (none) | Blocks: F-003, F-007
+
+[optional: paste relevant sections from prd.md or technical-notes.md]
 ```
 
-Generates a machine-checkable spec with acceptance criteria, tasks, and test harness definition. Updates the registry: `F-001` moves to `speced`, `specRef` is set.
+Superpowers walks you through: approach options → design approval → implementation plan with actual code → subagent execution task by task.
 
----
+> **Why not stay in sandwich?** Superpowers' brainstorming skill enforces a human approval gate before any code is written, proposes 2-3 implementation approaches with tradeoffs, and produces implementation plans with full code in every step. That's the right tool for execution — sandwich's job ends at "what to build and in what order."
 
 ### 5. Morning check
 
@@ -89,13 +113,13 @@ Generates a machine-checkable spec with acceptance criteria, tasks, and test har
 /status
 ```
 
-Shows a dashboard: gates, open client questions (and what they block), stale specs, and recommended next action. Useful at the start of any session to reorient.
-
-For a full maintenance report (billing evidence, SLA log):
+Shows gates, open client questions (and what they block), stale features, and recommended next action.
 
 ```
 /status --report
 ```
+
+Full maintenance report — useful for billing evidence and SLA logs.
 
 ---
 
@@ -107,31 +131,12 @@ For a full maintenance report (billing evidence, SLA log):
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
 | `/prep F-001` | Deep impact analysis for a specific feature |
-| `/recipe F-001` | Generate spec for a feature |
 | `/status` | Morning-check dashboard |
 | `/status --report` | Full maintenance/SLA report from journal |
 
 ---
 
-## Registry (single source of truth)
-
-The registry lives in `.sandwich/registry/` and is committed to git. It never loses state between re-runs.
-
-| File | Purpose |
-|------|---------|
-| `project.json` | Project metadata, brief hashes, gate states |
-| `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides, spec links |
-| `questions.json` | Client questions ↔ answers ↔ what they unblock |
-| `decisions.json` | ADR-lite scope/architecture decisions |
-| `journal.jsonl` | Append-only audit trail — every gate, reconciliation, drift event |
-
-**Rendered views** (`docs/sandwich/feature-queue.md`) are committed — generated fresh each run from the registry, shareable with PMs.
-
-### Stable feature IDs
-
-A feature keeps its ID (`F-001`, `F-002`, …) across re-runs even if the brief rewrites its title, because matching uses a content fingerprint — not position or exact text. Human overrides (pinned priority, pinned lifecycle) survive every reconciliation.
-
-## Pipeline diagram
+## Pipeline
 
 ```
 /order  ──→  brief artifacts
@@ -140,32 +145,31 @@ A feature keeps its ID (`F-001`, `F-002`, …) across re-runs even if the brief 
                  /prep  ──→  feature-queue.md
                                    │
                                    ▼
-                            /recipe F-001  ──→  spec + registry update
+                         Human picks a feature
                                    │
                                    ▼
-                            Superpowers (execution)
+                         Superpowers brainstorming
+                         → writing-plans
+                         → subagent-driven-development
 ```
 
-Human picks features. AI automates analysis and record-keeping.
+Sandwich handles requirements capture and prioritization. Superpowers handles design and execution.
 
 ---
 
-## Reconciliation
+## Registry
 
-When brief changes mid-project:
+The registry lives in `.sandwich/registry/` and is committed to git. It never loses state between re-runs.
 
-```
-/order  →  brief artifacts update
-               ↓
-           /prep  →  detects brief change
-               ↓
-           Reconciles:
-             • New features → added to registry with new ID
-             • Missing features → flagged as orphaned (never deleted if in-progress)
-             • Changed features → flagged needsReanalysis, stale spec flagged
-               ↓
-           Output: "3 added, 1 orphaned, 2 stale specs"
-```
+| File | Purpose |
+|------|---------|
+| `project.json` | Project metadata, brief hashes, gate states |
+| `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides |
+| `questions.json` | Client questions ↔ answers ↔ what they unblock |
+| `decisions.json` | ADR-lite scope/architecture decisions |
+| `journal.jsonl` | Append-only audit trail — every gate, reconciliation, drift event |
+
+A feature keeps its ID (`F-001`, `F-002`, …) across re-runs even if the brief rewrites its title, because matching uses a content fingerprint — not position or exact text. Human overrides (pinned priority, pinned lifecycle) survive every reconciliation.
 
 ---
 
@@ -202,11 +206,9 @@ The model never computes a priority number. It supplies four dimension scores:
 | `impact` | Business/user value (1–10) |
 | `effort` | Relative dev cost (1–10) |
 | `risk` | Technical uncertainty (1–10) |
-| `urgency` | Time pressure factor (1.0 / 1.5 / 2.0) |
+| `urgency` | Time pressure factor (0.8 / 1.0 / 1.2 / 1.5) |
 
 Priority is computed deterministically in code: `(impact × urgency × (10 − risk)) ÷ effort`, normalized to 0–100. Same inputs always produce the same ranking — no LLM variance.
-
-Human overrides (pin a priority, force a lifecycle) survive every re-run.
 
 ---
 
@@ -214,7 +216,6 @@ Human overrides (pin a priority, force a lifecycle) survive every re-run.
 
 | Directory | Git | Purpose |
 |-----------|-----|---------|
-| `docs/sandwich/` | tracked | Brief artifacts, feature queue, specs — everything shareable |
-| `docs/sandwich/specs/` | tracked | Machine-checkable specs |
+| `docs/sandwich/` | tracked | Brief artifacts and feature queue — everything shareable |
 | `docs/sandwich/intake/` | tracked | Raw PM inputs (KAK, MOM, meeting notes) |
 | `.sandwich/registry/` | tracked | Pipeline state (source of truth) |
