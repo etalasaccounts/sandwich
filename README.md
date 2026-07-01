@@ -76,15 +76,36 @@ Produces `docs/sandwich/feature-queue.md` — shareable with PMs.
 
 ### 4. Pick a feature and hand off to Superpowers
 
-Pick a feature ID from the queue, then use [Superpowers brainstorming](https://github.com/obra/Superpowers) to design and execute it:
+Sandwich stops at the feature queue. For design, implementation planning, and execution, use **[Superpowers](https://github.com/obra/Superpowers)** — it's more mature and purpose-built for that phase.
+
+**Install Superpowers first if you haven't:**
+
+```bash
+# Pi
+\pi install https://github.com/obra/Superpowers.git
+
+# Claude Code
+claude install https://github.com/obra/Superpowers.git
+```
+
+**Then hand off from the queue:**
+
+Pick a feature from `docs/sandwich/feature-queue.md` and start a brainstorming session. Paste the feature details so Superpowers has full context:
 
 ```
 /brainstorm
-I want to build F-001 (User authentication flow) from the feature queue.
-[paste the feature details from feature-queue.md]
+
+Feature: F-001 — User authentication flow
+Priority score: 85 | Module: Auth | Confidence: stated
+Description: OAuth2 login with Google and email/password
+Depends on: (none) | Blocks: F-003, F-007
+
+[optional: paste relevant sections from prd.md or technical-notes.md]
 ```
 
-Superpowers takes it from here: design conversation → implementation plan → subagent execution.
+Superpowers walks you through: approach options → design approval → implementation plan with actual code → subagent execution task by task.
+
+> **Why not stay in sandwich?** Superpowers' brainstorming skill enforces a human approval gate before any code is written, proposes 2-3 implementation approaches with tradeoffs, and produces implementation plans with full code in every step. That's the right tool for execution — sandwich's job ends at "what to build and in what order."
 
 ### 5. Morning check
 
