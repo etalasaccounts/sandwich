@@ -8,7 +8,6 @@ import {
   validateScores,
   validateReconciliation,
 } from "./validation.ts";
-import { validateSpec } from "../../recipe/lib/validation.ts";
 import { zodToJsonSchema } from "./agent-wrapper.ts";
 
 let n = 0;
@@ -89,38 +88,6 @@ check("scores: recommendation outside top-3 computed priority warns", () => {
   };
   const r = validateScores(four);
   assert.ok(r.warnings.some(w => w.includes("not in top 3")));
-});
-
-// --- spec ---
-const validSpec = {
-  featureId: "F-001",
-  title: "Login",
-  summary: "OAuth login",
-  acceptanceCriteria: [{ id: "AC-001", given: "g", when: "w", then: "t", testable: true, testCommand: "npm test" }],
-  scope: { inScope: ["oauth"], outOfScope: ["sso"] },
-  tasks: [{ id: "T-001", description: "build", files: ["src/auth.ts"], acceptanceCriteria: ["AC-001"], estimatedMinutes: 30 }],
-  harness: { setup: ["npm i"], testsToWrite: ["test/auth.test.ts"], validators: ["npm test"] },
-};
-check("spec accepts a complete, internally-consistent spec", () => {
-  const r = validateSpec(validSpec);
-  assert.equal(r.valid, true);
-});
-check("spec rejects task referencing an unknown criterion", () => {
-  const bad = structuredClone(validSpec);
-  bad.tasks[0].acceptanceCriteria = ["AC-999"];
-  assert.equal(validateSpec(bad).valid, false);
-});
-check("spec warns when a criterion is uncovered by tasks", () => {
-  const bad = structuredClone(validSpec);
-  bad.acceptanceCriteria.push({ id: "AC-002", given: "g", when: "w", then: "t", testable: true, testCommand: "npm test" });
-  const r = validateSpec(bad);
-  assert.equal(r.valid, true);
-  assert.ok(r.warnings.some(w => w.includes("AC-002")));
-});
-check("spec rejects non-atomic task (>60 min)", () => {
-  const bad = structuredClone(validSpec);
-  bad.tasks[0].estimatedMinutes = 120;
-  assert.equal(validateSpec(bad).valid, false);
 });
 
 // --- reconciliation ---

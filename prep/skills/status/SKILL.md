@@ -45,4 +45,4 @@ the billing and SLA evidence.
 ## Key principle
 
 This is the morning-check command. If `Awaiting you` is empty, the queue is
-approved and current, and you can pick a feature and run `/recipe <F-id>`.
+approved and current, and you can pick a feature and hand it off to Superpowers brainstorming.

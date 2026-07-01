@@ -214,7 +214,7 @@ check("renderStatus surfaces the actions awaiting a human", () => {
     [{ id: "Q1", text: "API docs?", priority: 1, status: "open", unblocks: ["F-008"] }]
   );
   assert.ok(txt.includes("Awaiting you"));
-  assert.ok(txt.includes("/recipe F-001"), "should tell the human to regenerate the stale spec");
+  assert.ok(txt.includes("F-001"), "should surface the stale spec feature id");
   assert.ok(txt.includes("/prep --approve"), "should prompt to approve the queue");
   assert.ok(txt.includes("open client question"), "should surface open questions");
 });
