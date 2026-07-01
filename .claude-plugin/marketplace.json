@@ -1,9 +1,17 @@
 {
   "name": "sandwich",
-  "displayName": "Sandwich",
-  "description": "Composable agent stack for software agencies. First ingredient: brief — turns messy client input into standardized PRD artifacts.",
-  "version": "0.1.0",
-  "author": "etalas",
-  "repository": "https://github.com/etalasaccounts/sandwich.git",
-  "tags": ["prd", "brief", "agency", "planning"]
+  "description": "Composable agent stack for software agencies",
+  "owner": {
+    "name": "Etalas"
+  },
+  "plugins": [
+    {
+      "name": "sandwich",
+      "description": "Composable agent stack for software agencies. Turns messy client input into a validated, scored feature registry — then hands off to Superpowers for execution.",
+      "source": "./",
+      "author": {
+        "name": "Etalas"
+      }
+    }
+  ]
 }
