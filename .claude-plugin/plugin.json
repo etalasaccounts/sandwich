@@ -2,7 +2,10 @@
   "name": "sandwich",
   "version": "0.1.0",
   "description": "Composable agent stack for software agencies",
-  "skills": ["./order/skills", "./plan/skills/plan", "./plan/skills/status", "./spec/skills/recipe"],
+  "author": {
+    "name": "Etalas"
+  },
+  "skills": ["./order/skills/order", "./plan/skills/plan", "./plan/skills/status", "./spec/skills/recipe"],
   "workflows": [
     "./order/workflow/order.workflow.ts",
     "./plan/workflow/plan.workflow.ts",

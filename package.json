@@ -28,7 +28,7 @@
       "./spec/pi-extension/spec.ts"
     ],
     "skills": [
-      "./order/skills",
+      "./order/skills/order",
       "./plan/skills/plan",
       "./plan/skills/status",
       "./spec/skills/recipe"

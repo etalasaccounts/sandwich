@@ -11,7 +11,11 @@ Composable agent stack for software agencies. **All outputs validated with zod s
 
 **Claude Code:**
 ```bash
-claude install https://github.com/etalasaccounts/sandwich.git
+# Step 1: register the sandwich marketplace
+claude plugin marketplace add etalasaccounts/sandwich
+
+# Step 2: install
+claude plugin install sandwich
 ```
 
 ## Ingredients
