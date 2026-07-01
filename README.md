@@ -17,7 +17,11 @@ All outputs validated with Zod schemas. The model never computes priority number
 
 **Claude Code:**
 ```bash
-claude install https://github.com/etalasaccounts/sandwich.git
+# Step 1: register the sandwich marketplace
+claude plugin marketplace add etalasaccounts/sandwich
+
+# Step 2: install
+claude plugin install sandwich
 ```
 
 After installing, restart your AI session so the skills are discovered.
@@ -84,8 +88,8 @@ Sandwich stops at the feature queue. For design, implementation planning, and ex
 # Pi
 \pi install https://github.com/obra/Superpowers.git
 
-# Claude Code
-claude install https://github.com/obra/Superpowers.git
+# Claude Code (Superpowers is in the official marketplace)
+claude plugin install superpowers
 ```
 
 **Then hand off from the queue:**
