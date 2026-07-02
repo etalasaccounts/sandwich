@@ -862,26 +862,25 @@ git commit -m "feat: verify-complete gate — /prep fails loudly on missing arti
 
 - [ ] **Step 1: Append a failing check to the registry selfcheck**
 
-`renderFeatureQueue` writes to disk, so the check uses a temp dir. Append to `registry/registry.selfcheck.ts` before the final `console.log` (reuse the file's existing `speced` fixture array and `now` constant; `initProject` is already imported):
+`renderFeatureQueue` writes to disk, so the check uses a temp dir. The file
+already imports `mkdtempSync`, `tmpdir`, `join`, and `initProject` — add only
+`readFileSync` to the existing `node:fs` import line, and add
+`renderFeatureQueue` to the existing `./registry-io.ts` import block. Then
+append this check to `registry/registry.selfcheck.ts` before the final
+`console.log` (reuses the file's existing `speced` fixture array, defined at
+~line 133, and `now` constant, defined at ~line 44):
 
 ```ts
 // --- feature queue projection: spec links, no inline details ---
-import { mkdtempSync, readFileSync as readQueueFile } from "node:fs";
-import { tmpdir } from "node:os";
-import { join as joinPath } from "node:path";
-import { renderFeatureQueue } from "./registry-io.ts";
-
 check("renderFeatureQueue links specs and drops the Details section", () => {
-  const dir = mkdtempSync(joinPath(tmpdir(), "sandwich-queue-"));
+  const dir = mkdtempSync(join(tmpdir(), "sandwich-queue-"));
   renderFeatureQueue(dir, speced, initProject("X", now));
-  const md = readQueueFile(joinPath(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
+  const md = readFileSync(join(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
   assert.ok(md.includes("| Spec |"), "queue table should have a Spec column");
   assert.ok(md.includes(`[specs/${speced[0].id}.md](specs/${speced[0].id}.md)`), "row should link the spec file");
   assert.ok(!md.includes("## Details"), "inline Details section should be gone");
 });
 ```
-
-If the file's fixture is not named `speced`, adapt to the array of `Feature` fixtures that already exists in that selfcheck (it is used by the existing `renderStatus` check at ~line 208).
 
 - [ ] **Step 2: Run to verify it fails**
 
