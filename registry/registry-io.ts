@@ -695,43 +695,15 @@ export function renderFeatureQueue(
   }
 
   lines.push("## Queue", "");
-  lines.push("| # | ID | Title | Module | Priority | Status |");
-  lines.push("|---|----|-------|--------|----------|--------|");
+  lines.push("| # | ID | Title | Module | Priority | Status | Spec |");
+  lines.push("|---|----|-------|--------|----------|--------|------|");
   active.forEach((f, i) => {
     const pin = f.overrides.priority ? "📌" : "";
     lines.push(
-      `| ${i + 1} | ${f.id} | ${f.title} | ${f.module} | ${pin}${effectivePriority(f)} | ${displayStatus(f)} |`
+      `| ${i + 1} | ${f.id} | ${f.title} | ${f.module} | ${pin}${effectivePriority(f)} | ${displayStatus(f)} | [specs/${f.id}.md](specs/${f.id}.md) |`
     );
   });
   lines.push("", "---", "");
-
-  // Detail blocks
-  lines.push("## Details", "");
-  active.forEach((f) => {
-    lines.push(`### ${f.id}: ${f.title}`, "");
-    lines.push(
-      `**Priority:** ${effectivePriority(f)}/100${f.overrides.priority ? ` (📌 pinned by ${f.overrides.priority.by}: ${f.overrides.priority.reason})` : ""} | **Status:** ${displayStatus(f)} | **Confidence:** ${f.confidence}`,
-      ""
-    );
-    if (f.score) {
-      lines.push(
-        "| Dimension | Score | Factors |",
-        "|-----------|-------|---------|",
-        `| Impact | ${f.score.impact.score}/10 | ${f.score.impact.factors.join("; ")} |`,
-        `| Effort | ${f.score.effort.score}/10 | ${f.score.effort.factors.join("; ")} |`,
-        `| Risk | ${f.score.risk.score}/10 | ${f.score.risk.factors.join("; ")} |`,
-        `| Urgency | ×${f.score.urgency.factor} | ${f.score.urgency.reason} |`,
-        ""
-      );
-    }
-    if (f.dependsOn.length) lines.push(`**Depends on:** ${f.dependsOn.join(", ")}`, "");
-    if (f.blockedBy.length) lines.push(`**Blocked by:** ${f.blockedBy.join(", ")}`, "");
-    if (f.description) lines.push(f.description, "");
-    lines.push(
-      `**Source:** ${f.provenance.file}${f.provenance.lines ? `:${f.provenance.lines}` : ""}`,
-      ""
-    );
-  });
 
   // Shipped / rejected history, kept for the record.
   const done = features.filter((f) => effectiveLifecycle(f) === "done");
@@ -757,7 +729,8 @@ export function renderStatus(
   features: Feature[],
   project: Project,
   journal: JournalEvent[],
-  questions: Question[]
+  questions: Question[],
+  audit?: { missingSpecs: string[]; missingDecisionTargets: string[] }
 ): string {
   const lc = (f: Feature) => effectiveLifecycle(f);
   const count = (s: string) => features.filter((f) => lc(f) === s).length;
@@ -797,6 +770,14 @@ export function renderStatus(
     todos.push(`Confirm removal of ${orphaned.length} orphaned feature(s): ${orphaned.map((f) => f.id).join(", ")}`);
   if (!project.gates.queueApproved.passed && features.length)
     todos.push("Approve the queue once you're happy with priorities: /prep --approve");
+  if (audit?.missingSpecs.length)
+    todos.push(
+      `Write missing spec file(s): ${audit.missingSpecs.join(", ")} → docs/sandwich/specs/, then run render-specs + verify-complete`
+    );
+  if (audit?.missingDecisionTargets.length)
+    todos.push(
+      `Journal records decision(s) ${audit.missingDecisionTargets.join(", ")} missing from decisions.json — restore them`
+    );
 
   out.push("Awaiting you:");
   if (todos.length === 0) out.push("  ✓ nothing — queue is approved and current");

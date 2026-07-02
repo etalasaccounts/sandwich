@@ -544,65 +544,6 @@ export function writeImpactAnalysis(
   writeFileSync(paths.impactAnalysis, lines.join("\n"), "utf8");
 }
 
-export interface Spec {
-  featureId: string;
-  title: string;
-  summary: string;
-  acceptanceCriteria: Array<{ id: string; given: string; when: string; then: string; testable: boolean; testCommand: string }>;
-  scope: { inScope: string[]; outOfScope: string[] };
-  tasks: Array<{ id: string; description: string; files: string[]; acceptanceCriteria: string[]; estimatedMinutes: number }>;
-  harness: { setup: string[]; testsToWrite: string[]; validators: string[] };
-}
-
-export function writeSpec(projectRoot: string, spec: Spec): { json: string; md: string } {
-  const paths = getPrepPaths(projectRoot);
-  mkdirSync(paths.specsDir, { recursive: true });
-
-  const jsonPath = join(paths.specsDir, `${spec.featureId}.json`);
-  const mdPath = join(paths.specsDir, `${spec.featureId}.md`);
-
-  writeFileSync(jsonPath, JSON.stringify(spec, null, 2), "utf8");
-
-  const totalMinutes = spec.tasks.reduce((sum, t) => sum + t.estimatedMinutes, 0);
-  const lines: string[] = [
-    `# Spec: ${spec.featureId} — ${spec.title}`,
-    `Generated: ${new Date().toISOString().split("T")[0]}`,
-    "",
-    spec.summary,
-    "",
-    `**Acceptance criteria:** ${spec.acceptanceCriteria.length} · **Tasks:** ${spec.tasks.length} · **Est:** ${(totalMinutes / 60).toFixed(1)}h (AI-assisted)`,
-    "",
-    `## Acceptance Criteria`,
-    ...spec.acceptanceCriteria.flatMap((ac) => [
-      `### ${ac.id}`,
-      `- **Given** ${ac.given}`,
-      `- **When** ${ac.when}`,
-      `- **Then** ${ac.then}`,
-      `- \`${ac.testCommand}\``,
-      "",
-    ]),
-    `## Scope`,
-    `**In:**`,
-    ...spec.scope.inScope.map((s) => `- ${s}`),
-    `**Out:**`,
-    ...spec.scope.outOfScope.map((s) => `- ${s}`),
-    "",
-    `## Tasks`,
-    ...spec.tasks.map(
-      (t) => `- **${t.id}** (${t.estimatedMinutes}m) ${t.description} — \`${t.files.join("`, `")}\` [${t.acceptanceCriteria.join(", ")}]`
-    ),
-    "",
-    `## Harness`,
-    `- Setup: ${spec.harness.setup.map((c) => `\`${c}\``).join(", ") || "—"}`,
-    `- Tests to write: ${spec.harness.testsToWrite.map((c) => `\`${c}\``).join(", ") || "—"}`,
-    `- Validators: ${spec.harness.validators.map((c) => `\`${c}\``).join(", ")}`,
-    "",
-  ];
-
-  writeFileSync(mdPath, lines.join("\n"), "utf8");
-  return { json: jsonPath, md: mdPath };
-}
-
 export function writePlanContext(projectRoot: string, context: unknown): void {
   const paths = getPrepPaths(projectRoot);
   ensurePrepDir(projectRoot);

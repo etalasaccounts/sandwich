@@ -76,7 +76,7 @@ Paste the client's answers alongside `/order`. The skill detects answer mode and
 
 Reads the brief, extracts all features, scores them, and writes the registry. On re-run it reconciles — new features are added, dropped features are flagged, and any feature that was in-progress is never auto-removed.
 
-Produces `docs/sandwich/feature-queue.md` — shareable with PMs.
+Produces `docs/sandwich/feature-queue.md` — shareable with PMs — plus a `docs/sandwich/specs/F-XXX.md` for every active feature: scope and an acceptance-criteria checklist, ready to hand to Superpowers.
 
 ### 4. Pick a feature and hand off to Superpowers
 
@@ -94,20 +94,15 @@ claude plugin install superpowers
 
 **Then hand off from the queue:**
 
-Pick a feature from `docs/sandwich/feature-queue.md` and start a brainstorming session. Paste the feature details so Superpowers has full context:
+Pick the top feature from `docs/sandwich/feature-queue.md` — say it's `F-001` — and open its spec, `docs/sandwich/specs/F-001.md`. It already has the scope and acceptance-criteria checklist Superpowers needs; paste it in to start a brainstorming session:
 
 ```
 /brainstorm
 
-Feature: F-001 — User authentication flow
-Priority score: 85 | Module: Auth | Confidence: stated
-Description: OAuth2 login with Google and email/password
-Depends on: (none) | Blocks: F-003, F-007
-
-[optional: paste relevant sections from prd.md or technical-notes.md]
+[paste the contents of docs/sandwich/specs/F-001.md]
 ```
 
-Superpowers walks you through: approach options → design approval → implementation plan with actual code → subagent execution task by task.
+Superpowers walks you through: approach options → design approval → implementation plan with actual code → subagent execution task by task. As each acceptance criterion is proven, flip `"done": true` for it in `F-001.json` and re-run `render-specs.ts` to check it off in the spec.
 
 > **Why not stay in sandwich?** Superpowers' brainstorming skill enforces a human approval gate before any code is written, proposes 2-3 implementation approaches with tradeoffs, and produces implementation plans with full code in every step. That's the right tool for execution — sandwich's job ends at "what to build and in what order."
 
@@ -143,19 +138,11 @@ Full maintenance report — useful for billing evidence and SLA logs.
 ## Pipeline
 
 ```
-/order  ──→  brief artifacts
-                   │
-                   ▼
-                 /prep  ──→  feature-queue.md
-                                   │
-                                   ▼
-                         Human picks a feature
-                                   │
-                                   ▼
-                         Superpowers brainstorming
-                         → writing-plans
-                         → subagent-driven-development
+/order → /prep → docs/sandwich/specs/F-XXX.md → superpowers:brainstorming → build
+                 └─ feature-queue.md (priorities + links)
 ```
+
+After `/prep`, every active feature has its own `docs/sandwich/specs/F-XXX.md` — scope plus an acceptance-criteria checklist, generated deterministically from the registry. Pick the top feature off `feature-queue.md` and hand its spec file straight to Superpowers brainstorming as the starting point. As implementation proves each acceptance criterion, flip it to `"done": true` in the feature's `F-XXX.json` and re-run `render-specs.ts` (or the next `/prep`) to check it off in the rendered markdown.
 
 Sandwich handles requirements capture and prioritization. Superpowers handles design and execution.
 
@@ -222,4 +209,5 @@ Priority is computed deterministically in code: `(impact × urgency × (10 − r
 |-----------|-----|---------|
 | `docs/sandwich/` | tracked | Brief artifacts and feature queue — everything shareable |
 | `docs/sandwich/intake/` | tracked | Raw PM inputs (KAK, MOM, meeting notes) |
+| `docs/sandwich/specs/` | tracked | Per-feature specs (`F-XXX.json` + rendered `F-XXX.md`) — the dev's starting point for Superpowers |
 | `.sandwich/registry/` | tracked | Pipeline state (source of truth) |

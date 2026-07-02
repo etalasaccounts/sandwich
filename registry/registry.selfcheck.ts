@@ -2,7 +2,7 @@
 // Run: node --experimental-strip-types registry/registry.selfcheck.ts
 // Plain asserts, no framework. Exits non-zero on first failure.
 import { strict as assert } from "node:assert";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -30,6 +30,7 @@ import {
   appendJournal,
   readJournal,
   renderStatus,
+  renderFeatureQueue,
   canonicalizeRegistryContent,
   gateRegistryWrite,
 } from "./registry-io.ts";
@@ -217,6 +218,18 @@ check("renderStatus surfaces the actions awaiting a human", () => {
   assert.ok(txt.includes("F-001"), "should surface the stale spec feature id");
   assert.ok(txt.includes("/prep --approve"), "should prompt to approve the queue");
   assert.ok(txt.includes("open client question"), "should surface open questions");
+});
+
+check("renderStatus surfaces completeness audit findings", () => {
+  const txt = renderStatus(
+    speced,
+    initProject("X", now),
+    [],
+    [],
+    { missingSpecs: ["F-004", "F-007"], missingDecisionTargets: ["D2"] }
+  );
+  assert.ok(txt.includes("F-004, F-007"), "should list features missing specs");
+  assert.ok(txt.includes("D2"), "should list unrecorded decisions");
 });
 
 // --- client-questions parsing ---
@@ -526,6 +539,16 @@ check("gateRegistryWrite blocks an unsalvageable registry write", () => {
   const d = gateRegistryWrite("/proj/.sandwich/registry/features.json", "{ not json");
   assert.equal(d.action, "block");
   assert.ok((d as { reason: string }).reason.includes("features.json"));
+});
+
+// --- feature queue projection: spec links, no inline details ---
+check("renderFeatureQueue links specs and drops the Details section", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sandwich-queue-"));
+  renderFeatureQueue(dir, speced, initProject("X", now));
+  const md = readFileSync(join(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
+  assert.ok(md.includes("| Spec |"), "queue table should have a Spec column");
+  assert.ok(md.includes(`[specs/${speced[0].id}.md](specs/${speced[0].id}.md)`), "row should link the spec file");
+  assert.ok(!md.includes("## Details"), "inline Details section should be gone");
 });
 
 console.log(`\n${n} checks passed.`);

@@ -35,6 +35,7 @@ written automatically to keep machine state hidden.
 | File | Purpose |
 |------|---------|
 | `feature-queue.md` | Human-readable projection of the registry (shareable with PMs) |
+| `specs/F-XXX.md` + `specs/F-XXX.json` | Per-feature spec: scope + acceptance-criteria checklist — the dev's starting point for Superpowers brainstorming |
 
 **Git-ignored (machine state):**
 
@@ -63,15 +64,24 @@ matching is by content fingerprint — never by position or exact text.
 
 7. **Score features** — the agent supplies four dimension scores (impact, effort, risk, urgency); code computes the priority deterministically as `(impact × urgency × (10 − risk)) ÷ effort`, normalized to 0-100. The model never supplies the number, so the ranking is always reproducible.
 
-8. **Write registry files** — write `features.json`, `project.json`, `questions.json`, `decisions.json`, and append to `journal.jsonl`. The pi-gate validates each write against the schema; if validation fails it prints the exact errors — fix the field and retry.
+8. **Write registry files** — write `features.json`, `project.json`, `questions.json`, `decisions.json`, and append to `journal.jsonl`. The pi-gate validates each write against the schema; if validation fails it prints the exact errors — fix the field and retry. For every feature that gets a spec in step 9, set its `specRef` to `"specs/F-XXX.json"` so drift detection can flag stale specs when the brief moves.
 
-9. **Run the deterministic renderer** — after all registry files are written, run:
-   ```bash
-   node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/render.ts
-   ```
-   `SANDWICH_ROOT` is injected into your context at session start. The script reads the registry, renders `docs/sandwich/feature-queue.md`, and exits 1 with exact errors if the registry is invalid. Fix any errors and re-run.
+9. **Write per-feature specs** — for EVERY active feature (lifecycle not `done`/`rejected`), write `docs/sandwich/specs/F-XXX.json` following the spec schema below. Derive scope and acceptance criteria from the brief only — do NOT invent task breakdowns, estimates, or file lists (that is Superpowers brainstorming's job).
 
-10. **Present recommendation** — top 3 candidates with validation status
+10. **Run the deterministic renderers** — after all registry and spec files are written, run both:
+    ```bash
+    node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/render.ts
+    node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/render-specs.ts
+    ```
+    `SANDWICH_ROOT` is injected into your context at session start. The scripts read the registry and spec JSONs, render `docs/sandwich/feature-queue.md` and `docs/sandwich/specs/F-XXX.md`, and exit 1 with exact errors if anything is invalid. Fix and re-run.
+
+11. **Verify completeness** — run:
+    ```bash
+    node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/verify-complete.ts
+    ```
+    Exit 1 lists every missing or invalid artifact (a feature without a spec, a journal decision missing from decisions.json, a missing rendered file). Fix each listed item and re-run until it prints `✓ /prep output is complete`. /prep is NOT done until this passes.
+
+12. **Present recommendation** — top 3 candidates with validation status, and point the human at the top feature's spec file: "buka `docs/sandwich/specs/F-XXX.md` untuk mulai".
 
 ## Validation layer
 
@@ -305,6 +315,38 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 | `type` | enum | `brief-changed`, `feature-added`, `feature-rescored`, `lifecycle-changed`, `override-set`, `question-answered`, `decision-recorded`, `reconciled`, `gate-passed`, `spec-generated`, `build-completed`, `drift-detected` |
 | `target` | string | Optional. e.g. `"F-001"`, `"Q3"` |
 | `summary` | string | Short description (NOT `details`) |
+
+### docs/sandwich/specs/F-XXX.json — one file per active feature
+
+> Validated by `render-specs.ts` and `verify-complete.ts`. Content only —
+> never include priority, lifecycle, estimates, task lists, or file paths.
+
+```json
+{
+  "featureId": "F-001",
+  "title": "OTP Verification Flow",
+  "module": "auth",
+  "description": "Email verification dengan OTP (valid 15 menit) saat registrasi",
+  "scope": {
+    "inScope": ["Kirim OTP via email saat registrasi", "Validasi OTP 15 menit"],
+    "outOfScope": ["OTP via SMS"]
+  },
+  "acceptanceCriteria": [
+    { "id": "AC1", "text": "User menerima email OTP dalam 60 detik setelah registrasi", "done": false }
+  ],
+  "dependsOn": [],
+  "source": { "file": "prd.md", "lines": "31-33" }
+}
+```
+
+| Field | Rule |
+|-------|------|
+| `featureId` | must match `F-\d{3}` and equal the filename |
+| `scope.inScope` | ≥ 1 item |
+| `scope.outOfScope` | may be empty, never omitted |
+| `acceptanceCriteria` | ≥ 1; ids `AC1`, `AC2`, …; `done` starts `false`; each criterion concrete and testable |
+| `dependsOn` | feature ids, consistent with the registry |
+| `source` | brief file (+ optional `lines`) the feature came from |
 
 ### Common mistakes — DO NOT make these
 
