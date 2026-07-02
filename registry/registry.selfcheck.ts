@@ -220,6 +220,18 @@ check("renderStatus surfaces the actions awaiting a human", () => {
   assert.ok(txt.includes("open client question"), "should surface open questions");
 });
 
+check("renderStatus surfaces completeness audit findings", () => {
+  const txt = renderStatus(
+    speced,
+    initProject("X", now),
+    [],
+    [],
+    { missingSpecs: ["F-004", "F-007"], missingDecisionTargets: ["D2"] }
+  );
+  assert.ok(txt.includes("F-004, F-007"), "should list features missing specs");
+  assert.ok(txt.includes("D2"), "should list unrecorded decisions");
+});
+
 // --- client-questions parsing ---
 const QMD = `# Client Questions
 

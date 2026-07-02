@@ -729,7 +729,8 @@ export function renderStatus(
   features: Feature[],
   project: Project,
   journal: JournalEvent[],
-  questions: Question[]
+  questions: Question[],
+  audit?: { missingSpecs: string[]; missingDecisionTargets: string[] }
 ): string {
   const lc = (f: Feature) => effectiveLifecycle(f);
   const count = (s: string) => features.filter((f) => lc(f) === s).length;
@@ -769,6 +770,14 @@ export function renderStatus(
     todos.push(`Confirm removal of ${orphaned.length} orphaned feature(s): ${orphaned.map((f) => f.id).join(", ")}`);
   if (!project.gates.queueApproved.passed && features.length)
     todos.push("Approve the queue once you're happy with priorities: /prep --approve");
+  if (audit?.missingSpecs.length)
+    todos.push(
+      `Write missing spec file(s): ${audit.missingSpecs.join(", ")} → docs/sandwich/specs/, then run render-specs + verify-complete`
+    );
+  if (audit?.missingDecisionTargets.length)
+    todos.push(
+      `Journal records decision(s) ${audit.missingDecisionTargets.join(", ")} missing from decisions.json — restore them`
+    );
 
   out.push("Awaiting you:");
   if (todos.length === 0) out.push("  ✓ nothing — queue is approved and current");
