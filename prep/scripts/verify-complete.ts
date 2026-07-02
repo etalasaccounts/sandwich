@@ -17,7 +17,9 @@ import { validateFeatureSpec } from "../lib/spec-schema.ts";
 import { getPrepPaths } from "../lib/prep-lib.ts";
 import {
   getRegistryPaths,
+  readProject,
   readFeatures,
+  readQuestions,
   readDecisions,
   readJournal,
 } from "../../registry/registry-io.ts";
@@ -67,6 +69,28 @@ try {
     `✗ ${reg.decisions} is corrupt and could not be parsed: ${err instanceof Error ? err.message : String(err)}`
   );
   process.exit(1);
+}
+
+if (existsSync(reg.project)) {
+  try {
+    readProject(projectRoot);
+  } catch (err) {
+    console.error(
+      `✗ ${reg.project} is corrupt and could not be parsed: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
+}
+
+if (existsSync(reg.questions)) {
+  try {
+    readQuestions(projectRoot);
+  } catch (err) {
+    console.error(
+      `✗ ${reg.questions} is corrupt and could not be parsed: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
 }
 
 const input: CompletenessInput = {

@@ -17,7 +17,8 @@ the project. You do not change anything — this is read-only.
 ## What it reads
 
 Everything from `.sandwich/registry/` — `project.json`, `features.json`,
-`questions.json`, `journal.jsonl`. Nothing is written.
+`questions.json`, `decisions.json`, `journal.jsonl` — plus the spec files under
+`docs/sandwich/specs/`. Nothing is written.
 
 ## Output
 

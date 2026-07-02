@@ -7,7 +7,7 @@
 // Exit 0 on success (one ✓ line per file), exit 1 listing ALL errors.
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { validateFeatureSpec } from "../lib/spec-schema.ts";
 import { renderSpecMd } from "../lib/spec-render.ts";
 import { getPrepPaths } from "../lib/prep-lib.ts";
@@ -52,7 +52,7 @@ for (const file of jsonFiles.sort()) {
   }
   const spec = r.data!;
   const expectedFile = `${spec.featureId}.json`;
-  if (basename(file) !== expectedFile) {
+  if (file !== expectedFile) {
     errors.push(`${file}: featureId is ${spec.featureId} — rename the file to ${expectedFile}`);
     continue;
   }

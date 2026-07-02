@@ -185,5 +185,24 @@ check("featuresMissingSpecs lists active features lacking a valid spec", () => {
   const specs = new Map([["F-001", { jsonValid: false, errors: ["x"], mdExists: true }]]);
   assert.deepEqual(featuresMissingSpecs([feature("F-001"), feature("F-002", "done")], specs), ["F-001"]);
 });
+check("overridden lifecycle (not raw lifecycle) determines whether a spec is required", () => {
+  const overridden: Feature = {
+    ...feature("F-001", "proposed"),
+    overrides: {
+      lifecycle: { value: "done", by: "ria", reason: "shipped out of band", at: "2026-07-02T00:00:00.000Z" },
+    },
+  } as Feature;
+  const specs = new Map<string, { jsonValid: boolean; errors: string[]; mdExists: boolean }>();
+  assert.deepEqual(featuresMissingSpecs([overridden], specs), []);
+  const input = { ...completeInput(), features: [overridden], specs };
+  assert.deepEqual(auditCompleteness(input), []);
+});
+check("rejected features are excluded from spec requirement without an override", () => {
+  const rejected = feature("F-001", "rejected");
+  const specs = new Map<string, { jsonValid: boolean; errors: string[]; mdExists: boolean }>();
+  assert.deepEqual(featuresMissingSpecs([rejected], specs), []);
+  const input = { ...completeInput(), features: [rejected], specs };
+  assert.deepEqual(auditCompleteness(input), []);
+});
 
 console.log(`\n${n} checks passed.`);
