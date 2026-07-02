@@ -47,11 +47,33 @@ if (existsSync(prep.specsDir)) {
   }
 }
 
+let features: ReturnType<typeof readFeatures> | null = null;
+if (existsSync(reg.features)) {
+  try {
+    features = readFeatures(projectRoot);
+  } catch (err) {
+    console.error(
+      `✗ ${reg.features} is corrupt and could not be parsed: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
+}
+
+let decisions: ReturnType<typeof readDecisions>;
+try {
+  decisions = readDecisions(projectRoot);
+} catch (err) {
+  console.error(
+    `✗ ${reg.decisions} is corrupt and could not be parsed: ${err instanceof Error ? err.message : String(err)}`
+  );
+  process.exit(1);
+}
+
 const input: CompletenessInput = {
   projectExists: existsSync(reg.project),
-  features: existsSync(reg.features) ? readFeatures(projectRoot) : null,
+  features,
   questionsExists: existsSync(reg.questions),
-  decisions: readDecisions(projectRoot),
+  decisions,
   journal: readJournal(projectRoot),
   specs,
   featureQueueExists: existsSync(prep.featureQueue),
