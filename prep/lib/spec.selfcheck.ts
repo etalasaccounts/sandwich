@@ -97,4 +97,93 @@ check("renderSpecMd omits :lines when source.lines missing", () => {
   assert.ok(!md.includes("prd.md:undefined"));
 });
 
+// --- completeness audit ---
+import {
+  auditCompleteness,
+  decisionTargetsMissing,
+  featuresMissingSpecs,
+  type CompletenessInput,
+} from "./completeness.ts";
+import type { Feature, Decision, JournalEvent } from "../../registry/registry-lib.ts";
+
+const feature = (id: string, lifecycle: Feature["lifecycle"] = "proposed"): Feature => ({
+  id,
+  fingerprint: `${id.toLowerCase()}-fp`,
+  title: `Feature ${id}`,
+  description: "",
+  type: "feature",
+  module: "core",
+  confidence: "stated",
+  lifecycle,
+  flags: { needsReanalysis: false, stale: false, orphaned: false },
+  provenance: { file: "prd.md", briefHash: "abc" },
+  dependsOn: [],
+  blocks: [],
+  blockedBy: [],
+  overrides: {},
+  commits: [],
+  createdAt: "2026-07-02T00:00:00.000Z",
+  updatedAt: "2026-07-02T00:00:00.000Z",
+} as unknown as Feature);
+
+const completeInput = (): CompletenessInput => ({
+  projectExists: true,
+  features: [feature("F-001"), feature("F-002", "done")],
+  questionsExists: true,
+  decisions: [],
+  journal: [],
+  specs: new Map([["F-001", { jsonValid: true, errors: [], mdExists: true }]]),
+  featureQueueExists: true,
+});
+
+check("audit passes on a complete project", () => {
+  assert.deepEqual(auditCompleteness(completeInput()), []);
+});
+check("audit flags missing registry files", () => {
+  const errs = auditCompleteness({ ...completeInput(), projectExists: false, questionsExists: false, features: null });
+  assert.ok(errs.some((e) => e.includes("project.json")));
+  assert.ok(errs.some((e) => e.includes("features.json")));
+  assert.ok(errs.some((e) => e.includes("questions.json")));
+});
+check("audit flags active feature without spec, ignores done/rejected", () => {
+  const input = completeInput();
+  input.specs = new Map();
+  const errs = auditCompleteness(input);
+  assert.ok(errs.some((e) => e.includes("F-001") && e.includes("spec")));
+  assert.ok(!errs.some((e) => e.includes("F-002")), "done feature needs no spec");
+});
+check("audit flags invalid spec json and missing md separately", () => {
+  const input = completeInput();
+  input.specs = new Map([["F-001", { jsonValid: false, errors: ["title: Required"], mdExists: false }]]);
+  const errs = auditCompleteness(input);
+  assert.ok(errs.some((e) => e.includes("F-001.json") && e.includes("title: Required")));
+  assert.ok(errs.some((e) => e.includes("F-001.md")));
+});
+check("audit flags orphan spec with no matching feature", () => {
+  const input = completeInput();
+  input.specs.set("F-099", { jsonValid: true, errors: [], mdExists: true });
+  const errs = auditCompleteness(input);
+  assert.ok(errs.some((e) => e.includes("F-099") && e.toLowerCase().includes("orphan")));
+});
+check("audit matches journal decisions to decisions.json numerically (D1 vs D-001)", () => {
+  const journal: JournalEvent[] = [
+    { ts: "2026-07-02T00:00:00.000Z", actor: "system", type: "decision-recorded", target: "D1", summary: "x" } as JournalEvent,
+    { ts: "2026-07-02T00:00:00.000Z", actor: "system", type: "decision-recorded", target: "D2", summary: "y" } as JournalEvent,
+  ];
+  const decisions: Decision[] = [
+    { id: "D-001", title: "t", status: "accepted", context: "c", decision: "d", at: "2026-07-02" } as Decision,
+  ];
+  assert.deepEqual(decisionTargetsMissing(journal, decisions), ["D2"]);
+  const input = { ...completeInput(), journal, decisions };
+  assert.ok(auditCompleteness(input).some((e) => e.includes("D2") && e.includes("decisions.json")));
+});
+check("audit flags missing feature-queue.md", () => {
+  const errs = auditCompleteness({ ...completeInput(), featureQueueExists: false });
+  assert.ok(errs.some((e) => e.includes("feature-queue.md")));
+});
+check("featuresMissingSpecs lists active features lacking a valid spec", () => {
+  const specs = new Map([["F-001", { jsonValid: false, errors: ["x"], mdExists: true }]]);
+  assert.deepEqual(featuresMissingSpecs([feature("F-001"), feature("F-002", "done")], specs), ["F-001"]);
+});
+
 console.log(`\n${n} checks passed.`);
