@@ -67,4 +67,34 @@ check("schema allows empty outOfScope and missing source.lines", () => {
   assert.equal(validateFeatureSpec(ok).valid, true);
 });
 
+// --- renderer ---
+import { renderSpecMd } from "./spec-render.ts";
+
+check("renderSpecMd renders header, scope, checklist, and hand-off", () => {
+  const md = renderSpecMd(validSpec(), 27);
+  assert.ok(md.startsWith("# F-001: OTP Verification Flow\n"));
+  assert.ok(md.includes("**Module:** auth · **Priority:** 27/100 · **Depends on:** — · **Source:** prd.md:31-33"));
+  assert.ok(md.includes("- [ ] **AC1** — User menerima email OTP dalam 60 detik"));
+  assert.ok(md.includes("- [x] **AC2** — OTP ditolak setelah 15 menit"));
+  assert.ok(md.includes("**In:**\n- Kirim OTP via email saat registrasi"));
+  assert.ok(md.includes("**Out:**\n- OTP via SMS"));
+  assert.ok(md.includes("superpowers:brainstorming"));
+  assert.ok(md.includes("edit `F-001.json`, bukan file ini"));
+});
+check("renderSpecMd joins dependsOn and handles empty outOfScope", () => {
+  const s = validSpec();
+  s.dependsOn = ["F-002", "F-003"];
+  s.scope.outOfScope = [];
+  const md = renderSpecMd(s, 14);
+  assert.ok(md.includes("**Depends on:** F-002, F-003"));
+  assert.ok(md.includes("**Out:**\n- —"));
+});
+check("renderSpecMd omits :lines when source.lines missing", () => {
+  const s = validSpec();
+  delete (s.source as { lines?: string }).lines;
+  const md = renderSpecMd(s, 5);
+  assert.ok(md.includes("**Source:** prd.md\n") || md.includes("**Source:** prd.md*"), "no dangling colon");
+  assert.ok(!md.includes("prd.md:undefined"));
+});
+
 console.log(`\n${n} checks passed.`);
