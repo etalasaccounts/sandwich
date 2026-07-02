@@ -21,19 +21,23 @@ Everything from `.sandwich/registry/` — `project.json`, `features.json`,
 
 ## Output
 
-`/status` prints:
+Run the deterministic dashboard and print its output verbatim:
 
-- **Gates** — is the brief approved? is the queue approved?
-- **Lifecycle counts** — proposed / queued / speced / building / review / done / deferred / rejected
-- **Flags** — changed (brief moved), stale specs, blocked, orphaned
-- **Awaiting you** — the specific actions only a human can take, in priority order:
-  answer open questions → re-review changed features → regenerate stale specs →
-  confirm orphan removals → approve the queue
-- **Recent activity** — the last few journal events
+```bash
+node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/status.ts
+```
 
-`/status --report` prints a maintenance report (shipped features + activity
-summary) built from the journal — for a maintenance engagement, the journal is
-the billing and SLA evidence.
+For `/status --report`:
+
+```bash
+node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/status.ts --report
+```
+
+The dashboard covers: gates, lifecycle counts, flags, **Awaiting you** (open
+questions, changed features, stale specs, orphans, missing spec files,
+decisions recorded in the journal but absent from decisions.json, queue
+approval), and recent activity. Do not hand-assemble these — the script is
+the single source of the numbers.
 
 ## Commands
 
@@ -45,4 +49,5 @@ the billing and SLA evidence.
 ## Key principle
 
 This is the morning-check command. If `Awaiting you` is empty, the queue is
-approved and current, and you can pick a feature and hand it off to Superpowers brainstorming.
+approved and current, and you can pick a feature and open its
+`docs/sandwich/specs/F-XXX.md` and hand it off to Superpowers brainstorming.
