@@ -147,6 +147,7 @@ Agent output → JSON parse → Schema validate → Confidence check
 | `/prep --impact-only [feature-id]` | Skip prioritization, just analyze impact |
 | `/prep --queue-only` | Update queue without recommendation |
 | `/prep --approve` | Pass the `queueApproved` gate — confirms scores/overrides/removals |
+| `/prep --done F-XXX [commit-sha...]` | Mark a feature done, recording any commit SHAs |
 
 ## Key principles
 
