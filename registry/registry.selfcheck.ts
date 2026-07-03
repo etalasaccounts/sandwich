@@ -16,6 +16,7 @@ import {
   computePriority,
   passGate,
   resetGate,
+  markFeatureDone,
   parseClientQuestions,
   type Feature,
   type ExtractedFeature,
@@ -203,6 +204,20 @@ check("resetGate clears a passed gate and is a no-op when already open", () => {
   assert.equal(resetGate(passed, "queueApproved", now).gates.queueApproved.passed, false);
   const open = initProject("X", now);
   assert.equal(resetGate(open, "queueApproved", now), open); // unchanged reference
+});
+check("markFeatureDone sets lifecycle done and merges commits without duplicates", () => {
+  const before: Feature = { ...speced[0], commits: ["abc111"] };
+  const after = markFeatureDone(before, ["abc111", "def222"], "2026-07-03T00:00:00.000Z");
+  assert.equal(after.lifecycle, "done");
+  assert.deepEqual(after.commits, ["abc111", "def222"]);
+  assert.equal(after.updatedAt, "2026-07-03T00:00:00.000Z");
+  assert.equal(before.lifecycle, "speced", "input feature must not be mutated");
+});
+check("markFeatureDone with no commits leaves commits array untouched", () => {
+  const before: Feature = { ...speced[0], commits: ["abc111"], lifecycle: "queued" };
+  const after = markFeatureDone(before, [], "2026-07-03T00:00:00.000Z");
+  assert.deepEqual(after.commits, ["abc111"]);
+  assert.equal(after.lifecycle, "done");
 });
 
 // --- status projection ---
