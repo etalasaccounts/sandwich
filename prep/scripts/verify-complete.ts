@@ -45,6 +45,7 @@ if (existsSync(prep.specsDir)) {
       jsonValid,
       errors,
       mdExists: existsSync(join(prep.specsDir, `${id}.md`)),
+      allCriteriaDone: false,
     });
   }
 }
