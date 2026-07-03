@@ -241,10 +241,12 @@ check("renderStatus surfaces completeness audit findings", () => {
     initProject("X", now),
     [],
     [],
-    { missingSpecs: ["F-004", "F-007"], missingDecisionTargets: ["D2"] }
+    { missingSpecs: ["F-004", "F-007"], missingDecisionTargets: ["D2"], readyToMarkDone: ["F-009"] }
   );
   assert.ok(txt.includes("F-004, F-007"), "should list features missing specs");
   assert.ok(txt.includes("D2"), "should list unrecorded decisions");
+  assert.ok(txt.includes("F-009"), "should list features ready to mark done");
+  assert.ok(txt.includes("/prep --done"), "should prompt the command to close it out");
 });
 
 // --- client-questions parsing ---

@@ -730,7 +730,7 @@ export function renderStatus(
   project: Project,
   journal: JournalEvent[],
   questions: Question[],
-  audit?: { missingSpecs: string[]; missingDecisionTargets: string[] }
+  audit?: { missingSpecs: string[]; missingDecisionTargets: string[]; readyToMarkDone: string[] }
 ): string {
   const lc = (f: Feature) => effectiveLifecycle(f);
   const count = (s: string) => features.filter((f) => lc(f) === s).length;
@@ -768,6 +768,10 @@ export function renderStatus(
     todos.push(`Re-run Superpowers brainstorming for ${stale.length} stale spec(s): ${stale.map((f) => f.id).join(", ")}`);
   if (orphaned.length)
     todos.push(`Confirm removal of ${orphaned.length} orphaned feature(s): ${orphaned.map((f) => f.id).join(", ")}`);
+  if (audit?.readyToMarkDone.length)
+    todos.push(
+      `Confirm & mark done — every AC checked: ${audit.readyToMarkDone.join(", ")} → /prep --done <id>`
+    );
   if (!project.gates.queueApproved.passed && features.length)
     todos.push("Approve the queue once you're happy with priorities: /prep --approve");
   if (audit?.missingSpecs.length)
