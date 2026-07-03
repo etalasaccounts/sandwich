@@ -146,6 +146,7 @@ Agent output → JSON parse → Schema validate → Confidence check
 | `/prep [feature-id]` | Deep impact analysis for specific feature |
 | `/prep --impact-only [feature-id]` | Skip prioritization, just analyze impact |
 | `/prep --queue-only` | Update queue without recommendation |
+| `/prep --approve` | Pass the `queueApproved` gate — confirms scores/overrides/removals |
 
 ## Key principles
 
