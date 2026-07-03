@@ -79,6 +79,7 @@ check("renderSpecMd renders header, scope, checklist, and hand-off", () => {
   assert.ok(md.includes("**In:**\n- Kirim OTP via email saat registrasi"));
   assert.ok(md.includes("**Out:**\n- OTP via SMS"));
   assert.ok(md.includes("superpowers:brainstorming"));
+  assert.ok(md.includes("/prep --done F-001"), "footer should tell the implementer how to close out the feature");
   assert.ok(md.includes("edit `F-001.json`, bukan file ini"));
 });
 check("renderSpecMd joins dependsOn and handles empty outOfScope", () => {
