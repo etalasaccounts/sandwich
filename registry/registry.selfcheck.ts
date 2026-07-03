@@ -247,6 +247,7 @@ check("renderStatus surfaces completeness audit findings", () => {
   assert.ok(txt.includes("D2"), "should list unrecorded decisions");
   assert.ok(txt.includes("F-009"), "should list features ready to mark done");
   assert.ok(txt.includes("/prep --done"), "should prompt the command to close it out");
+  assert.ok(txt.includes("/prep --done F-009"), "should render a runnable command with the real feature id, not a <id> placeholder");
 });
 
 // --- client-questions parsing ---

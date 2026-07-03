@@ -770,7 +770,7 @@ export function renderStatus(
     todos.push(`Confirm removal of ${orphaned.length} orphaned feature(s): ${orphaned.map((f) => f.id).join(", ")}`);
   if (audit?.readyToMarkDone.length)
     todos.push(
-      `Confirm & mark done — every AC checked: ${audit.readyToMarkDone.join(", ")} → /prep --done <id>`
+      `Confirm & mark done — every AC checked: ${audit.readyToMarkDone.join(", ")} → /prep --done ${audit.readyToMarkDone[0]}`
     );
   if (!project.gates.queueApproved.passed && features.length)
     todos.push("Approve the queue once you're happy with priorities: /prep --approve");

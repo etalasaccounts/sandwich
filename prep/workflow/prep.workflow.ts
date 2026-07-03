@@ -103,7 +103,7 @@ const approveQueue = argv.includes("--approve");
 const doneFlagIdx = argv.indexOf("--done");
 const markDone = doneFlagIdx !== -1;
 const doneCommits = markDone
-  ? argv.slice(doneFlagIdx + 1).filter((a) => a !== featureIdArg && !a.startsWith("--"))
+  ? argv.slice(doneFlagIdx + 1).filter((a) => a !== featureIdArg && !a.startsWith("--") && !a.startsWith("F-"))
   : [];
 
 // ==================== PHASE 1: READ ====================
