@@ -17,6 +17,7 @@ import {
   passGate,
   resetGate,
   markFeatureDone,
+  isEligible,
   parseClientQuestions,
   type Feature,
   type ExtractedFeature,
@@ -218,6 +219,40 @@ check("markFeatureDone with no commits leaves commits array untouched", () => {
   const after = markFeatureDone(before, [], "2026-07-03T00:00:00.000Z");
   assert.deepEqual(after.commits, ["abc111"]);
   assert.equal(after.lifecycle, "done");
+});
+
+// --- dependency eligibility ---
+check("isEligible is true for a feature with no dependencies", () => {
+  const f: Feature = { ...speced[0], id: "F-010", dependsOn: [] };
+  assert.equal(isEligible(f, new Map([[f.id, f]])), true);
+});
+check("isEligible is true when every dependency is done", () => {
+  const dep: Feature = { ...speced[0], id: "F-011", lifecycle: "done" };
+  const f: Feature = { ...speced[0], id: "F-012", dependsOn: ["F-011"] };
+  const byId = new Map([[dep.id, dep], [f.id, f]]);
+  assert.equal(isEligible(f, byId), true);
+});
+check("isEligible is false when a dependency isn't done", () => {
+  const dep: Feature = { ...speced[0], id: "F-013", lifecycle: "queued" };
+  const f: Feature = { ...speced[0], id: "F-014", dependsOn: ["F-013"] };
+  const byId = new Map([[dep.id, dep], [f.id, f]]);
+  assert.equal(isEligible(f, byId), false);
+});
+check("isEligible is false for a dangling dependency reference", () => {
+  const f: Feature = { ...speced[0], id: "F-015", dependsOn: ["F-999"] };
+  const byId = new Map([[f.id, f]]);
+  assert.equal(isEligible(f, byId), false);
+});
+check("isEligible respects an overridden lifecycle on the dependency", () => {
+  const dep: Feature = {
+    ...speced[0],
+    id: "F-016",
+    lifecycle: "queued",
+    overrides: { lifecycle: { value: "done", by: "ria", reason: "shipped out of band", at: now } },
+  };
+  const f: Feature = { ...speced[0], id: "F-017", dependsOn: ["F-016"] };
+  const byId = new Map([[dep.id, dep], [f.id, f]]);
+  assert.equal(isEligible(f, byId), true);
 });
 
 // --- status projection ---
@@ -567,6 +602,29 @@ check("renderFeatureQueue links specs and drops the Details section", () => {
   assert.ok(md.includes("| Spec |"), "queue table should have a Spec column");
   assert.ok(md.includes(`[specs/${speced[0].id}.md](specs/${speced[0].id}.md)`), "row should link the spec file");
   assert.ok(!md.includes("## Details"), "inline Details section should be gone");
+});
+
+check("renderFeatureQueue splits Eligible now vs Blocked by dependency", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sandwich-queue-elig-"));
+  const done: Feature = { ...speced[0], id: "F-020", title: "Done dep", lifecycle: "done" };
+  const eligibleFeature: Feature = { ...speced[0], id: "F-021", title: "Ready to build", dependsOn: ["F-020"] };
+  const blockedFeature: Feature = { ...speced[0], id: "F-022", title: "Waiting", dependsOn: ["F-021"] };
+  renderFeatureQueue(dir, [done, eligibleFeature, blockedFeature], initProject("X", now));
+  const md = readFileSync(join(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
+  assert.ok(md.includes("### Eligible now"), "should have an Eligible now section");
+  assert.ok(md.includes("### Blocked by dependency"), "should have a Blocked by dependency section");
+  const eligibleSection = md.split("### Blocked by dependency")[0];
+  assert.ok(eligibleSection.includes("F-021"), "F-021 should be listed as eligible");
+  assert.ok(!eligibleSection.includes("F-022"), "F-022 should not appear in the eligible section");
+  const blockedSection = md.split("### Blocked by dependency")[1];
+  assert.ok(blockedSection.includes("F-022"), "F-022 should be listed as blocked");
+  assert.ok(blockedSection.includes("F-021"), "blocked row should say what it's waiting on (F-021)");
+});
+check("renderFeatureQueue omits the Blocked by dependency section when nothing is blocked", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sandwich-queue-noblock-"));
+  renderFeatureQueue(dir, speced, initProject("X", now));
+  const md = readFileSync(join(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
+  assert.ok(!md.includes("### Blocked by dependency"), "no blocked section when nothing is blocked");
 });
 
 console.log(`\n${n} checks passed.`);

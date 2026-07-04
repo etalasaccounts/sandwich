@@ -46,6 +46,7 @@ import {
   parseClientQuestions,
   passGate,
   markFeatureDone,
+  isEligible,
   type Feature as RegistryFeature,
   type ExtractedFeature,
   type RippleReport,
@@ -454,8 +455,12 @@ const openCount = questions.filter((q) => q.status === "open").length;
 log(`Questions: ${questions.length} parsed (${openCount} open) | blocking ${openByFeature.size} feature(s)`);
 
 // Top unblocked candidates, drawn from features still in the brief.
+// Uses the full registryFeatures set (not currentFeatures()) to resolve
+// dependency lifecycle, so a dependency dropped from the brief but already
+// shipped (or not) still resolves correctly.
+const byId = new Map(registryFeatures.map((f) => [f.id, f]));
 const topUnblocked = currentFeatures()
-  .filter((f) => f.blockedBy.length === 0)
+  .filter((f) => f.blockedBy.length === 0 && isEligible(f, byId))
   .sort((a, b) => effectivePriority(b) - effectivePriority(a))
   .slice(0, 3);
 
