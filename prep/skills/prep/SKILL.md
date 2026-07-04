@@ -224,7 +224,7 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
     "provenance": { "file": "prd.md", "lines": "45-52", "briefHash": "a3f2c1d8" },
     "dependsOn": [],
     "blocks": ["F-003", "F-007"],
-    "blockedBy": [],
+    "blockedBy": ["Q3"],
     "score": {
       "impact": { "score": 9, "factors": ["Unblocks 5 downstream features"] },
       "effort": { "score": 5, "factors": ["OAuth integration"] },
@@ -234,7 +234,6 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
       "formulaVersion": 1
     },
     "overrides": {},
-    "specRef": null,
     "commits": [],
     "createdAt": "2026-06-29T12:00:00.000Z",
     "updatedAt": "2026-06-29T12:00:00.000Z"
@@ -253,6 +252,9 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 | `score.priority` | number | Computed: `(impact.score × urgency.factor × (10 − risk.score)) ÷ effort.score`, 0–100 |
 | `score.formulaVersion` | number | Always `1` |
 | `fingerprint` | string | Lowercase, punctuation-stripped: `title + "\|" + module` |
+| `dependsOn` / `blocks` | string[] | **Feature** ids (`F-XXX`) this feature depends on / blocks |
+| `blockedBy` | string[] | **Question** ids (`Q1`, `Q2`, ...) gating this feature — see `questions.json`. NOT feature ids. |
+| `specRef` | string, optional | `"specs/F-XXX.json"` once a spec exists. **Omit the field entirely** until then — do not set it to `null` (the schema rejects `null`, only `string` or absent) |
 
 ### project.json — single object
 
@@ -357,7 +359,8 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 | `{ "features": [...] }` | bare array `[...]` |
 | `{ "questions": [...] }` | bare array `[...]` |
 | `"lifecycle": "ready"` | `"lifecycle": "proposed"` |
-| `"lifecycle": "blocked"` | `"lifecycle": "queued"` + `"blockedBy": [...]` |
+| `"lifecycle": "blocked"` | `"lifecycle": "queued"` + `"blockedBy": ["Q1", ...]` (question ids) |
+| `"blockedBy": ["F-002"]` | `"blockedBy": ["Q1"]` — blockedBy holds question ids, not feature ids (`dependsOn`/`blocks` are for feature ids) |
 | `"question": "..."` | `"text": "..."` |
 | `"blocksFeature": [...]` | `"unblocks": [...]` |
 | `"timestamp": "..."` | `"ts": "..."` |
@@ -365,7 +368,7 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 | `"source": "prd.md"` | `"provenance": { "file": "prd.md", "briefHash": "..." }` |
 | `"status": "queued"` | `"lifecycle": "queued"` |
 | `"id": "Q-001"` | `"id": "Q1"` |
-| `"specLink": null` | `"specRef": null` |
+| `"specLink": null` or `"specRef": null` | omit `specRef` entirely until a spec exists (schema rejects `null`) |
 | `"humanOverride": null` | `"overrides": {}` |
 
 ## Style rules
