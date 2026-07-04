@@ -24,6 +24,13 @@ Everything from `.sandwich/registry/` — `project.json`, `features.json`,
 
 Run the deterministic dashboard and print its output verbatim:
 
+`SANDWICH_ROOT` is injected into your context at session start as plain
+text (e.g. `SANDWICH_ROOT=/path/to/plugin`) — it is NOT a live shell
+environment variable, and Bash tool calls do not share shell state with
+each other. Read the path from your context and substitute it literally
+in place of `$SANDWICH_ROOT` below before running — do not rely on
+`$SANDWICH_ROOT` to shell-expand, since nothing exported it.
+
 ```bash
 node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/status.ts
 ```
