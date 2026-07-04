@@ -691,3 +691,14 @@ export function effectiveLifecycle(f: Feature): Lifecycle {
   if (f.overrides.lifecycle) return f.overrides.lifecycle.value as Lifecycle;
   return f.lifecycle;
 }
+
+/** Can this feature be built today? Every dependsOn id must resolve to a
+ *  feature whose effective lifecycle is "done". A dangling reference (id
+ *  not in the registry) fails closed — treated as not eligible, so a data
+ *  problem surfaces as "blocked" rather than silently passing. */
+export function isEligible(feature: Feature, byId: Map<string, Feature>): boolean {
+  return feature.dependsOn.every((id) => {
+    const dep = byId.get(id);
+    return dep !== undefined && effectiveLifecycle(dep) === "done";
+  });
+}

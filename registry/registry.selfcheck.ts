@@ -17,6 +17,7 @@ import {
   passGate,
   resetGate,
   markFeatureDone,
+  isEligible,
   parseClientQuestions,
   type Feature,
   type ExtractedFeature,
@@ -218,6 +219,40 @@ check("markFeatureDone with no commits leaves commits array untouched", () => {
   const after = markFeatureDone(before, [], "2026-07-03T00:00:00.000Z");
   assert.deepEqual(after.commits, ["abc111"]);
   assert.equal(after.lifecycle, "done");
+});
+
+// --- dependency eligibility ---
+check("isEligible is true for a feature with no dependencies", () => {
+  const f: Feature = { ...speced[0], id: "F-010", dependsOn: [] };
+  assert.equal(isEligible(f, new Map([[f.id, f]])), true);
+});
+check("isEligible is true when every dependency is done", () => {
+  const dep: Feature = { ...speced[0], id: "F-011", lifecycle: "done" };
+  const f: Feature = { ...speced[0], id: "F-012", dependsOn: ["F-011"] };
+  const byId = new Map([[dep.id, dep], [f.id, f]]);
+  assert.equal(isEligible(f, byId), true);
+});
+check("isEligible is false when a dependency isn't done", () => {
+  const dep: Feature = { ...speced[0], id: "F-013", lifecycle: "queued" };
+  const f: Feature = { ...speced[0], id: "F-014", dependsOn: ["F-013"] };
+  const byId = new Map([[dep.id, dep], [f.id, f]]);
+  assert.equal(isEligible(f, byId), false);
+});
+check("isEligible is false for a dangling dependency reference", () => {
+  const f: Feature = { ...speced[0], id: "F-015", dependsOn: ["F-999"] };
+  const byId = new Map([[f.id, f]]);
+  assert.equal(isEligible(f, byId), false);
+});
+check("isEligible respects an overridden lifecycle on the dependency", () => {
+  const dep: Feature = {
+    ...speced[0],
+    id: "F-016",
+    lifecycle: "queued",
+    overrides: { lifecycle: { value: "done", by: "ria", reason: "shipped out of band", at: now } },
+  };
+  const f: Feature = { ...speced[0], id: "F-017", dependsOn: ["F-016"] };
+  const byId = new Map([[dep.id, dep], [f.id, f]]);
+  assert.equal(isEligible(f, byId), true);
 });
 
 // --- status projection ---
