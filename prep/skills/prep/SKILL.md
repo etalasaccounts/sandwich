@@ -73,7 +73,15 @@ matching is by content fingerprint — never by position or exact text.
     node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/render.ts
     node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/render-specs.ts
     ```
-    `SANDWICH_ROOT` is injected into your context at session start. The scripts read the registry and spec JSONs, render `docs/sandwich/feature-queue.md` and `docs/sandwich/specs/F-XXX.md`, and exit 1 with exact errors if anything is invalid. Fix and re-run.
+    `SANDWICH_ROOT` is injected into your context at session start as plain
+    text (e.g. `SANDWICH_ROOT=/path/to/plugin`) — it is NOT a live shell
+    environment variable, and Bash tool calls do not share shell state with
+    each other. Read the path from your context and substitute it literally
+    in place of `$SANDWICH_ROOT` above before running — do not rely on
+    `$SANDWICH_ROOT` to shell-expand, since nothing exported it. The scripts
+    read the registry and spec JSONs, render `docs/sandwich/feature-queue.md`
+    and `docs/sandwich/specs/F-XXX.md`, and exit 1 with exact errors if
+    anything is invalid. Fix and re-run.
 
 11. **Verify completeness** — run:
     ```bash

@@ -53,7 +53,12 @@ You detect the right mode — the user doesn't need to specify:
       ```bash
       node --experimental-strip-types $SANDWICH_ROOT/order/scripts/render.ts <kind>
       ```
-      `SANDWICH_ROOT` is injected into your context at session start.
+      `SANDWICH_ROOT` is injected into your context at session start as
+      plain text (e.g. `SANDWICH_ROOT=/path/to/plugin`) — it is NOT a live
+      shell environment variable, and Bash tool calls do not share shell
+      state with each other. Read the path from your context and substitute
+      it literally in place of `$SANDWICH_ROOT` above before running — do
+      not rely on `$SANDWICH_ROOT` to shell-expand, since nothing exported it.
 
    The script validates your JSON and writes the `.md`. If validation fails, it prints the exact errors — fix your JSON and re-run.
 
