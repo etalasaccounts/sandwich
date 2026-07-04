@@ -604,4 +604,27 @@ check("renderFeatureQueue links specs and drops the Details section", () => {
   assert.ok(!md.includes("## Details"), "inline Details section should be gone");
 });
 
+check("renderFeatureQueue splits Eligible now vs Blocked by dependency", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sandwich-queue-elig-"));
+  const done: Feature = { ...speced[0], id: "F-020", title: "Done dep", lifecycle: "done" };
+  const eligibleFeature: Feature = { ...speced[0], id: "F-021", title: "Ready to build", dependsOn: ["F-020"] };
+  const blockedFeature: Feature = { ...speced[0], id: "F-022", title: "Waiting", dependsOn: ["F-021"] };
+  renderFeatureQueue(dir, [done, eligibleFeature, blockedFeature], initProject("X", now));
+  const md = readFileSync(join(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
+  assert.ok(md.includes("### Eligible now"), "should have an Eligible now section");
+  assert.ok(md.includes("### Blocked by dependency"), "should have a Blocked by dependency section");
+  const eligibleSection = md.split("### Blocked by dependency")[0];
+  assert.ok(eligibleSection.includes("F-021"), "F-021 should be listed as eligible");
+  assert.ok(!eligibleSection.includes("F-022"), "F-022 should not appear in the eligible section");
+  const blockedSection = md.split("### Blocked by dependency")[1];
+  assert.ok(blockedSection.includes("F-022"), "F-022 should be listed as blocked");
+  assert.ok(blockedSection.includes("F-021"), "blocked row should say what it's waiting on (F-021)");
+});
+check("renderFeatureQueue omits the Blocked by dependency section when nothing is blocked", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sandwich-queue-noblock-"));
+  renderFeatureQueue(dir, speced, initProject("X", now));
+  const md = readFileSync(join(dir, "docs", "sandwich", "feature-queue.md"), "utf8");
+  assert.ok(!md.includes("### Blocked by dependency"), "no blocked section when nothing is blocked");
+});
+
 console.log(`\n${n} checks passed.`);

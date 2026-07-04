@@ -32,6 +32,7 @@ import {
   PRIORITY_FORMULA_VERSION,
   effectivePriority,
   effectiveLifecycle,
+  isEligible,
   type Project,
   type Feature,
   type Question,
@@ -654,10 +655,13 @@ export function renderFeatureQueue(
   const byId = new Map(features.map((f) => [f.id, f]));
   const label = (id: string) => `${id} (${byId.get(id)?.title ?? "?"})`;
 
-  // Active features sorted by effective priority (human pins win).
-  const active = features
-    .filter((f) => !["done", "rejected"].includes(effectiveLifecycle(f)))
+  // Active features split into what's buildable today vs. waiting on a
+  // dependency — score alone doesn't answer "can I build this now?".
+  const active = features.filter((f) => !["done", "rejected"].includes(effectiveLifecycle(f)));
+  const eligible = active
+    .filter((f) => isEligible(f, byId))
     .sort((a, b) => effectivePriority(b) - effectivePriority(a));
+  const blockedByDep = active.filter((f) => !isEligible(f, byId));
 
   const lines: string[] = [
     `# Feature Queue — ${project.name}`,
@@ -695,15 +699,34 @@ export function renderFeatureQueue(
   }
 
   lines.push("## Queue", "");
-  lines.push("| # | ID | Title | Module | Priority | Status | Spec |");
-  lines.push("|---|----|-------|--------|----------|--------|------|");
-  active.forEach((f, i) => {
-    const pin = f.overrides.priority ? "📌" : "";
-    lines.push(
-      `| ${i + 1} | ${f.id} | ${f.title} | ${f.module} | ${pin}${effectivePriority(f)} | ${displayStatus(f)} | [specs/${f.id}.md](specs/${f.id}.md) |`
-    );
-  });
-  lines.push("", "---", "");
+  lines.push("### Eligible now", "");
+  if (eligible.length === 0) {
+    lines.push("_(none — see below)_", "");
+  } else {
+    lines.push("| # | ID | Title | Module | Priority | Status | Spec |");
+    lines.push("|---|----|-------|--------|----------|--------|------|");
+    eligible.forEach((f, i) => {
+      const pin = f.overrides.priority ? "📌" : "";
+      lines.push(
+        `| ${i + 1} | ${f.id} | ${f.title} | ${f.module} | ${pin}${effectivePriority(f)} | ${displayStatus(f)} | [specs/${f.id}.md](specs/${f.id}.md) |`
+      );
+    });
+    lines.push("");
+  }
+  if (blockedByDep.length > 0) {
+    lines.push("### Blocked by dependency", "");
+    lines.push("| ID | Title | Waiting on | Spec |");
+    lines.push("|----|-------|------------|------|");
+    blockedByDep.forEach((f) => {
+      const waitingOn = f.dependsOn
+        .filter((id) => !byId.has(id) || effectiveLifecycle(byId.get(id)!) !== "done")
+        .map((id) => label(id))
+        .join(", ");
+      lines.push(`| ${f.id} | ${f.title} | ${waitingOn} | [specs/${f.id}.md](specs/${f.id}.md) |`);
+    });
+    lines.push("");
+  }
+  lines.push("---", "");
 
   // Shipped / rejected history, kept for the record.
   const done = features.filter((f) => effectiveLifecycle(f) === "done");
