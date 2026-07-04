@@ -692,13 +692,19 @@ export function effectiveLifecycle(f: Feature): Lifecycle {
   return f.lifecycle;
 }
 
+/** Is this dependency id resolved (present in the registry and done)? The
+ *  single definition of "satisfied dependency" — isEligible and the
+ *  feature-queue "waiting on" list both call this so the definition can
+ *  only change in one place. */
+export function isDependencyDone(id: string, byId: Map<string, Feature>): boolean {
+  const dep = byId.get(id);
+  return dep !== undefined && effectiveLifecycle(dep) === "done";
+}
+
 /** Can this feature be built today? Every dependsOn id must resolve to a
  *  feature whose effective lifecycle is "done". A dangling reference (id
  *  not in the registry) fails closed — treated as not eligible, so a data
  *  problem surfaces as "blocked" rather than silently passing. */
 export function isEligible(feature: Feature, byId: Map<string, Feature>): boolean {
-  return feature.dependsOn.every((id) => {
-    const dep = byId.get(id);
-    return dep !== undefined && effectiveLifecycle(dep) === "done";
-  });
+  return feature.dependsOn.every((id) => isDependencyDone(id, byId));
 }

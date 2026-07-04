@@ -33,6 +33,7 @@ import {
   effectivePriority,
   effectiveLifecycle,
   isEligible,
+  isDependencyDone,
   type Project,
   type Feature,
   type Question,
@@ -658,10 +659,12 @@ export function renderFeatureQueue(
   // Active features split into what's buildable today vs. waiting on a
   // dependency — score alone doesn't answer "can I build this now?".
   const active = features.filter((f) => !["done", "rejected"].includes(effectiveLifecycle(f)));
-  const eligible = active
-    .filter((f) => isEligible(f, byId))
-    .sort((a, b) => effectivePriority(b) - effectivePriority(a));
-  const blockedByDep = active.filter((f) => !isEligible(f, byId));
+  const eligible: Feature[] = [];
+  const blockedByDep: Feature[] = [];
+  for (const f of active) {
+    (isEligible(f, byId) ? eligible : blockedByDep).push(f);
+  }
+  eligible.sort((a, b) => effectivePriority(b) - effectivePriority(a));
 
   const lines: string[] = [
     `# Feature Queue — ${project.name}`,
@@ -719,7 +722,7 @@ export function renderFeatureQueue(
     lines.push("|----|-------|------------|------|");
     blockedByDep.forEach((f) => {
       const waitingOn = f.dependsOn
-        .filter((id) => !byId.has(id) || effectiveLifecycle(byId.get(id)!) !== "done")
+        .filter((id) => !isDependencyDone(id, byId))
         .map((id) => label(id))
         .join(", ");
       lines.push(`| ${f.id} | ${f.title} | ${waitingOn} | [specs/${f.id}.md](specs/${f.id}.md) |`);
