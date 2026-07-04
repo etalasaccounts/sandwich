@@ -14,6 +14,7 @@ export interface SpecPresence {
   jsonValid: boolean;
   errors: string[];
   mdExists: boolean;
+  allCriteriaDone: boolean;
 }
 
 export interface CompletenessInput {
@@ -59,6 +60,19 @@ export function featuresMissingSpecs(
   return features
     .filter(isActive)
     .filter((f) => !(specs.get(f.id)?.jsonValid))
+    .map((f) => f.id);
+}
+
+/** Active features whose spec shows every acceptance criterion checked, but
+ *  whose registry lifecycle isn't "done" yet — the signal /status surfaces
+ *  so a human can confirm and run /prep --done. */
+export function featuresReadyToMarkDone(
+  features: Feature[],
+  specs: Map<string, SpecPresence>
+): string[] {
+  return features
+    .filter(isActive)
+    .filter((f) => specs.get(f.id)?.allCriteriaDone === true)
     .map((f) => f.id);
 }
 

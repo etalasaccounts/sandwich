@@ -129,6 +129,8 @@ Full maintenance report — useful for billing evidence and SLA logs.
 | `/order` | Generate or update brief artifacts (auto-detects mode) |
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
+| `/prep --approve` | Approve the queue (passes the `queueApproved` gate) |
+| `/prep --done F-001 [sha...]` | Mark a feature done and record its commits |
 | `/prep F-001` | Deep impact analysis for a specific feature |
 | `/status` | Morning-check dashboard |
 | `/status --report` | Full maintenance/SLA report from journal |

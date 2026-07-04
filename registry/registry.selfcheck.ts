@@ -16,6 +16,7 @@ import {
   computePriority,
   passGate,
   resetGate,
+  markFeatureDone,
   parseClientQuestions,
   type Feature,
   type ExtractedFeature,
@@ -204,6 +205,20 @@ check("resetGate clears a passed gate and is a no-op when already open", () => {
   const open = initProject("X", now);
   assert.equal(resetGate(open, "queueApproved", now), open); // unchanged reference
 });
+check("markFeatureDone sets lifecycle done and merges commits without duplicates", () => {
+  const before: Feature = { ...speced[0], commits: ["abc111"] };
+  const after = markFeatureDone(before, ["abc111", "def222"], "2026-07-03T00:00:00.000Z");
+  assert.equal(after.lifecycle, "done");
+  assert.deepEqual(after.commits, ["abc111", "def222"]);
+  assert.equal(after.updatedAt, "2026-07-03T00:00:00.000Z");
+  assert.equal(before.lifecycle, "speced", "input feature must not be mutated");
+});
+check("markFeatureDone with no commits leaves commits array untouched", () => {
+  const before: Feature = { ...speced[0], commits: ["abc111"], lifecycle: "queued" };
+  const after = markFeatureDone(before, [], "2026-07-03T00:00:00.000Z");
+  assert.deepEqual(after.commits, ["abc111"]);
+  assert.equal(after.lifecycle, "done");
+});
 
 // --- status projection ---
 check("renderStatus surfaces the actions awaiting a human", () => {
@@ -226,10 +241,13 @@ check("renderStatus surfaces completeness audit findings", () => {
     initProject("X", now),
     [],
     [],
-    { missingSpecs: ["F-004", "F-007"], missingDecisionTargets: ["D2"] }
+    { missingSpecs: ["F-004", "F-007"], missingDecisionTargets: ["D2"], readyToMarkDone: ["F-009"] }
   );
   assert.ok(txt.includes("F-004, F-007"), "should list features missing specs");
   assert.ok(txt.includes("D2"), "should list unrecorded decisions");
+  assert.ok(txt.includes("F-009"), "should list features ready to mark done");
+  assert.ok(txt.includes("/prep --done"), "should prompt the command to close it out");
+  assert.ok(txt.includes("/prep --done F-009"), "should render a runnable command with the real feature id, not a <id> placeholder");
 });
 
 // --- client-questions parsing ---

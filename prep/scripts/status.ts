@@ -8,6 +8,7 @@ import { join, resolve } from "node:path";
 import {
   featuresMissingSpecs,
   decisionTargetsMissing,
+  featuresReadyToMarkDone,
   type SpecPresence,
 } from "../lib/completeness.ts";
 import { validateFeatureSpec } from "../lib/spec-schema.ts";
@@ -71,10 +72,13 @@ if (existsSync(prep.specsDir)) {
   for (const file of readdirSync(prep.specsDir).filter((f) => f.endsWith(".json"))) {
     const id = file.replace(/\.json$/, "");
     let jsonValid = false;
+    let allCriteriaDone = false;
     try {
-      jsonValid = validateFeatureSpec(JSON.parse(readFileSync(join(prep.specsDir, file), "utf8"))).valid;
+      const r = validateFeatureSpec(JSON.parse(readFileSync(join(prep.specsDir, file), "utf8")));
+      jsonValid = r.valid;
+      allCriteriaDone = r.valid && (r.data?.acceptanceCriteria.length ?? 0) > 0 && (r.data?.acceptanceCriteria.every((ac) => ac.done) ?? false);
     } catch {}
-    specs.set(id, { jsonValid, errors: [], mdExists: existsSync(join(prep.specsDir, `${id}.md`)) });
+    specs.set(id, { jsonValid, errors: [], mdExists: existsSync(join(prep.specsDir, `${id}.md`)), allCriteriaDone });
   }
 }
 
@@ -82,5 +86,6 @@ console.log(
   renderStatus(features, project, journal, questions, {
     missingSpecs: featuresMissingSpecs(features, specs),
     missingDecisionTargets: decisionTargetsMissing(journal, decisions),
+    readyToMarkDone: featuresReadyToMarkDone(features, specs),
   })
 );

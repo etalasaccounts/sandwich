@@ -79,6 +79,7 @@ check("renderSpecMd renders header, scope, checklist, and hand-off", () => {
   assert.ok(md.includes("**In:**\n- Kirim OTP via email saat registrasi"));
   assert.ok(md.includes("**Out:**\n- OTP via SMS"));
   assert.ok(md.includes("superpowers:brainstorming"));
+  assert.ok(md.includes("/prep --done F-001"), "footer should tell the implementer how to close out the feature");
   assert.ok(md.includes("edit `F-001.json`, bukan file ini"));
 });
 check("renderSpecMd joins dependsOn and handles empty outOfScope", () => {
@@ -102,6 +103,7 @@ import {
   auditCompleteness,
   decisionTargetsMissing,
   featuresMissingSpecs,
+  featuresReadyToMarkDone,
   type CompletenessInput,
 } from "./completeness.ts";
 import type { Feature, Decision, JournalEvent } from "../../registry/registry-lib.ts";
@@ -132,7 +134,7 @@ const completeInput = (): CompletenessInput => ({
   questionsExists: true,
   decisions: [],
   journal: [],
-  specs: new Map([["F-001", { jsonValid: true, errors: [], mdExists: true }]]),
+  specs: new Map([["F-001", { jsonValid: true, errors: [], mdExists: true, allCriteriaDone: false }]]),
   featureQueueExists: true,
 });
 
@@ -154,14 +156,14 @@ check("audit flags active feature without spec, ignores done/rejected", () => {
 });
 check("audit flags invalid spec json and missing md separately", () => {
   const input = completeInput();
-  input.specs = new Map([["F-001", { jsonValid: false, errors: ["title: Required"], mdExists: false }]]);
+  input.specs = new Map([["F-001", { jsonValid: false, errors: ["title: Required"], mdExists: false, allCriteriaDone: false }]]);
   const errs = auditCompleteness(input);
   assert.ok(errs.some((e) => e.includes("F-001.json") && e.includes("title: Required")));
   assert.ok(errs.some((e) => e.includes("F-001.md")));
 });
 check("audit flags orphan spec with no matching feature", () => {
   const input = completeInput();
-  input.specs.set("F-099", { jsonValid: true, errors: [], mdExists: true });
+  input.specs.set("F-099", { jsonValid: true, errors: [], mdExists: true, allCriteriaDone: false });
   const errs = auditCompleteness(input);
   assert.ok(errs.some((e) => e.includes("F-099") && e.toLowerCase().includes("orphan")));
 });
@@ -182,8 +184,25 @@ check("audit flags missing feature-queue.md", () => {
   assert.ok(errs.some((e) => e.includes("feature-queue.md")));
 });
 check("featuresMissingSpecs lists active features lacking a valid spec", () => {
-  const specs = new Map([["F-001", { jsonValid: false, errors: ["x"], mdExists: true }]]);
+  const specs = new Map([["F-001", { jsonValid: false, errors: ["x"], mdExists: true, allCriteriaDone: false }]]);
   assert.deepEqual(featuresMissingSpecs([feature("F-001"), feature("F-002", "done")], specs), ["F-001"]);
+});
+check("featuresReadyToMarkDone includes an active feature whose spec has every AC checked", () => {
+  const specs = new Map([
+    ["F-001", { jsonValid: true, errors: [], mdExists: true, allCriteriaDone: true }],
+    ["F-002", { jsonValid: true, errors: [], mdExists: true, allCriteriaDone: false }],
+  ]);
+  assert.deepEqual(
+    featuresReadyToMarkDone([feature("F-001"), feature("F-002")], specs),
+    ["F-001"]
+  );
+});
+check("featuresReadyToMarkDone excludes a feature already done, even with all ACs checked", () => {
+  const specs = new Map([["F-001", { jsonValid: true, errors: [], mdExists: true, allCriteriaDone: true }]]);
+  assert.deepEqual(featuresReadyToMarkDone([feature("F-001", "done")], specs), []);
+});
+check("featuresReadyToMarkDone excludes a feature with no spec on record", () => {
+  assert.deepEqual(featuresReadyToMarkDone([feature("F-001")], new Map()), []);
 });
 check("overridden lifecycle (not raw lifecycle) determines whether a spec is required", () => {
   const overridden: Feature = {
@@ -192,14 +211,14 @@ check("overridden lifecycle (not raw lifecycle) determines whether a spec is req
       lifecycle: { value: "done", by: "ria", reason: "shipped out of band", at: "2026-07-02T00:00:00.000Z" },
     },
   } as Feature;
-  const specs = new Map<string, { jsonValid: boolean; errors: string[]; mdExists: boolean }>();
+  const specs = new Map<string, { jsonValid: boolean; errors: string[]; mdExists: boolean; allCriteriaDone: boolean }>();
   assert.deepEqual(featuresMissingSpecs([overridden], specs), []);
   const input = { ...completeInput(), features: [overridden], specs };
   assert.deepEqual(auditCompleteness(input), []);
 });
 check("rejected features are excluded from spec requirement without an override", () => {
   const rejected = feature("F-001", "rejected");
-  const specs = new Map<string, { jsonValid: boolean; errors: string[]; mdExists: boolean }>();
+  const specs = new Map<string, { jsonValid: boolean; errors: string[]; mdExists: boolean; allCriteriaDone: boolean }>();
   assert.deepEqual(featuresMissingSpecs([rejected], specs), []);
   const input = { ...completeInput(), features: [rejected], specs };
   assert.deepEqual(auditCompleteness(input), []);

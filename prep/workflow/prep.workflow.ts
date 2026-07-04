@@ -44,6 +44,8 @@ import {
   effectivePriority,
   fingerprint,
   parseClientQuestions,
+  passGate,
+  markFeatureDone,
   type Feature as RegistryFeature,
   type ExtractedFeature,
   type RippleReport,
@@ -97,6 +99,12 @@ const featureIdArg = argv.find((a) => a.startsWith("F-"));
 const impactOnly = argv.includes("--impact-only");
 const queueOnly = argv.includes("--queue-only");
 const forceFresh = argv.includes("--fresh");
+const approveQueue = argv.includes("--approve");
+const doneFlagIdx = argv.indexOf("--done");
+const markDone = doneFlagIdx !== -1;
+const doneCommits = markDone
+  ? argv.slice(doneFlagIdx + 1).filter((a) => a !== featureIdArg && !a.startsWith("--") && !a.startsWith("F-"))
+  : [];
 
 // ==================== PHASE 1: READ ====================
 phase("Read");
@@ -117,6 +125,64 @@ let project = readProject(projectRoot) ?? initProject(deriveProjectName(briefArt
 const existingFeatures: RegistryFeature[] = readFeatures(projectRoot);
 
 log(`Git: ${gitState.branches.length} branches | Registry: ${existingFeatures.length} existing features`);
+
+// Special case: approve the queue gate — no extraction, just flips the gate
+// a human has to pass before picking a feature off the queue.
+if (approveQueue) {
+  if (existingFeatures.length === 0) {
+    throw new Error("No features in the registry yet. Run /prep first, then approve the queue.");
+  }
+  if (project.gates.queueApproved.passed) {
+    log(`Queue already approved by ${project.gates.queueApproved.by} at ${project.gates.queueApproved.at}.`);
+    throw new Error("SKIP");
+  }
+  const approver = tryExec("git config user.name", projectRoot).trim() || "human";
+  project = passGate(project, "queueApproved", approver, now);
+  writeProject(projectRoot, project);
+  appendJournal(projectRoot, {
+    ts: now,
+    actor: approver,
+    type: "gate-passed",
+    target: "queueApproved",
+    summary: `Queue approved by ${approver}`,
+  });
+  renderFeatureQueue(projectRoot, existingFeatures, project);
+  log(`✓ Queue approved by ${approver}`);
+  log("✓ docs/sandwich/feature-queue.md");
+  throw new Error("SKIP");
+}
+
+// Special case: mark a feature done — no extraction, just closes out one
+// feature once implementation is verified. Mirrors the --approve branch.
+if (markDone) {
+  if (!featureIdArg) {
+    throw new Error("Usage: /prep --done F-XXX [commit-sha...]");
+  }
+  const target = existingFeatures.find((f) => f.id === featureIdArg);
+  if (!target) {
+    throw new Error(`${featureIdArg} not found in the registry. Run /prep first.`);
+  }
+  if (target.lifecycle === "done") {
+    log(`${featureIdArg} is already marked done.`);
+    throw new Error("SKIP");
+  }
+  const actor = tryExec("git config user.name", projectRoot).trim() || "human";
+  const updated = markFeatureDone(target, doneCommits, now);
+  const nextFeatures = existingFeatures.map((f) => (f.id === featureIdArg ? updated : f));
+  writeFeatures(projectRoot, nextFeatures);
+  appendJournal(projectRoot, {
+    ts: now,
+    actor,
+    type: "lifecycle-changed",
+    target: featureIdArg,
+    summary: `${featureIdArg} marked done by ${actor}`,
+    data: { from: target.lifecycle, to: "done", commits: updated.commits },
+  });
+  renderFeatureQueue(projectRoot, nextFeatures, project);
+  log(`✓ ${featureIdArg} marked done${doneCommits.length ? ` (${doneCommits.join(", ")})` : ""}`);
+  log("✓ docs/sandwich/feature-queue.md");
+  throw new Error("SKIP");
+}
 
 // Per-artifact hashes so drift detection knows exactly which brief file moved.
 const hashFile = (s: string | null | undefined): string | null =>

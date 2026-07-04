@@ -356,6 +356,21 @@ export function resetGate(
   };
 }
 
+/** Mark a feature done and record what shipped it. Sets lifecycle directly —
+ *  nothing computes "done", so there is no machine value to override. */
+export function markFeatureDone(
+  feature: Feature,
+  commits: string[],
+  at: string
+): Feature {
+  return {
+    ...feature,
+    lifecycle: "done",
+    commits: Array.from(new Set([...feature.commits, ...commits])),
+    updatedAt: at,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Questions — parse the brief's client-questions.md into structured registry
 // entries so /status can surface open questions and features can be marked
