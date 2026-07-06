@@ -81,16 +81,23 @@ Mirrors `order/` and `prep/`'s existing shape exactly:
 ```
 wireframe/
 ├── skills/wireframe/SKILL.md
+├── agents/                     # prompt files for workflow.ts's agent() calls, mirrors order/agents/
 ├── lib/
 │   ├── wireframe-schemas.ts   # ManifestSchema (zod)
 │   ├── wireframe-render.ts    # deterministic index.html generator
 │   └── wireframe.selfcheck.ts # plain-assert tests, no framework
 ├── scripts/render.ts           # CLI entry: node --experimental-strip-types wireframe/scripts/render.ts
-└── workflow/wireframe.workflow.ts
+├── workflow/wireframe.workflow.ts   # pi-harness scriptable workflow (phase/agent/parallel DSL)
+└── pi-extension/wireframe.ts        # pi registration adapter, mirrors prep/pi-extension/prep.ts
 ```
 
-Registered in `.claude-plugin/plugin.json` alongside `order` and `prep`'s
-existing `skills`/`workflows` entries.
+Registered in **two** manifests, same as `order`/`prep`:
+- `.claude-plugin/plugin.json` — add to the `skills` and `workflows` arrays
+  (Claude Code plugin format)
+- `package.json`'s `"pi"` field — add `./wireframe/pi-extension/wireframe.ts`
+  to `extensions` and `./wireframe/skills/wireframe` to `skills` (pi package
+  format); also add `wireframe/lib/wireframe.selfcheck.ts` to the root
+  `"scripts".test` command alongside the other `*.selfcheck.ts` files
 
 ### 3. Artifacts (`docs/wireframes/`)
 
@@ -144,10 +151,12 @@ implicit in file names.
    detection):
    - **Fresh** (no `manifest.json` yet) — group all `needsUI` flows into
      screens, write one HTML file per screen, write `manifest.json`.
-   - **Incremental** (`manifest.json` exists) — for each `needsUI` flow, diff
-     current vs. `.snapshot.json` by id, reusing `diffOrderDoc` from
-     `order/lib/order-render.ts` (id-keyed, not array-position-keyed, so
-     reordering or inserting flows doesn't produce false positives):
+   - **Incremental** (`manifest.json` exists) — for each `needsUI` flow,
+     compare its current content hash against the one recorded in
+     `.snapshot.json`, reusing `hashOutput`/`hasOutputChanged` from
+     `lib/agent-wrapper.ts` (the same sha256-based change-detection helper
+     the rest of the codebase already uses) — keyed by flow id, so
+     reordering or inserting flows doesn't produce false positives:
      - *changed* → every screen listing that flow gets `flags.stale = true`
        plus an appended reason. HTML is never touched.
      - *new flow id* → fits an existing screen, or needs a new one; only
@@ -191,11 +200,39 @@ test framework, matching `order/lib/validation.selfcheck.ts`):
 `wireframe/lib/wireframe.selfcheck.ts` checks:
 - `ScreenSchema`/`WireframeManifestSchema` accept valid input and reject
   malformed ids and empty `flows` arrays.
-- The id-keyed diff correctly flags a changed flow's screen(s) as stale and
+- `hasOutputChanged` correctly flags a changed flow's screen(s) as stale and
   leaves an unrelated screen untouched.
 - The `index.html` renderer emits a link for every entry in the manifest.
 
-Run via `node --experimental-strip-types wireframe/lib/wireframe.selfcheck.ts`.
+Run via `node --experimental-strip-types wireframe/lib/wireframe.selfcheck.ts`,
+and add that invocation to `package.json`'s `scripts.test` chain.
+
+### 7. Pi-harness parity
+
+`order/` and `prep/` each ship three layers, not just the interactive skill:
+the `SKILL.md` (what Sections 1-6 describe, used when an agent like Claude
+Code invokes the skill interactively), a `*.workflow.ts` using a separate
+scriptable DSL (`phase()`, `agent()`, `parallel()`, `log()` globals, an
+injected `args` string, and a top-level `return`) for headless/programmatic
+execution under the **pi** coding-agent harness, and a thin
+`pi-extension/*.ts` adapter (implementing `@earendil-works/pi-coding-agent`'s
+`ExtensionAPI`) that registers the skill path with pi.
+
+`wireframe.workflow.ts` mirrors `order.workflow.ts`'s shape: a `Detect`
+phase (prerequisite + mode check), a `Group` phase (one `agent()` call that
+proposes the flow-to-screen grouping for fresh mode, or nothing new to
+group in incremental mode), a `Generate` phase (one `agent()` call per new
+screen to produce its HTML, matching the parallel `Promise.all` pattern
+`order.workflow.ts` uses for its four artifacts), and a final write of
+`manifest.json` + `.snapshot.json` + the rendered `index.html`. Prompts for
+the `agent()` calls live in `wireframe/agents/*.md`, mirroring
+`order/agents/*.md`.
+
+`pi-extension/wireframe.ts` follows `prep/pi-extension/prep.ts`'s minimal
+form exactly (register `skillPaths`, no gate — the manifest-drift check
+from Section 5 covers integrity, and `registerRegistryGate`-style live-write
+interception is a `/prep`-registry-specific concept that doesn't apply here
+since `wireframe` never touches `.sandwich/registry/`).
 
 ## Key decisions log
 
@@ -206,6 +243,7 @@ Run via `node --experimental-strip-types wireframe/lib/wireframe.selfcheck.ts`.
 | Scope selection (which flows get wireframed) | Explicit `needsUI: boolean` added to `UserFlowsDocSchema`, set by `/order` at extraction time | More auditable than downstream inference from the `actor` field, and avoids wasting generation effort on flows nothing will ever prune (system/cron actors) |
 | Flow-to-screen mapping | Agent groups flows into screens holistically per project, recorded explicitly in `manifest.json` | Flows and screens are rarely 1:1 in practice (arneshdiveshop's checkout was one flow rendered as one 2-step screen; PLP serves multiple flows) — forcing strict 1:1 produces awkward duplicates |
 | Staleness handling | Flag `stale` in the manifest, never auto-overwrite existing screen HTML | Wireframes are hand-tuned by humans after generation (unlike `prd.md`/`user-flows.md`, which are fully disposable/regeneratable); silently rewriting would destroy that work |
-| Staleness detection mechanism | Reuse `diffOrderDoc` (existing deterministic JSON diff in `order-render.ts`) against a git-ignored `.snapshot.json`, keyed by flow id | Avoids inventing a new fingerprint/hash mechanism when a working one already exists in the codebase; id-keyed (not position-keyed) avoids false positives from reordering |
+| Staleness detection mechanism | Reuse `hashOutput`/`hasOutputChanged` (existing sha256 change-detection in `lib/agent-wrapper.ts`) against a git-ignored `.snapshot.json`, keyed by flow id | Avoids inventing a new fingerprint mechanism when a working one already exists and is already used elsewhere in the codebase; id-keyed avoids false positives from reordering. (Corrected during plan-writing from an earlier draft that named `diffOrderDoc` — that utility diffs two known JSON shapes path-by-path, which is a good fit for `/order`'s own changelog, but `hashOutput` is the simpler, already-established tool for a yes/no "did this content change" check.) |
 | Deploy/hosting | Out of scope for v1 | Keeps the skill's surface area small (YAGNI); `arneshdiveshop`'s Vercel deploy of `docs/wireframes/` was a manual follow-up step, not part of wireframe generation itself |
 | Output format | Static HTML per screen, Tailwind CDN (`<script src="https://cdn.tailwindcss.com">`), no build step, `index.html` nav hub | Matches the proven `arneshdiveshop` pattern directly; viewable in a browser with zero setup, unlike the rest of the pipeline's markdown/JSON which is diffable but not visual |
+| Pi-harness parity | Build `wireframe.workflow.ts` + `pi-extension/wireframe.ts` now, matching `order`/`prep` exactly, rather than deferring | Explicitly requested — discovered during plan-writing that `order`/`prep` both ship this layer and the original design (correctly) hadn't scoped it since brainstorming only examined the interactive `SKILL.md` path |
