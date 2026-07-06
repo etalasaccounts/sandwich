@@ -114,4 +114,22 @@ check("writeManifest + readManifest round-trip a valid manifest", () => {
   }
 });
 
+import { renderIndexHtml } from "./wireframe-render.ts";
+
+const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", file: "homepage.html", flows: ["UF-001"], flags: { stale: false, orphaned: false }, staleReasons: [] };
+
+check("renderIndexHtml emits a link and name for every screen in the manifest", () => {
+  const html = renderIndexHtml({ screens: [RENDERED_SCREEN] });
+  assert.ok(html.includes('href="homepage.html"'));
+  assert.ok(html.includes("Homepage"));
+});
+check("renderIndexHtml surfaces the stale flag as a visible badge", () => {
+  const html = renderIndexHtml({ screens: [{ ...RENDERED_SCREEN, flags: { stale: true, orphaned: false }, staleReasons: ["UF-001 content changed"] }] });
+  assert.ok(html.includes("STALE"));
+});
+check("renderIndexHtml surfaces the orphaned flag as a visible badge", () => {
+  const html = renderIndexHtml({ screens: [{ ...RENDERED_SCREEN, flags: { stale: false, orphaned: true }, staleReasons: [] }] });
+  assert.ok(html.includes("ORPHANED"));
+});
+
 console.log(`\n${n} wireframe checks passed.`);
