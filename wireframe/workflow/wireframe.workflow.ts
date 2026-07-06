@@ -54,9 +54,14 @@ const needsUIFlows: NeedsUIFlow[] = userFlows.flows
   .map((f) => ({ id: f.id, title: f.title, actor: f.actor, trigger: f.trigger, steps: f.steps, outcome: f.outcome }));
 log(`${needsUIFlows.length} of ${userFlows.flows.length} flows need a screen`);
 
+const existingManifest = readManifest(projectRoot);
+if (needsUIFlows.length === 0 && (existingManifest?.screens.length ?? 0) === 0) {
+  log("No needsUI flows found and no existing manifest — nothing to wireframe yet.");
+  return { manifest: null, screensCreated: 0, stale: 0, orphaned: 0 };
+}
+
 // Phase 2: Diff
 phase("Diff");
-const existingManifest = readManifest(projectRoot);
 const snapshot = readSnapshot(projectRoot);
 const diff = diffFlows(needsUIFlows, snapshot);
 log(`new: ${diff.newIds.size} | changed: ${diff.changedIds.size} | removed: ${diff.removedIds.size}`);
@@ -90,6 +95,17 @@ if (newFlows.length > 0) {
   log(`Proposed ${newScreens.length} new screen(s)`);
 } else {
   log("No new flows — nothing to group");
+}
+
+// Guard: a proposed new screen must never claim a filename an existing screen already owns —
+// doing so would silently overwrite that screen's real HTML on write.
+for (const newScreen of newScreens) {
+  const collision = screens.find((s) => s.file === newScreen.file);
+  if (collision) {
+    throw new Error(
+      `Filename collision: proposed new screen "${newScreen.id}" wants file "${newScreen.file}", which is already used by existing screen "${collision.id}". Refusing to write.`
+    );
+  }
 }
 
 // Phase 4: Generate — one HTML file per new screen, in parallel
