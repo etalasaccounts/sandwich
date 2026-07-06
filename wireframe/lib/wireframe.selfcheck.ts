@@ -38,11 +38,12 @@ check("validateWireframeManifest rejects a malformed flow id inside flows", () =
   assert.equal(r.valid, false);
 });
 
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   getWireframePaths,
+  ensureWireframeDir,
   readSnapshot,
   writeSnapshot,
   diffFlows,
@@ -109,6 +110,19 @@ check("writeManifest + readManifest round-trip a valid manifest", () => {
     assert.ok(path.endsWith("manifest.json"));
     const back = readManifest(dir);
     assert.equal(back?.screens[0].id, "SCR-001");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+check("readManifest returns undefined for structurally invalid manifest JSON", () => {
+  const dir = mkdtempSync(join(tmpdir(), "wireframe-io-"));
+  try {
+    ensureWireframeDir(dir);
+    const paths = getWireframePaths(dir);
+    writeFileSync(paths.manifest, JSON.stringify({ screens: [] }), "utf8");
+    const back = readManifest(dir);
+    assert.equal(back, undefined);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

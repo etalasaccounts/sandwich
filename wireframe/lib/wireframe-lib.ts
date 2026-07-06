@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { hasOutputChanged, hashOutput } from "../../lib/agent-wrapper.ts";
+import { validateWireframeManifest } from "./wireframe-schemas.ts";
 import type { WireframeManifest } from "./wireframe-schemas.ts";
 
 export interface WireframePaths {
@@ -91,7 +92,9 @@ export function readManifest(projectRoot: string): WireframeManifest | undefined
   const paths = getWireframePaths(projectRoot);
   if (!existsSync(paths.manifest)) return undefined;
   try {
-    return JSON.parse(readFileSync(paths.manifest, "utf8"));
+    const parsed = JSON.parse(readFileSync(paths.manifest, "utf8"));
+    const result = validateWireframeManifest(parsed);
+    return result.valid ? result.data : undefined;
   } catch {
     return undefined;
   }

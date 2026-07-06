@@ -119,6 +119,15 @@ it never edits that screen's HTML.
 | `flags.orphaned` | boolean | Set when none of this screen's flows still need UI |
 | `staleReasons` | string[] | Human-readable reasons, e.g. `"UF-004 content changed"` |
 
+**On `stale` and re-runs:** `stale` means "changed since the *last* `/wireframe`
+run," not "still needs attention forever." `.snapshot.json` is overwritten
+with the current flow content on every run, so if `/wireframe` runs again
+later for an unrelated reason before a flagged screen's HTML is manually
+fixed, the flag clears itself once the flow stops differing from the new
+snapshot baseline — even though the screen was never actually updated. Act on
+and report `stale` screens promptly; don't assume the flag will still be
+there next time you look.
+
 ## Style rules
 
 - Keep the client's terminology from `user-flows.md` — do not rename flows or actors.
