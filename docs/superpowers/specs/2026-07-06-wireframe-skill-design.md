@@ -98,7 +98,7 @@ existing `skills`/`workflows` entries.
 docs/wireframes/
 ├── manifest.json     # screen registry — source of truth
 ├── .snapshot.json     # git-ignored, last-seen needsUI flows (diff baseline)
-├── .gitignore          # ignores .snapshot.json (and later, .vercel/ if a deploy step is ever added)
+├── .gitignore          # ignores .snapshot.json
 ├── index.html          # nav hub, pure projection of manifest.json, regenerated every run
 ├── homepage.html
 ├── plp.html
