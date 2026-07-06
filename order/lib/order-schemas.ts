@@ -46,6 +46,7 @@ export const UserFlowsDocSchema = z.object({
     steps: z.array(z.string().min(1)).min(1, "A flow needs at least one step"),
     outcome: z.string().min(1),
     confidence: ConfidenceSchema,
+    needsUI: z.boolean(),
   })).min(1, "At least one user flow required"),
 });
 export type UserFlowsDoc = z.infer<typeof UserFlowsDocSchema>;

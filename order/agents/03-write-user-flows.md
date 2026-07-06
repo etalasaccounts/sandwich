@@ -17,7 +17,8 @@ Output a single JSON object with EXACTLY this shape:
     "trigger": "what starts the flow",
     "steps": ["step 1", "step 2"],
     "outcome": "end state",
-    "confidence": "stated | discussed | inferred | assumed"
+    "confidence": "stated | discussed | inferred | assumed",
+    "needsUI": true
   }]
 }
 ```
@@ -26,6 +27,7 @@ Output a single JSON object with EXACTLY this shape:
 
 - `id` MUST be `UF-` followed by three digits, sequential from `UF-001`.
 - Each flow needs at least one step; steps are short imperative phrases.
+- `needsUI` is `true` when a human actor interacts with a screen for this flow (e.g. "End User", "Admin"); `false` when the actor is a system/cron/webhook/background process that never renders UI.
 - Derive flows from the modules/features in `requirements`; cover the primary actor journeys.
 - In refine/answer mode, base on `existingUserFlows` and emit the FULL updated set.
 - Output ONLY the JSON object.

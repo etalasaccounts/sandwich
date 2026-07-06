@@ -60,8 +60,14 @@ check("validatePrdDoc rejects a bad confidence enum", () => {
   assert.equal(validatePrdDoc(bad).valid, false);
 });
 check("validateUserFlowsDoc requires UF-### ids and >=1 step", () => {
-  assert.equal(validateUserFlowsDoc({ flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated" }] }).valid, true);
-  assert.equal(validateUserFlowsDoc({ flows: [{ id: "F1", title: "t", actor: "a", trigger: "x", steps: [], outcome: "o", confidence: "stated" }] }).valid, false);
+  assert.equal(validateUserFlowsDoc({ flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated", needsUI: true }] }).valid, true);
+  assert.equal(validateUserFlowsDoc({ flows: [{ id: "F1", title: "t", actor: "a", trigger: "x", steps: [], outcome: "o", confidence: "stated", needsUI: true }] }).valid, false);
+});
+check("validateUserFlowsDoc requires needsUI on every flow", () => {
+  const withNeedsUI = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated", needsUI: true }] };
+  assert.equal(validateUserFlowsDoc(withNeedsUI).valid, true);
+  const withoutNeedsUI = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated" }] };
+  assert.equal(validateUserFlowsDoc(withoutNeedsUI).valid, false);
 });
 check("validateTechNotesDoc requires stack or architectureNotes", () => {
   assert.equal(validateTechNotesDoc({ stack: [{ layer: "db", choice: "pg", rationale: "ok" }], architectureNotes: [], risks: [], openDecisions: [] }).valid, true);
@@ -86,7 +92,7 @@ check("renderPrd emits the confidence marker, not a raw enum word", () => {
   assert.ok(md.includes("# Acme — Product Requirements Document"));
 });
 check("renderUserFlows lists numbered steps", () => {
-  const md = renderUserFlows({ flows: [{ id: "UF-001", title: "Login", actor: "User", trigger: "click", steps: ["open", "submit"], outcome: "in", confidence: "stated" }] });
+  const md = renderUserFlows({ flows: [{ id: "UF-001", title: "Login", actor: "User", trigger: "click", steps: ["open", "submit"], outcome: "in", confidence: "stated", needsUI: true }] });
   assert.ok(md.includes("### UF-001 — Login"));
   assert.ok(md.includes("1. open"));
   assert.ok(md.includes("2. submit"));
