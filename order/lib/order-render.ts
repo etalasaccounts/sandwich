@@ -121,6 +121,7 @@ export function renderUserFlows(doc: UserFlowsDoc, prev?: UserFlowsDoc): string 
       `### ${f.id} — ${f.title}`,
       `- **Actor:** ${f.actor}`,
       `- **Trigger:** ${f.trigger}`,
+      `- **Needs UI:** ${f.needsUI ? "yes" : "no"}`,
       `- **Confidence:** ${mark(f.confidence)}`,
       "",
       `**Steps:**`,
