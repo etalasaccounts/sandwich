@@ -112,7 +112,7 @@ import {
 } from "./completeness.ts";
 import type { Feature, Decision, JournalEvent } from "../../registry/registry-lib.ts";
 
-const feature = (id: string, lifecycle: Feature["lifecycle"] = "proposed"): Feature => ({
+const feature = (id: string, lifecycle: Feature["lifecycle"] = "queued"): Feature => ({
   id,
   fingerprint: `${id.toLowerCase()}-fp`,
   title: `Feature ${id}`,
@@ -210,7 +210,7 @@ check("featuresReadyToMarkDone excludes a feature with no spec on record", () =>
 });
 check("overridden lifecycle (not raw lifecycle) determines whether a spec is required", () => {
   const overridden: Feature = {
-    ...feature("F-001", "proposed"),
+    ...feature("F-001", "queued"),
     overrides: {
       lifecycle: { value: "done", by: "ria", reason: "shipped out of band", at: "2026-07-02T00:00:00.000Z" },
     },

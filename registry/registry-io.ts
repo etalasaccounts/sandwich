@@ -172,26 +172,28 @@ function normalizeFeature(raw: unknown): unknown {
   // Weaker models pluralize the score key and stash the number alongside it.
   if (obj.scores && !obj.score) { obj.score = obj.scores; delete obj.scores; }
 
-  const validLifecycles = ["proposed", "queued", "speced", "building", "review", "done", "deferred", "rejected"];
+  const validLifecycles = ["queued", "speced", "building", "review", "done", "deferred", "rejected"];
   // LLMs often wrap lifecycle in an object: { status: "blocked", blocked_by: [...] }
   if (obj.lifecycle && typeof obj.lifecycle === "object") {
     const lc = obj.lifecycle as Record<string, unknown>;
     const status = lc.status as string | undefined;
-    obj.lifecycle = validLifecycles.includes(status ?? "") ? status : "proposed";
+    obj.lifecycle = validLifecycles.includes(status ?? "") ? status : "queued";
   }
   // LLMs also use "status" instead of "lifecycle"
   if (!obj.lifecycle && obj.status && typeof obj.status === "string") {
-    obj.lifecycle = validLifecycles.includes(obj.status) ? obj.status : "proposed";
+    obj.lifecycle = validLifecycles.includes(obj.status) ? obj.status : "queued";
   }
-  if (!obj.lifecycle) obj.lifecycle = "proposed";
-  // An invalid lifecycle string ("ready"/"blocked" etc.) is recovered from a
-  // valid `status` sibling when present, else falls back to "proposed".
-  // Blocked-ness is orthogonal (tracked in blockedBy), never a lifecycle value.
+  if (!obj.lifecycle) obj.lifecycle = "queued";
+  // An invalid lifecycle string ("ready"/"blocked"/the old "proposed" etc.) is
+  // recovered from a valid `status` sibling when present, else falls back to
+  // "queued". Blocked-ness is orthogonal (tracked in blockedBy), never a
+  // lifecycle value. This is also how old on-disk "proposed" data migrates:
+  // it's simply not in validLifecycles anymore, so it falls through here.
   if (typeof obj.lifecycle === "string" && !validLifecycles.includes(obj.lifecycle)) {
     obj.lifecycle =
       typeof obj.status === "string" && validLifecycles.includes(obj.status)
         ? obj.status
-        : "proposed";
+        : "queued";
   }
 
   if (!obj.type) obj.type = "feature";

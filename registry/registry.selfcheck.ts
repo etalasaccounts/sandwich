@@ -82,10 +82,10 @@ const existing: Feature[] = mergeExtraction(
   now
 );
 
-check("a brand-new extraction mints F-001 as proposed", () => {
+check("a brand-new extraction mints F-001 as queued", () => {
   assert.equal(existing.length, 1);
   assert.equal(existing[0].id, "F-001");
-  assert.equal(existing[0].lifecycle, "proposed");
+  assert.equal(existing[0].lifecycle, "queued");
 });
 
 check("a reworded title keeps its stable ID (no renumber)", () => {
@@ -385,6 +385,7 @@ try {
     const result = readFeatures(roguedir);
     assert.equal(result.length, 1);
     assert.equal(result[0].id, "F-001");
+    assert.equal(result[0].lifecycle, "queued", "old on-disk \"proposed\" must migrate to \"queued\" on read");
   });
 
   check("readFeatures normalizes LLM-invented field names and fills defaults", () => {
@@ -399,7 +400,7 @@ try {
     const result = readFeatures(roguedir);
     assert.equal(result.length, 1);
     assert.equal(result[0].id, "F-002");
-    assert.equal(result[0].lifecycle, "proposed");
+    assert.equal(result[0].lifecycle, "queued");
     assert.equal(result[0].confidence, "inferred");
     assert.equal(result[0].module, "General");
     assert.equal(result[0].type, "feature");
@@ -412,7 +413,7 @@ try {
     writeFileSync(join(rogueReg, "features.json"), JSON.stringify({
       features: [
         { id: "F-001", title: "Good", type: "feature", module: "X", confidence: "stated",
-          lifecycle: "proposed", fingerprint: "fp1", provenance: { file: "a.md", briefHash: "h" },
+          lifecycle: "queued", fingerprint: "fp1", provenance: { file: "a.md", briefHash: "h" },
           createdAt: now, updatedAt: now },
         { garbage: true },
         42,
@@ -510,7 +511,7 @@ check("gate recomputes feature priority from dimensions, ignoring the model's nu
   const res = canonicalizeRegistryContent("features.json", raw);
   assert.equal(res.ok, true);
   const parsed = JSON.parse((res as { content: string }).content);
-  assert.equal(parsed[0].lifecycle, "proposed");
+  assert.equal(parsed[0].lifecycle, "queued");
   assert.equal(parsed[0].score.priority, computePriority({ impact: 9, effort: 5, risk: 3, urgency: 1.5 }));
   assert.notEqual(parsed[0].score.priority, 999);
   assert.equal(parsed[0].score.formulaVersion, 1);

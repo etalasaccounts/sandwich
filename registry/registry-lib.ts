@@ -70,8 +70,7 @@ export type Overrides = z.infer<typeof OverridesSchema>;
 // ---------------------------------------------------------------------------
 
 export const LifecycleSchema = z.enum([
-  "proposed", // freshly extracted, not yet triaged by a human
-  "queued", // triaged, scored, waiting to be picked
+  "queued", // freshly extracted or triaged, waiting to be picked
   "speced", // a recipe (spec) has been generated
   "building", // execution in progress (via superpowers)
   "review", // built, awaiting human acceptance
@@ -559,7 +558,7 @@ export function mergeExtraction(
       type: ex.type,
       module: ex.module,
       confidence: ex.confidence,
-      lifecycle: "proposed",
+      lifecycle: "queued",
       flags: { needsReanalysis: false, stale: false, orphaned: false },
       provenance: {
         file: ex.source.file,
