@@ -197,23 +197,6 @@ export const DecisionSchema = z.object({
 export type Decision = z.infer<typeof DecisionSchema>;
 
 // ---------------------------------------------------------------------------
-// Gates — the explicit human-in-the-loop checkpoints. Downstream commands read
-// these and refuse (or warn) if the upstream gate hasn't been passed.
-// ---------------------------------------------------------------------------
-
-export const GateSchema = z.object({
-  passed: z.boolean(),
-  by: z.string().optional(),
-  at: z.string().optional(),
-});
-
-export const GatesSchema = z.object({
-  briefApproved: GateSchema, // client-questions reviewed before going out
-  queueApproved: GateSchema, // scores/overrides/removals confirmed
-});
-export type Gates = z.infer<typeof GatesSchema>;
-
-// ---------------------------------------------------------------------------
 // Project — top-level registry metadata. Holds the brief hashes so any
 // ingredient can cheaply detect "has the brief changed since I last ran?".
 // ---------------------------------------------------------------------------
@@ -228,7 +211,6 @@ export const ProjectSchema = z.object({
     technicalNotes: z.string().nullable(),
     clientQuestions: z.string().nullable(),
   }),
-  gates: GatesSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -320,39 +302,6 @@ export function effectiveValue<T>(
 ): { value: T; pinned: boolean } {
   if (override) return { value: override.value as T, pinned: true };
   return { value: computed, pinned: false };
-}
-
-// ---------------------------------------------------------------------------
-// Gates — the explicit human-in-the-loop checkpoints. A gate is passed by a
-// deliberate human action and is invalidated automatically when the thing it
-// approved changes underneath it.
-// ---------------------------------------------------------------------------
-
-export function passGate(
-  project: Project,
-  gate: keyof Project["gates"],
-  by: string,
-  at: string
-): Project {
-  return {
-    ...project,
-    gates: { ...project.gates, [gate]: { passed: true, by, at } },
-    updatedAt: at,
-  };
-}
-
-/** Invalidate a previously-passed gate (e.g. the queue changed after approval). */
-export function resetGate(
-  project: Project,
-  gate: keyof Project["gates"],
-  at: string
-): Project {
-  if (!project.gates[gate].passed) return project;
-  return {
-    ...project,
-    gates: { ...project.gates, [gate]: { passed: false } },
-    updatedAt: at,
-  };
 }
 
 /** Mark a feature done and record what shipped it. Sets lifecycle directly —

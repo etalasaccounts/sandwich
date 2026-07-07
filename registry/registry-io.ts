@@ -151,17 +151,10 @@ function normalizeProject(raw: unknown): unknown {
       clientQuestions: bh.clientQuestions ?? bh.client_questions ?? bh["client-questions.md"] ?? null,
     };
   }
-  if (!obj.gates || typeof obj.gates !== "object") {
-    obj.gates = { briefApproved: { passed: false }, queueApproved: { passed: false } };
-  } else {
-    const g = camelCaseKeys(obj.gates as Record<string, unknown>);
-    const isGateObj = (v: unknown) => v && typeof v === "object" && "passed" in (v as Record<string, unknown>);
-    if (!isGateObj(g.briefApproved))
-      g.briefApproved = { passed: false };
-    if (!isGateObj(g.queueApproved))
-      g.queueApproved = { passed: false };
-    obj.gates = g;
-  }
+  // Legacy on-disk "gates" key: ProjectSchema no longer has this field, and
+  // it isn't .strict(), so zod silently drops it on parse — no code needed
+  // here to strip it. (See registry.selfcheck.ts's "readProject normalizes
+  // snake_case LLM project" test for the regression check.)
   return obj;
 }
 

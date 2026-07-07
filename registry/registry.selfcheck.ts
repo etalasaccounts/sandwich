@@ -14,8 +14,6 @@ import {
   attachScores,
   effectivePriority,
   computePriority,
-  passGate,
-  resetGate,
   markFeatureDone,
   isEligible,
   parseClientQuestions,
@@ -194,18 +192,6 @@ check("attachScores stamps deterministic priority and formula version", () => {
   assert.equal(withScores[0].score?.formulaVersion, 1);
 });
 
-// --- gates ---
-check("passGate marks a gate passed with attribution", () => {
-  const p = passGate(initProject("X", now), "queueApproved", "ria", now);
-  assert.equal(p.gates.queueApproved.passed, true);
-  assert.equal(p.gates.queueApproved.by, "ria");
-});
-check("resetGate clears a passed gate and is a no-op when already open", () => {
-  const passed = passGate(initProject("X", now), "queueApproved", "ria", now);
-  assert.equal(resetGate(passed, "queueApproved", now).gates.queueApproved.passed, false);
-  const open = initProject("X", now);
-  assert.equal(resetGate(open, "queueApproved", now), open); // unchanged reference
-});
 check("markFeatureDone sets lifecycle done and merges commits without duplicates", () => {
   const before: Feature = { ...speced[0], commits: ["abc111"] };
   const after = markFeatureDone(before, ["abc111", "def222"], "2026-07-03T00:00:00.000Z");
@@ -338,7 +324,6 @@ try {
     const back = readProject(dir);
     assert.equal(back?.name, "SwissBelhotel");
     assert.equal(back?.schemaVersion, 1);
-    assert.equal(back?.gates.queueApproved.passed, false);
   });
 
   check("features round-trip and defaults are applied on read", () => {
@@ -438,8 +423,7 @@ try {
     assert.ok(result !== null);
     assert.equal(result!.name, "SwissBelhotel Maintenance");
     assert.equal(result!.schemaVersion, 1);
-    assert.equal(result!.gates.briefApproved.passed, false);
-    assert.equal(result!.gates.queueApproved.passed, false);
+    assert.ok(!("gates" in (result as object)), "legacy gates key must be silently dropped, not surfaced");
     assert.equal(result!.createdAt, "2026-06-29T00:00:00.000Z");
   });
 
