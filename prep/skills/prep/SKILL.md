@@ -24,7 +24,7 @@ written automatically to keep machine state hidden.
 
 | File | Purpose |
 |------|---------|
-| `project.json` | Project metadata, brief hashes, gate states |
+| `project.json` | Project metadata, brief hashes |
 | `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides, spec links, commits |
 | `questions.json` | Client questions ↔ answers ↔ what they unblock |
 | `decisions.json` | ADR-lite scope/architecture decisions |
