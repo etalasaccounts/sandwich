@@ -252,7 +252,6 @@ check("renderStatus surfaces the actions awaiting a human", () => {
   );
   assert.ok(txt.includes("Awaiting you"));
   assert.ok(txt.includes("F-001"), "should surface the stale spec feature id");
-  assert.ok(txt.includes("/prep --approve"), "should prompt to approve the queue");
   assert.ok(txt.includes("open client question"), "should surface open questions");
 });
 

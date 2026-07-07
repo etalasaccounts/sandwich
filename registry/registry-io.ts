@@ -491,10 +491,6 @@ export function initProject(name: string, now: string): Project {
       technicalNotes: null,
       clientQuestions: null,
     },
-    gates: {
-      briefApproved: { passed: false },
-      queueApproved: { passed: false },
-    },
     createdAt: now,
     updatedAt: now,
   };
@@ -630,7 +626,6 @@ function displayStatus(f: Feature): string {
   else if (f.flags.orphaned) base = "⚠️ orphaned (dropped from brief)";
   else if (f.blockedBy.length > 0) base = `🔴 blocked (${f.blockedBy.join(", ")})`;
   else if (f.flags.needsReanalysis) base = "⚠️ changed — re-review";
-  else if (lc === "proposed") base = "🟡 proposed";
   else base = "🟡 queued";
   // Stale spec is orthogonal to lifecycle — a built/speced feature can drift.
   if (f.flags.stale) base += " · 📋⚠️ spec stale";
@@ -665,7 +660,6 @@ export function renderFeatureQueue(
     `# Feature Queue — ${project.name}`,
     "",
     `> Projection of \`.sandwich/registry/\` · ${features.length} features · generated ${new Date().toISOString().split("T")[0]}`,
-    `> Gates: brief ${project.gates.briefApproved.passed ? "✅" : "⬜"} · queue ${project.gates.queueApproved.passed ? "✅" : "⬜"}`,
     "",
   ];
 
@@ -765,13 +759,10 @@ export function renderStatus(
   const out: string[] = [];
   out.push(`SANDWICH STATUS — ${project.name}`);
   out.push("─".repeat(48));
-  out.push(
-    `Gates:  brief ${project.gates.briefApproved.passed ? "✅" : "⬜"}   queue ${project.gates.queueApproved.passed ? "✅" : "⬜"}`
-  );
   out.push("");
   out.push("Lifecycle:");
   out.push(
-    `  proposed ${count("proposed")} · queued ${count("queued")} · speced ${count("speced")} · building ${count("building")} · review ${count("review")} · done ${count("done")} · deferred ${count("deferred")} · rejected ${count("rejected")}`
+    `  queued ${count("queued")} · speced ${count("speced")} · building ${count("building")} · review ${count("review")} · done ${count("done")} · deferred ${count("deferred")} · rejected ${count("rejected")}`
   );
   out.push("");
   out.push(
@@ -793,8 +784,6 @@ export function renderStatus(
     todos.push(
       `Confirm & mark done — every AC checked: ${audit.readyToMarkDone.join(", ")} → /prep --done ${audit.readyToMarkDone[0]}`
     );
-  if (!project.gates.queueApproved.passed && features.length)
-    todos.push("Approve the queue once you're happy with priorities: /prep --approve");
   if (audit?.missingSpecs.length)
     todos.push(
       `Write missing spec file(s): ${audit.missingSpecs.join(", ")} → docs/sandwich/specs/, then run render-specs + verify-complete`
