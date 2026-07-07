@@ -460,7 +460,7 @@ export function matchByFingerprint(
  * Fold a fingerprint match into the next generation of the feature list.
  *   - matched  → keep ID, lifecycle, overrides, score, spec link, commits;
  *                refresh content (title/module/deps) and provenance.
- *   - added    → mint a new stable ID, lifecycle "proposed", empty overrides.
+ *   - added    → mint a new stable ID, lifecycle "queued", empty overrides.
  *   - missing  → preserved verbatim (orphan/stale handling is Phase 4).
  *
  * `hashFor` maps a source filename to that brief artifact's current hash so each
