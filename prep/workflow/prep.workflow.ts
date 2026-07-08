@@ -44,7 +44,6 @@ import {
   effectivePriority,
   fingerprint,
   parseClientQuestions,
-  passGate,
   markFeatureDone,
   isEligible,
   type Feature as RegistryFeature,
@@ -100,7 +99,6 @@ const featureIdArg = argv.find((a) => a.startsWith("F-"));
 const impactOnly = argv.includes("--impact-only");
 const queueOnly = argv.includes("--queue-only");
 const forceFresh = argv.includes("--fresh");
-const approveQueue = argv.includes("--approve");
 const doneFlagIdx = argv.indexOf("--done");
 const markDone = doneFlagIdx !== -1;
 const doneCommits = markDone
@@ -127,34 +125,9 @@ const existingFeatures: RegistryFeature[] = readFeatures(projectRoot);
 
 log(`Git: ${gitState.branches.length} branches | Registry: ${existingFeatures.length} existing features`);
 
-// Special case: approve the queue gate — no extraction, just flips the gate
-// a human has to pass before picking a feature off the queue.
-if (approveQueue) {
-  if (existingFeatures.length === 0) {
-    throw new Error("No features in the registry yet. Run /prep first, then approve the queue.");
-  }
-  if (project.gates.queueApproved.passed) {
-    log(`Queue already approved by ${project.gates.queueApproved.by} at ${project.gates.queueApproved.at}.`);
-    throw new Error("SKIP");
-  }
-  const approver = tryExec("git config user.name", projectRoot).trim() || "human";
-  project = passGate(project, "queueApproved", approver, now);
-  writeProject(projectRoot, project);
-  appendJournal(projectRoot, {
-    ts: now,
-    actor: approver,
-    type: "gate-passed",
-    target: "queueApproved",
-    summary: `Queue approved by ${approver}`,
-  });
-  renderFeatureQueue(projectRoot, existingFeatures, project);
-  log(`✓ Queue approved by ${approver}`);
-  log("✓ docs/sandwich/feature-queue.md");
-  throw new Error("SKIP");
-}
-
 // Special case: mark a feature done — no extraction, just closes out one
-// feature once implementation is verified. Mirrors the --approve branch.
+// feature once implementation is verified. Same early-exit,
+// guard-then-mutate-then-render shape used elsewhere in this file.
 if (markDone) {
   if (!featureIdArg) {
     throw new Error("Usage: /prep --done F-XXX [commit-sha...]");

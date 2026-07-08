@@ -41,12 +41,12 @@ For `/status --report`:
 node --experimental-strip-types $SANDWICH_ROOT/prep/scripts/status.ts --report
 ```
 
-The dashboard covers: gates, lifecycle counts, flags, **Awaiting you** (open
+The dashboard covers: lifecycle counts, flags, **Awaiting you** (open
 questions, changed features, stale specs, orphans, features whose spec shows
 every acceptance criterion checked but aren't marked done yet, missing spec
-files, decisions recorded in the journal but absent from decisions.json, queue
-approval), and recent activity. Do not hand-assemble these — the script is
-the single source of the numbers.
+files, decisions recorded in the journal but absent from decisions.json), and
+recent activity. Do not hand-assemble these — the script is the single source
+of the numbers.
 
 ## Commands
 
@@ -58,5 +58,5 @@ the single source of the numbers.
 ## Key principle
 
 This is the morning-check command. If `Awaiting you` is empty, the queue is
-approved and current, and you can pick a feature and open its
+current, and you can pick a feature and open its
 `docs/sandwich/specs/F-XXX.md` and hand it off to Superpowers brainstorming.

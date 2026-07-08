@@ -151,17 +151,10 @@ function normalizeProject(raw: unknown): unknown {
       clientQuestions: bh.clientQuestions ?? bh.client_questions ?? bh["client-questions.md"] ?? null,
     };
   }
-  if (!obj.gates || typeof obj.gates !== "object") {
-    obj.gates = { briefApproved: { passed: false }, queueApproved: { passed: false } };
-  } else {
-    const g = camelCaseKeys(obj.gates as Record<string, unknown>);
-    const isGateObj = (v: unknown) => v && typeof v === "object" && "passed" in (v as Record<string, unknown>);
-    if (!isGateObj(g.briefApproved))
-      g.briefApproved = { passed: false };
-    if (!isGateObj(g.queueApproved))
-      g.queueApproved = { passed: false };
-    obj.gates = g;
-  }
+  // Legacy on-disk "gates" key: ProjectSchema no longer has this field, and
+  // it isn't .strict(), so zod silently drops it on parse — no code needed
+  // here to strip it. (See registry.selfcheck.ts's "readProject normalizes
+  // snake_case LLM project" test for the regression check.)
   return obj;
 }
 
@@ -172,26 +165,28 @@ function normalizeFeature(raw: unknown): unknown {
   // Weaker models pluralize the score key and stash the number alongside it.
   if (obj.scores && !obj.score) { obj.score = obj.scores; delete obj.scores; }
 
-  const validLifecycles = ["proposed", "queued", "speced", "building", "review", "done", "deferred", "rejected"];
+  const validLifecycles = ["queued", "speced", "building", "review", "done", "deferred", "rejected"];
   // LLMs often wrap lifecycle in an object: { status: "blocked", blocked_by: [...] }
   if (obj.lifecycle && typeof obj.lifecycle === "object") {
     const lc = obj.lifecycle as Record<string, unknown>;
     const status = lc.status as string | undefined;
-    obj.lifecycle = validLifecycles.includes(status ?? "") ? status : "proposed";
+    obj.lifecycle = validLifecycles.includes(status ?? "") ? status : "queued";
   }
   // LLMs also use "status" instead of "lifecycle"
   if (!obj.lifecycle && obj.status && typeof obj.status === "string") {
-    obj.lifecycle = validLifecycles.includes(obj.status) ? obj.status : "proposed";
+    obj.lifecycle = validLifecycles.includes(obj.status) ? obj.status : "queued";
   }
-  if (!obj.lifecycle) obj.lifecycle = "proposed";
-  // An invalid lifecycle string ("ready"/"blocked" etc.) is recovered from a
-  // valid `status` sibling when present, else falls back to "proposed".
-  // Blocked-ness is orthogonal (tracked in blockedBy), never a lifecycle value.
+  if (!obj.lifecycle) obj.lifecycle = "queued";
+  // An invalid lifecycle string ("ready"/"blocked"/the old "proposed" etc.) is
+  // recovered from a valid `status` sibling when present, else falls back to
+  // "queued". Blocked-ness is orthogonal (tracked in blockedBy), never a
+  // lifecycle value. This is also how old on-disk "proposed" data migrates:
+  // it's simply not in validLifecycles anymore, so it falls through here.
   if (typeof obj.lifecycle === "string" && !validLifecycles.includes(obj.lifecycle)) {
     obj.lifecycle =
       typeof obj.status === "string" && validLifecycles.includes(obj.status)
         ? obj.status
-        : "proposed";
+        : "queued";
   }
 
   if (!obj.type) obj.type = "feature";
@@ -496,10 +491,6 @@ export function initProject(name: string, now: string): Project {
       technicalNotes: null,
       clientQuestions: null,
     },
-    gates: {
-      briefApproved: { passed: false },
-      queueApproved: { passed: false },
-    },
     createdAt: now,
     updatedAt: now,
   };
@@ -635,7 +626,6 @@ function displayStatus(f: Feature): string {
   else if (f.flags.orphaned) base = "⚠️ orphaned (dropped from brief)";
   else if (f.blockedBy.length > 0) base = `🔴 blocked (${f.blockedBy.join(", ")})`;
   else if (f.flags.needsReanalysis) base = "⚠️ changed — re-review";
-  else if (lc === "proposed") base = "🟡 proposed";
   else base = "🟡 queued";
   // Stale spec is orthogonal to lifecycle — a built/speced feature can drift.
   if (f.flags.stale) base += " · 📋⚠️ spec stale";
@@ -670,7 +660,6 @@ export function renderFeatureQueue(
     `# Feature Queue — ${project.name}`,
     "",
     `> Projection of \`.sandwich/registry/\` · ${features.length} features · generated ${new Date().toISOString().split("T")[0]}`,
-    `> Gates: brief ${project.gates.briefApproved.passed ? "✅" : "⬜"} · queue ${project.gates.queueApproved.passed ? "✅" : "⬜"}`,
     "",
   ];
 
@@ -770,13 +759,10 @@ export function renderStatus(
   const out: string[] = [];
   out.push(`SANDWICH STATUS — ${project.name}`);
   out.push("─".repeat(48));
-  out.push(
-    `Gates:  brief ${project.gates.briefApproved.passed ? "✅" : "⬜"}   queue ${project.gates.queueApproved.passed ? "✅" : "⬜"}`
-  );
   out.push("");
   out.push("Lifecycle:");
   out.push(
-    `  proposed ${count("proposed")} · queued ${count("queued")} · speced ${count("speced")} · building ${count("building")} · review ${count("review")} · done ${count("done")} · deferred ${count("deferred")} · rejected ${count("rejected")}`
+    `  queued ${count("queued")} · speced ${count("speced")} · building ${count("building")} · review ${count("review")} · done ${count("done")} · deferred ${count("deferred")} · rejected ${count("rejected")}`
   );
   out.push("");
   out.push(
@@ -798,8 +784,6 @@ export function renderStatus(
     todos.push(
       `Confirm & mark done — every AC checked: ${audit.readyToMarkDone.join(", ")} → /prep --done ${audit.readyToMarkDone[0]}`
     );
-  if (!project.gates.queueApproved.passed && features.length)
-    todos.push("Approve the queue once you're happy with priorities: /prep --approve");
   if (audit?.missingSpecs.length)
     todos.push(
       `Write missing spec file(s): ${audit.missingSpecs.join(", ")} → docs/sandwich/specs/, then run render-specs + verify-complete`

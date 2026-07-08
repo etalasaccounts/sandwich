@@ -112,7 +112,7 @@ Superpowers walks you through: approach options → design approval → implemen
 /status
 ```
 
-Shows gates, open client questions (and what they block), stale features, and recommended next action.
+Shows open client questions (and what they block), stale features, and recommended next action.
 
 ```
 /status --report
@@ -129,7 +129,6 @@ Full maintenance report — useful for billing evidence and SLA logs.
 | `/order` | Generate or update brief artifacts (auto-detects mode) |
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
-| `/prep --approve` | Approve the queue (passes the `queueApproved` gate) |
 | `/prep --done F-001 [sha...]` | Mark a feature done and record its commits |
 | `/prep F-001` | Deep impact analysis for a specific feature |
 | `/status` | Morning-check dashboard |
@@ -156,7 +155,7 @@ The registry lives in `.sandwich/registry/` and is committed to git. It never lo
 
 | File | Purpose |
 |------|---------|
-| `project.json` | Project metadata, brief hashes, gate states |
+| `project.json` | Project metadata, brief hashes |
 | `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides |
 | `questions.json` | Client questions ↔ answers ↔ what they unblock |
 | `decisions.json` | ADR-lite scope/architecture decisions |

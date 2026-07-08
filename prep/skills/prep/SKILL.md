@@ -24,7 +24,7 @@ written automatically to keep machine state hidden.
 
 | File | Purpose |
 |------|---------|
-| `project.json` | Project metadata, brief hashes, gate states |
+| `project.json` | Project metadata, brief hashes |
 | `features.json` | Canonical feature ledger — stable IDs, lifecycle, scores, human overrides, spec links, commits |
 | `questions.json` | Client questions ↔ answers ↔ what they unblock |
 | `decisions.json` | ADR-lite scope/architecture decisions |
@@ -154,7 +154,6 @@ Agent output → JSON parse → Schema validate → Confidence check
 | `/prep [feature-id]` | Deep impact analysis for specific feature |
 | `/prep --impact-only [feature-id]` | Skip prioritization, just analyze impact |
 | `/prep --queue-only` | Update queue without recommendation |
-| `/prep --approve` | Pass the `queueApproved` gate — confirms scores/overrides/removals |
 | `/prep --done F-XXX [commit-sha...]` | Mark a feature done, recording any commit SHAs |
 
 ## Key principles
@@ -227,7 +226,7 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
     "type": "feature",
     "module": "Auth",
     "confidence": "stated",
-    "lifecycle": "proposed",
+    "lifecycle": "queued",
     "flags": { "needsReanalysis": false, "stale": false, "orphaned": false },
     "provenance": { "file": "prd.md", "lines": "45-52", "briefHash": "a3f2c1d8" },
     "dependsOn": [],
@@ -254,7 +253,7 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 | `id` | string | `F-001`, `F-002`, ... (zero-padded 3 digits) |
 | `type` | enum | `feature`, `improvement`, `bugfix`, `infrastructure` |
 | `confidence` | enum | `stated`, `discussed`, `inferred`, `assumed` |
-| `lifecycle` | enum | `proposed`, `queued`, `speced`, `building`, `review`, `done`, `deferred`, `rejected` |
+| `lifecycle` | enum | `queued`, `speced`, `building`, `review`, `done`, `deferred`, `rejected` |
 | `provenance` | object | `{ "file": "prd.md", "lines": "45-52", "briefHash": "<16-char sha256 prefix>" }` |
 | `score.urgency.factor` | number | `0.8`, `1.0`, `1.2`, or `1.5` only |
 | `score.priority` | number | Computed: `(impact.score × urgency.factor × (10 − risk.score)) ÷ effort.score`, 0–100 |
@@ -276,10 +275,6 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
     "technicalNotes": null,
     "clientQuestions": "d6i5f4a1b2c7d0e9"
   },
-  "gates": {
-    "briefApproved": { "passed": false },
-    "queueApproved": { "passed": false }
-  },
   "createdAt": "2026-06-29T12:00:00.000Z",
   "updatedAt": "2026-06-29T12:00:00.000Z"
 }
@@ -289,7 +284,6 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 |-------|------|-------|
 | `schemaVersion` | number | Always `1` |
 | `briefHashes.*` | string or null | SHA-256 prefix (16 chars) of each brief artifact |
-| `gates.*` | object | `{ "passed": boolean, "by"?: string, "at"?: string }` |
 
 ### questions.json — bare JSON array
 
@@ -366,7 +360,7 @@ Registry files go in `.sandwich/registry/`. Create the directory if it doesn't e
 |-------|---------|
 | `{ "features": [...] }` | bare array `[...]` |
 | `{ "questions": [...] }` | bare array `[...]` |
-| `"lifecycle": "ready"` | `"lifecycle": "proposed"` |
+| `"lifecycle": "ready"` | `"lifecycle": "queued"` |
 | `"lifecycle": "blocked"` | `"lifecycle": "queued"` + `"blockedBy": ["Q1", ...]` (question ids) |
 | `"blockedBy": ["F-002"]` | `"blockedBy": ["Q1"]` — blockedBy holds question ids, not feature ids (`dependsOn`/`blocks` are for feature ids) |
 | `"question": "..."` | `"text": "..."` |

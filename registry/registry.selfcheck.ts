@@ -14,8 +14,6 @@ import {
   attachScores,
   effectivePriority,
   computePriority,
-  passGate,
-  resetGate,
   markFeatureDone,
   isEligible,
   parseClientQuestions,
@@ -82,10 +80,10 @@ const existing: Feature[] = mergeExtraction(
   now
 );
 
-check("a brand-new extraction mints F-001 as proposed", () => {
+check("a brand-new extraction mints F-001 as queued", () => {
   assert.equal(existing.length, 1);
   assert.equal(existing[0].id, "F-001");
-  assert.equal(existing[0].lifecycle, "proposed");
+  assert.equal(existing[0].lifecycle, "queued");
 });
 
 check("a reworded title keeps its stable ID (no renumber)", () => {
@@ -194,18 +192,6 @@ check("attachScores stamps deterministic priority and formula version", () => {
   assert.equal(withScores[0].score?.formulaVersion, 1);
 });
 
-// --- gates ---
-check("passGate marks a gate passed with attribution", () => {
-  const p = passGate(initProject("X", now), "queueApproved", "ria", now);
-  assert.equal(p.gates.queueApproved.passed, true);
-  assert.equal(p.gates.queueApproved.by, "ria");
-});
-check("resetGate clears a passed gate and is a no-op when already open", () => {
-  const passed = passGate(initProject("X", now), "queueApproved", "ria", now);
-  assert.equal(resetGate(passed, "queueApproved", now).gates.queueApproved.passed, false);
-  const open = initProject("X", now);
-  assert.equal(resetGate(open, "queueApproved", now), open); // unchanged reference
-});
 check("markFeatureDone sets lifecycle done and merges commits without duplicates", () => {
   const before: Feature = { ...speced[0], commits: ["abc111"] };
   const after = markFeatureDone(before, ["abc111", "def222"], "2026-07-03T00:00:00.000Z");
@@ -266,7 +252,6 @@ check("renderStatus surfaces the actions awaiting a human", () => {
   );
   assert.ok(txt.includes("Awaiting you"));
   assert.ok(txt.includes("F-001"), "should surface the stale spec feature id");
-  assert.ok(txt.includes("/prep --approve"), "should prompt to approve the queue");
   assert.ok(txt.includes("open client question"), "should surface open questions");
 });
 
@@ -338,7 +323,6 @@ try {
     const back = readProject(dir);
     assert.equal(back?.name, "SwissBelhotel");
     assert.equal(back?.schemaVersion, 1);
-    assert.equal(back?.gates.queueApproved.passed, false);
   });
 
   check("features round-trip and defaults are applied on read", () => {
@@ -385,6 +369,7 @@ try {
     const result = readFeatures(roguedir);
     assert.equal(result.length, 1);
     assert.equal(result[0].id, "F-001");
+    assert.equal(result[0].lifecycle, "queued", "old on-disk \"proposed\" must migrate to \"queued\" on read");
   });
 
   check("readFeatures normalizes LLM-invented field names and fills defaults", () => {
@@ -399,7 +384,7 @@ try {
     const result = readFeatures(roguedir);
     assert.equal(result.length, 1);
     assert.equal(result[0].id, "F-002");
-    assert.equal(result[0].lifecycle, "proposed");
+    assert.equal(result[0].lifecycle, "queued");
     assert.equal(result[0].confidence, "inferred");
     assert.equal(result[0].module, "General");
     assert.equal(result[0].type, "feature");
@@ -412,7 +397,7 @@ try {
     writeFileSync(join(rogueReg, "features.json"), JSON.stringify({
       features: [
         { id: "F-001", title: "Good", type: "feature", module: "X", confidence: "stated",
-          lifecycle: "proposed", fingerprint: "fp1", provenance: { file: "a.md", briefHash: "h" },
+          lifecycle: "queued", fingerprint: "fp1", provenance: { file: "a.md", briefHash: "h" },
           createdAt: now, updatedAt: now },
         { garbage: true },
         42,
@@ -437,8 +422,7 @@ try {
     assert.ok(result !== null);
     assert.equal(result!.name, "SwissBelhotel Maintenance");
     assert.equal(result!.schemaVersion, 1);
-    assert.equal(result!.gates.briefApproved.passed, false);
-    assert.equal(result!.gates.queueApproved.passed, false);
+    assert.ok(!("gates" in (result as object)), "legacy gates key must be silently dropped, not surfaced");
     assert.equal(result!.createdAt, "2026-06-29T00:00:00.000Z");
   });
 
@@ -510,7 +494,7 @@ check("gate recomputes feature priority from dimensions, ignoring the model's nu
   const res = canonicalizeRegistryContent("features.json", raw);
   assert.equal(res.ok, true);
   const parsed = JSON.parse((res as { content: string }).content);
-  assert.equal(parsed[0].lifecycle, "proposed");
+  assert.equal(parsed[0].lifecycle, "queued");
   assert.equal(parsed[0].score.priority, computePriority({ impact: 9, effort: 5, risk: 3, urgency: 1.5 }));
   assert.notEqual(parsed[0].score.priority, 999);
   assert.equal(parsed[0].score.formulaVersion, 1);
