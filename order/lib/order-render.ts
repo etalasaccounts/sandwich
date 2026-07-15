@@ -111,6 +111,14 @@ export function renderPrd(doc: PrdDoc, prev?: PrdDoc): string {
   return withChangelog(lines.join("\n"), doc, prev);
 }
 
+function renderStepFields(step: UserFlowsDoc["flows"][number]["steps"][number]): string[] {
+  if (!step.fields || step.fields.length === 0) return [];
+  return step.fields.map((f) => {
+    const opts = f.options && f.options.length ? `: ${f.options.join(", ")}` : "";
+    return `   - ${f.name} (${f.type}${f.required ? ", required" : ""})${opts}`;
+  });
+}
+
 export function renderUserFlows(doc: UserFlowsDoc, prev?: UserFlowsDoc): string {
   const lines: string[] = [
     `# User Flows`,
@@ -125,7 +133,7 @@ export function renderUserFlows(doc: UserFlowsDoc, prev?: UserFlowsDoc): string 
       `- **Confidence:** ${mark(f.confidence)}`,
       "",
       `**Steps:**`,
-      ...f.steps.map((s, i) => `${i + 1}. ${s}`),
+      ...f.steps.flatMap((s, i) => [`${i + 1}. ${s.text}`, ...renderStepFields(s)]),
       "",
       `**Outcome:** ${f.outcome}`,
       "",

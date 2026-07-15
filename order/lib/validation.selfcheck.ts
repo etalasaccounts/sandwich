@@ -102,10 +102,15 @@ check("renderPrd emits the confidence marker, not a raw enum word", () => {
   assert.ok(md.includes("# Acme — Product Requirements Document"));
 });
 check("renderUserFlows lists numbered steps", () => {
-  const md = renderUserFlows({ flows: [{ id: "UF-001", title: "Login", actor: "User", trigger: "click", steps: ["open", "submit"], outcome: "in", confidence: "stated", needsUI: true }] });
+  const md = renderUserFlows({ flows: [{ id: "UF-001", title: "Login", actor: "User", trigger: "click", steps: [{ text: "open" }, { text: "submit" }], outcome: "in", confidence: "stated", needsUI: true }] });
   assert.ok(md.includes("### UF-001 — Login"));
   assert.ok(md.includes("1. open"));
   assert.ok(md.includes("2. submit"));
+});
+check("renderUserFlows lists a step's fields as a nested list", () => {
+  const md = renderUserFlows({ flows: [{ id: "UF-001", title: "Checkout", actor: "User", trigger: "click", steps: [{ text: "enter shipping address", fields: [{ name: "city", type: "text", required: true }] }], outcome: "done", confidence: "stated", needsUI: true }] });
+  assert.ok(md.includes("1. enter shipping address"));
+  assert.ok(md.includes("city (text, required)"));
 });
 
 check("diffOrderDoc reports a changed leaf with its path", () => {
