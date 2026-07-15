@@ -198,22 +198,23 @@ check("scaffoldWireframeApp copies the real template into a fresh project and is
   }
 });
 
-import { renderIndexHtml } from "./wireframe-render.ts";
+import { renderNavHubPage } from "./wireframe-render.ts";
 
-const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", file: "homepage.html", flows: ["UF-001"], flags: { stale: false, orphaned: false }, staleReasons: [] };
+const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], flags: { stale: false, orphaned: false }, staleReasons: [] };
 
-check("renderIndexHtml emits a link and name for every screen in the manifest", () => {
-  const html = renderIndexHtml({ screens: [RENDERED_SCREEN] });
-  assert.ok(html.includes('href="homepage.html"'));
-  assert.ok(html.includes("Homepage"));
+check("renderNavHubPage emits a Link and name for every screen in the manifest", () => {
+  const tsx = renderNavHubPage({ screens: [RENDERED_SCREEN] });
+  assert.ok(tsx.includes('href={"/homepage"}'));
+  assert.ok(tsx.includes('"Homepage"'));
+  assert.ok(tsx.includes('import Link from "next/link"'));
 });
-check("renderIndexHtml surfaces the stale flag as a visible badge", () => {
-  const html = renderIndexHtml({ screens: [{ ...RENDERED_SCREEN, flags: { stale: true, orphaned: false }, staleReasons: ["UF-001 content changed"] }] });
-  assert.ok(html.includes("STALE"));
+check("renderNavHubPage surfaces the stale flag inline with the name", () => {
+  const tsx = renderNavHubPage({ screens: [{ ...RENDERED_SCREEN, flags: { stale: true, orphaned: false }, staleReasons: ["UF-001 content changed"] }] });
+  assert.ok(tsx.includes("STALE"));
 });
-check("renderIndexHtml surfaces the orphaned flag as a visible badge", () => {
-  const html = renderIndexHtml({ screens: [{ ...RENDERED_SCREEN, flags: { stale: false, orphaned: true }, staleReasons: [] }] });
-  assert.ok(html.includes("ORPHANED"));
+check("renderNavHubPage surfaces the orphaned flag inline with the name", () => {
+  const tsx = renderNavHubPage({ screens: [{ ...RENDERED_SCREEN, flags: { stale: false, orphaned: true }, staleReasons: [] }] });
+  assert.ok(tsx.includes("ORPHANED"));
 });
 
 console.log(`\n${n} wireframe checks passed.`);
