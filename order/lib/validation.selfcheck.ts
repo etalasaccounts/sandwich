@@ -60,14 +60,24 @@ check("validatePrdDoc rejects a bad confidence enum", () => {
   assert.equal(validatePrdDoc(bad).valid, false);
 });
 check("validateUserFlowsDoc requires UF-### ids and >=1 step", () => {
-  assert.equal(validateUserFlowsDoc({ flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated", needsUI: true }] }).valid, true);
+  assert.equal(validateUserFlowsDoc({ flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: [{ text: "s" }], outcome: "o", confidence: "stated", needsUI: true }] }).valid, true);
   assert.equal(validateUserFlowsDoc({ flows: [{ id: "F1", title: "t", actor: "a", trigger: "x", steps: [], outcome: "o", confidence: "stated", needsUI: true }] }).valid, false);
 });
 check("validateUserFlowsDoc requires needsUI on every flow", () => {
-  const withNeedsUI = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated", needsUI: true }] };
+  const withNeedsUI = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: [{ text: "s" }], outcome: "o", confidence: "stated", needsUI: true }] };
   assert.equal(validateUserFlowsDoc(withNeedsUI).valid, true);
-  const withoutNeedsUI = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: ["s"], outcome: "o", confidence: "stated" }] };
+  const withoutNeedsUI = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: [{ text: "s" }], outcome: "o", confidence: "stated" }] };
   assert.equal(validateUserFlowsDoc(withoutNeedsUI).valid, false);
+});
+check("validateUserFlowsDoc accepts a step with a populated fields array", () => {
+  const doc = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: [{ text: "enter shipping address", fields: [{ name: "city", type: "text", required: true }, { name: "country", type: "select", options: ["ID", "SG"] }] }], outcome: "o", confidence: "stated", needsUI: true }] };
+  const r = validateUserFlowsDoc(doc);
+  assert.equal(r.valid, true);
+  assert.equal(r.data?.flows[0].steps[0].fields?.[0].name, "city");
+});
+check("validateUserFlowsDoc rejects a field with an invalid type enum", () => {
+  const doc = { flows: [{ id: "UF-001", title: "t", actor: "a", trigger: "x", steps: [{ text: "s", fields: [{ name: "x", type: "phone" }] }], outcome: "o", confidence: "stated", needsUI: true }] };
+  assert.equal(validateUserFlowsDoc(doc).valid, false);
 });
 check("validateTechNotesDoc requires stack or architectureNotes", () => {
   assert.equal(validateTechNotesDoc({ stack: [{ layer: "db", choice: "pg", rationale: "ok" }], architectureNotes: [], risks: [], openDecisions: [] }).valid, true);
