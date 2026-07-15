@@ -52,7 +52,7 @@ check("validateWireframeManifest rejects a malformed screen id inside navigatesT
   assert.equal(r.valid, false);
 });
 
-import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -162,6 +162,37 @@ check("ensureWireframeDir writes a gitignore covering node_modules, .next, and t
     assert.ok(gitignore.includes("node_modules"));
     assert.ok(gitignore.includes(".next"));
     assert.ok(gitignore.includes(".snapshot.json"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+import { fileURLToPath } from "node:url";
+import { dirname, join as pj2 } from "node:path";
+import { scaffoldWireframeApp } from "./wireframe-lib.ts";
+
+const REAL_TEMPLATE_DIR = pj2(dirname(fileURLToPath(import.meta.url)), "..", "template");
+
+check("scaffoldWireframeApp copies the real template into a fresh project and is idempotent", () => {
+  const dir = mkdtempSync(join(tmpdir(), "wireframe-scaffold-"));
+  try {
+    const created = scaffoldWireframeApp(REAL_TEMPLATE_DIR, dir);
+    assert.ok(created.length > 10, "expected the full template tree to be copied");
+
+    const paths = getWireframePaths(dir);
+    assert.ok(existsSync(pj2(paths.root, "package.json")));
+    assert.ok(existsSync(pj2(paths.root, "components", "ui", "button.tsx")));
+    assert.ok(existsSync(pj2(paths.root, "components", "wireframe", "Navbar.tsx")));
+    assert.ok(existsSync(pj2(paths.root, "app", "layout.tsx")));
+
+    const buttonSrc = readFileSync(pj2(paths.root, "components", "ui", "button.tsx"), "utf8");
+    assert.ok(buttonSrc.includes("export const Button"));
+
+    // Simulate a human hand-editing a scaffolded file, then re-run — must not be clobbered.
+    writeFileSync(pj2(paths.root, "components", "wireframe", "Navbar.tsx"), "// hand-edited\n", "utf8");
+    scaffoldWireframeApp(REAL_TEMPLATE_DIR, dir);
+    const navbarAfterRescaffold = readFileSync(pj2(paths.root, "components", "wireframe", "Navbar.tsx"), "utf8");
+    assert.equal(navbarAfterRescaffold, "// hand-edited\n");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
