@@ -14,16 +14,17 @@ import { validateWireframeManifest } from "./wireframe-schemas.ts";
 const VALID_SCREEN = {
   id: "SCR-001",
   name: "Homepage",
-  file: "homepage.html",
+  route: "/homepage",
   flows: ["UF-001"],
 };
 
-check("validateWireframeManifest accepts a minimal valid manifest and fills flag defaults", () => {
+check("validateWireframeManifest accepts a minimal valid manifest and fills flag/navigatesTo defaults", () => {
   const r = validateWireframeManifest({ screens: [VALID_SCREEN] });
   assert.equal(r.valid, true);
   assert.equal(r.data!.screens[0].flags.stale, false);
   assert.equal(r.data!.screens[0].flags.orphaned, false);
   assert.deepEqual(r.data!.screens[0].staleReasons, []);
+  assert.deepEqual(r.data!.screens[0].navigatesTo, []);
 });
 check("validateWireframeManifest rejects a malformed screen id", () => {
   const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, id: "S1" }] });
@@ -35,6 +36,19 @@ check("validateWireframeManifest rejects an empty flows array", () => {
 });
 check("validateWireframeManifest rejects a malformed flow id inside flows", () => {
   const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, flows: ["F1"] }] });
+  assert.equal(r.valid, false);
+});
+check("validateWireframeManifest rejects a route without a leading slash", () => {
+  const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, route: "homepage" }] });
+  assert.equal(r.valid, false);
+});
+check("validateWireframeManifest accepts an explicit navigatesTo list", () => {
+  const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, navigatesTo: ["SCR-002"] }] });
+  assert.equal(r.valid, true);
+  assert.deepEqual(r.data!.screens[0].navigatesTo, ["SCR-002"]);
+});
+check("validateWireframeManifest rejects a malformed screen id inside navigatesTo", () => {
+  const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, navigatesTo: ["not-a-screen-id"] }] });
   assert.equal(r.valid, false);
 });
 

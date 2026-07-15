@@ -3,8 +3,9 @@ import { z } from "zod";
 export const ScreenSchema = z.object({
   id: z.string().regex(/^SCR-\d{3}$/, "Screen id must be SCR-XXX format"),
   name: z.string().min(1),
-  file: z.string().min(1),
+  route: z.string().regex(/^\/[a-z0-9-]*$/, "Route must be a lowercase-hyphenated path starting with /, e.g. /plp"),
   flows: z.array(z.string().regex(/^UF-\d{3}$/, "Flow id must be UF-XXX")).min(1, "A screen needs at least one flow"),
+  navigatesTo: z.array(z.string().regex(/^SCR-\d{3}$/, "Screen id must be SCR-XXX")).default([]),
   flags: z.object({
     stale: z.boolean().default(false),
     orphaned: z.boolean().default(false),
