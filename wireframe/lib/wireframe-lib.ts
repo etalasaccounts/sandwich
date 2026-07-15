@@ -35,6 +35,7 @@ export function getWireframePaths(projectRoot: string): WireframePaths {
 export function ensureWireframeDir(projectRoot: string): void {
   const paths = getWireframePaths(projectRoot);
   mkdirSync(paths.root, { recursive: true });
+  mkdirSync(paths.appDir, { recursive: true });
   if (!existsSync(paths.gitignore)) {
     writeFileSync(
       paths.gitignore,
