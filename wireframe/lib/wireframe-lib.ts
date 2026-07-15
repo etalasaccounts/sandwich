@@ -1,5 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join } from "node:path";
 import { hasOutputChanged, hashOutput } from "../../lib/agent-wrapper.ts";
 import { validateWireframeManifest } from "./wireframe-schemas.ts";
 import type { WireframeManifest } from "./wireframe-schemas.ts";
@@ -9,17 +16,19 @@ export interface WireframePaths {
   manifest: string;
   snapshot: string;
   gitignore: string;
-  indexHtml: string;
+  appDir: string;
+  navHubPage: string;
 }
 
 export function getWireframePaths(projectRoot: string): WireframePaths {
-  const root = join(projectRoot, "docs", "wireframes");
+  const root = join(projectRoot, "wireframes");
   return {
     root,
     manifest: join(root, "manifest.json"),
     snapshot: join(root, ".snapshot.json"),
     gitignore: join(root, ".gitignore"),
-    indexHtml: join(root, "index.html"),
+    appDir: join(root, "app"),
+    navHubPage: join(root, "app", "page.tsx"),
   };
 }
 
@@ -27,8 +36,62 @@ export function ensureWireframeDir(projectRoot: string): void {
   const paths = getWireframePaths(projectRoot);
   mkdirSync(paths.root, { recursive: true });
   if (!existsSync(paths.gitignore)) {
-    writeFileSync(paths.gitignore, ".snapshot.json\n", "utf8");
+    writeFileSync(
+      paths.gitignore,
+      "node_modules\n.next\n*.tsbuildinfo\nnext-env.d.ts\n.snapshot.json\n",
+      "utf8"
+    );
   }
+}
+
+// Maps a screen's manifest route to the Next.js App Router file it owns.
+// "/" is the nav hub itself; every other route gets its own segment dir.
+export function routeToFilePath(route: string): string {
+  if (!route.startsWith("/")) {
+    throw new Error(`Route must start with "/": got "${route}"`);
+  }
+  const segment = route.slice(1);
+  return segment === "" ? join("app", "page.tsx") : join("app", segment, "page.tsx");
+}
+
+// Recursively copies every file under templateDir into the project's
+// wireframes/ root, skipping any file that already exists on disk. Used
+// once, on the very first /wireframe run, to scaffold the Next.js + shadcn
+// app — never re-run against an existing wireframes/ directory.
+export function scaffoldWireframeApp(templateDir: string, projectRoot: string): string[] {
+  const destRoot = getWireframePaths(projectRoot).root;
+  const created: string[] = [];
+
+  function copyDir(srcDir: string, relPath: string): void {
+    for (const entry of readdirSync(srcDir, { withFileTypes: true })) {
+      const srcPath = join(srcDir, entry.name);
+      const rel = relPath ? join(relPath, entry.name) : entry.name;
+      if (entry.isDirectory()) {
+        copyDir(srcPath, rel);
+        continue;
+      }
+      const destPath = join(destRoot, rel);
+      if (existsSync(destPath)) continue;
+      mkdirSync(dirname(destPath), { recursive: true });
+      copyFileSync(srcPath, destPath);
+      created.push(rel);
+    }
+  }
+
+  copyDir(templateDir, "");
+  return created;
+}
+
+export interface NeedsUIFlowField {
+  name: string;
+  type: "text" | "email" | "number" | "date" | "select" | "textarea" | "checkbox";
+  required?: boolean;
+  options?: string[];
+}
+
+export interface NeedsUIFlowStep {
+  text: string;
+  fields?: NeedsUIFlowField[];
 }
 
 export interface NeedsUIFlow {
@@ -36,7 +99,7 @@ export interface NeedsUIFlow {
   title: string;
   actor: string;
   trigger: string;
-  steps: string[];
+  steps: NeedsUIFlowStep[];
   outcome: string;
 }
 

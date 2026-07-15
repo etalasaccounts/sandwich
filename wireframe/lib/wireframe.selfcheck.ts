@@ -52,7 +52,7 @@ check("validateWireframeManifest rejects a malformed screen id inside navigatesT
   assert.equal(r.valid, false);
 });
 
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -63,16 +63,27 @@ import {
   diffFlows,
   readManifest,
   writeManifest,
+  routeToFilePath,
 } from "./wireframe-lib.ts";
 
-const FLOW_A = { id: "UF-001", title: "Browse", actor: "User", trigger: "opens site", steps: ["view products"], outcome: "sees grid" };
-const FLOW_B = { id: "UF-002", title: "Checkout", actor: "User", trigger: "clicks buy", steps: ["pay"], outcome: "order placed" };
+const FLOW_A = { id: "UF-001", title: "Browse", actor: "User", trigger: "opens site", steps: [{ text: "view products" }], outcome: "sees grid" };
+const FLOW_B = { id: "UF-002", title: "Checkout", actor: "User", trigger: "clicks buy", steps: [{ text: "pay" }], outcome: "order placed" };
 
-check("getWireframePaths returns paths rooted under docs/wireframes", () => {
+check("getWireframePaths returns paths rooted under wireframes/", () => {
   const paths = getWireframePaths("/tmp/proj");
-  assert.ok(paths.manifest.endsWith("docs/wireframes/manifest.json"));
-  assert.ok(paths.snapshot.endsWith("docs/wireframes/.snapshot.json"));
-  assert.ok(paths.indexHtml.endsWith("docs/wireframes/index.html"));
+  assert.ok(paths.manifest.endsWith("wireframes/manifest.json"));
+  assert.ok(paths.snapshot.endsWith("wireframes/.snapshot.json"));
+  assert.ok(paths.navHubPage.endsWith("wireframes/app/page.tsx"));
+  assert.ok(paths.appDir.endsWith("wireframes/app"));
+});
+
+check("routeToFilePath maps a screen route to its page.tsx location", () => {
+  assert.equal(routeToFilePath("/plp"), join("app", "plp", "page.tsx"));
+  assert.equal(routeToFilePath("/"), join("app", "page.tsx"));
+});
+
+check("routeToFilePath rejects a route without a leading slash", () => {
+  assert.throws(() => routeToFilePath("plp"));
 });
 
 check("writeSnapshot + readSnapshot round-trip flow content hashes", () => {
@@ -92,7 +103,7 @@ check("diffFlows flags a changed flow and leaves an untouched one alone", () => 
   try {
     writeSnapshot(dir, [FLOW_A, FLOW_B]);
     const snapshot = readSnapshot(dir);
-    const changedB = { ...FLOW_B, steps: ["pay", "confirm"] };
+    const changedB = { ...FLOW_B, steps: [{ text: "pay" }, { text: "confirm" }] };
     const diff = diffFlows([FLOW_A, changedB], snapshot);
     assert.equal(diff.changedIds.has("UF-002"), true);
     assert.equal(diff.changedIds.has("UF-001"), false);
@@ -119,7 +130,7 @@ check("diffFlows detects new and removed flow ids", () => {
 check("writeManifest + readManifest round-trip a valid manifest", () => {
   const dir = mkdtempSync(join(tmpdir(), "wireframe-io-"));
   try {
-    const manifest = { screens: [{ id: "SCR-001", name: "Homepage", file: "homepage.html", flows: ["UF-001"], flags: { stale: false, orphaned: false }, staleReasons: [] }] };
+    const manifest = { screens: [{ id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], flags: { stale: false, orphaned: false }, staleReasons: [] }] };
     const path = writeManifest(dir, manifest);
     assert.ok(path.endsWith("manifest.json"));
     const back = readManifest(dir);
@@ -137,6 +148,20 @@ check("readManifest returns undefined for structurally invalid manifest JSON", (
     writeFileSync(paths.manifest, JSON.stringify({ screens: [] }), "utf8");
     const back = readManifest(dir);
     assert.equal(back, undefined);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+check("ensureWireframeDir writes a gitignore covering node_modules, .next, and the snapshot", () => {
+  const dir = mkdtempSync(join(tmpdir(), "wireframe-io-"));
+  try {
+    ensureWireframeDir(dir);
+    const paths = getWireframePaths(dir);
+    const gitignore = readFileSync(paths.gitignore, "utf8");
+    assert.ok(gitignore.includes("node_modules"));
+    assert.ok(gitignore.includes(".next"));
+    assert.ok(gitignore.includes(".snapshot.json"));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
