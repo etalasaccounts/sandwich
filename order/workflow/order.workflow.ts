@@ -211,13 +211,13 @@ const [prdDoc, flowsDoc, techDoc, questionsDoc] = await Promise.all([
     "write-client-questions"),
 ]);
 
-const w1 = writeOrderArtifact(projectRoot, "prd", prdDoc, renderPrd(prdDoc, prevDocs.prd));
+const w1 = writeOrderArtifact(projectRoot, "prd", prdDoc, renderPrd(prdDoc));
 const w2 = writeOrderArtifact(projectRoot, "userFlows", flowsDoc, renderUserFlows(flowsDoc, prevDocs.userFlows));
 const w3 = writeOrderArtifact(projectRoot, "technicalNotes", techDoc, renderTechNotes(techDoc, prevDocs.technicalNotes));
 const w4 = writeOrderArtifact(projectRoot, "clientQuestions", questionsDoc, renderClientQuestions(questionsDoc, prevDocs.clientQuestions));
 
 const after = {
-  prd: renderPrd(prdDoc, prevDocs.prd),
+  prd: renderPrd(prdDoc),
   userFlows: renderUserFlows(flowsDoc, prevDocs.userFlows),
   technicalNotes: renderTechNotes(techDoc, prevDocs.technicalNotes),
   clientQuestions: renderClientQuestions(questionsDoc, prevDocs.clientQuestions),
