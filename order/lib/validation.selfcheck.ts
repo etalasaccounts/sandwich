@@ -30,6 +30,8 @@ import {
   validateTechNotesDoc,
   validateClientQuestionsDoc,
   type PrdDoc,
+  type UserFlowsDoc,
+  type TechNotesDoc,
 } from "./order-schemas.ts";
 
 const VALID_PRD: PrdDoc = {
@@ -169,6 +171,63 @@ check("writeOrderArtifact writes json + md and readOrderDocs reads it back", () 
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+import { validateOrderArtifacts, validateOrderForPlanning } from "./validation.ts";
+
+const VALID_USER_FLOWS: UserFlowsDoc = {
+  flows: [{ id: "UF-001", title: "Login", actor: "User", trigger: "click", steps: [{ text: "open" }], outcome: "in", confidence: "stated", needsUI: true }],
+};
+const VALID_TECH_NOTES: TechNotesDoc = {
+  stack: [{ layer: "db", choice: "pg", rationale: "ok" }],
+  architectureNotes: [],
+  risks: [],
+  openDecisions: [{ text: "Use Postgres", confidence: "stated" }],
+};
+
+check("validateOrderArtifacts derives confidence from structured docs, not rendered text", () => {
+  const cleanMd = renderPrd(VALID_PRD); // carries zero [tags] after Task 1
+  const result = validateOrderArtifacts({
+    prd: cleanMd,
+    userFlows: "some rendered text",
+    technicalNotes: "some rendered text",
+    clientQuestions: null,
+    prdDoc: VALID_PRD,
+    userFlowsDoc: VALID_USER_FLOWS,
+    technicalNotesDoc: VALID_TECH_NOTES,
+  });
+  assert.equal(result.confidence.level, "confirmed");
+  assert.ok(result.confidence.score > 0.9, `expected high confidence, got ${result.confidence.score}`);
+});
+check("validateOrderArtifacts flags too many assumed items from structured docs", () => {
+  const mostlyAssumed: PrdDoc = {
+    ...VALID_PRD,
+    modules: [{
+      name: "Auth", status: "planned", description: "Login",
+      features: [
+        { text: "a", confidence: "assumed" },
+        { text: "b", confidence: "assumed" },
+        { text: "c", confidence: "assumed" },
+      ],
+    }],
+  };
+  const result = validateOrderArtifacts({
+    prd: "x", userFlows: "y", technicalNotes: null, clientQuestions: null,
+    prdDoc: mostlyAssumed, userFlowsDoc: null, technicalNotesDoc: null,
+  });
+  assert.ok(result.confidence.blockers.some((b) => b.includes("Too many assumed items")));
+  assert.equal(result.confidence.level, "assumed");
+});
+check("validateOrderForPlanning blocks when structured-doc confidence is low", () => {
+  const mostlyAssumed: PrdDoc = {
+    ...VALID_PRD,
+    modules: [{ name: "Auth", status: "planned", description: "d", features: [{ text: "a", confidence: "assumed" }] }],
+  };
+  const readiness = validateOrderForPlanning({
+    prd: "x", userFlows: "y", technicalNotes: null, clientQuestions: null,
+    prdDoc: mostlyAssumed, userFlowsDoc: null, technicalNotesDoc: null,
+  });
+  assert.equal(readiness.ready, false);
 });
 
 console.log(`\n${n} order checks passed.`);

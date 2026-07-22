@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Confidence, PrdDoc, UserFlowsDoc, TechNotesDoc } from "./order-schemas.js";
 
 // --- Brief Requirement Schemas ---
 
@@ -37,74 +38,68 @@ export interface BriefValidationResult {
   };
 }
 
-// --- Confidence marker detection ---
+// --- Confidence aggregation ---
+// Reads confidence directly off the structured docs rather than scanning
+// rendered markdown for tags — prd.md no longer carries them (see
+// docs/superpowers/specs/2026-07-22-clean-prd-client-facing-design.md).
 
-const CONFIDENCE_MARKERS = ["[stated]", "[discussed]", "[inferred]", "[assumed]"];
-
-function extractConfidenceMarkers(text: string): { marker: string; count: number }[] {
-  const counts: Record<string, number> = {};
-  
-  CONFIDENCE_MARKERS.forEach(marker => {
-    const regex = new RegExp(`\\${marker}`, "g");
-    const matches = text.match(regex);
-    if (matches) {
-      counts[marker] = matches.length;
-    }
-  });
-  
-  return Object.entries(counts).map(([marker, count]) => ({ marker, count }));
+function collectConfidences(docs: {
+  prd: PrdDoc | null;
+  userFlows: UserFlowsDoc | null;
+  technicalNotes: TechNotesDoc | null;
+}): Confidence[] {
+  const list: Confidence[] = [];
+  if (docs.prd) {
+    docs.prd.actors.forEach((a) => list.push(a.confidence));
+    docs.prd.modules.forEach((m) => m.features.forEach((f) => list.push(f.confidence)));
+    docs.prd.integrations.forEach((i) => list.push(i.confidence));
+    docs.prd.constraints.forEach((c) => list.push(c.confidence));
+  }
+  if (docs.userFlows) {
+    docs.userFlows.flows.forEach((f) => list.push(f.confidence));
+  }
+  if (docs.technicalNotes) {
+    docs.technicalNotes.openDecisions.forEach((d) => list.push(d.confidence));
+  }
+  return list;
 }
 
-function calculateBriefConfidence(artifacts: {
-  prd: string | null;
-  userFlows: string | null;
-  technicalNotes: string | null;
+function calculateBriefConfidence(docs: {
+  prd: PrdDoc | null;
+  userFlows: UserFlowsDoc | null;
+  technicalNotes: TechNotesDoc | null;
 }): { score: number; level: "confirmed" | "provisional" | "assumed"; blockers: string[] } {
-  
   const blockers: string[] = [];
-  let totalMarkers = 0;
-  let weightedSum = 0;
-  
-  // Weight for confidence markers in PRD
-  const weights: Record<string, number> = {
-    "[stated]": 1.0,
-    "[discussed]": 0.8,
-    "[inferred]": 0.5,
-    "[assumed]": 0.2,
+
+  const weights: Record<Confidence, number> = {
+    stated: 1.0,
+    discussed: 0.8,
+    inferred: 0.5,
+    assumed: 0.2,
   };
-  
-  const allText = [artifacts.prd, artifacts.userFlows, artifacts.technicalNotes]
-    .filter(Boolean)
-    .join("\n");
-  
-  const markers = extractConfidenceMarkers(allText);
-  
-  markers.forEach(({ marker, count }) => {
-    totalMarkers += count;
-    weightedSum += count * weights[marker];
-  });
-  
-  // If no markers found, assume medium confidence
-  const score = totalMarkers > 0 ? weightedSum / totalMarkers : 0.5;
-  
-  // Check for specific issues
-  if (!artifacts.prd) {
+
+  const confidences = collectConfidences(docs);
+  const total = confidences.length;
+  const weightedSum = confidences.reduce((sum, c) => sum + weights[c], 0);
+  const score = total > 0 ? weightedSum / total : 0.5;
+
+  if (!docs.prd) {
     blockers.push("Missing prd.md");
   }
-  if (!artifacts.userFlows) {
+  if (!docs.userFlows) {
     blockers.push("Missing user-flows.md");
   }
-  
-  const assumedCount = markers.find(m => m.marker === "[assumed]")?.count || 0;
-  if (totalMarkers > 0 && assumedCount / totalMarkers > 0.4) {
-    blockers.push(`Too many assumed items: ${Math.round((assumedCount / totalMarkers) * 100)}%`);
+
+  const assumedCount = confidences.filter((c) => c === "assumed").length;
+  if (total > 0 && assumedCount / total > 0.4) {
+    blockers.push(`Too many assumed items: ${Math.round((assumedCount / total) * 100)}%`);
   }
-  
+
   const level: "confirmed" | "provisional" | "assumed" =
     blockers.length > 0 ? "assumed" :
     score >= 0.7 ? "confirmed" :
     score >= 0.4 ? "provisional" : "assumed";
-  
+
   return { score, level, blockers };
 }
 
@@ -115,10 +110,13 @@ export function validateOrderArtifacts(artifacts: {
   userFlows: string | null;
   technicalNotes: string | null;
   clientQuestions: string | null;
+  prdDoc: PrdDoc | null;
+  userFlowsDoc: UserFlowsDoc | null;
+  technicalNotesDoc: TechNotesDoc | null;
 }): BriefValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   // Required artifacts
   if (!artifacts.prd) {
     errors.push("prd.md is required");
@@ -126,7 +124,7 @@ export function validateOrderArtifacts(artifacts: {
   if (!artifacts.userFlows) {
     errors.push("user-flows.md is required");
   }
-  
+
   // Content quality checks
   if (artifacts.prd && artifacts.prd.length < 200) {
     warnings.push("prd.md seems too short for meaningful extraction");
@@ -134,10 +132,14 @@ export function validateOrderArtifacts(artifacts: {
   if (artifacts.technicalNotes && artifacts.technicalNotes.length < 50) {
     warnings.push("technical-notes.md seems incomplete");
   }
-  
+
   // Calculate confidence
-  const confidence = calculateBriefConfidence(artifacts);
-  
+  const confidence = calculateBriefConfidence({
+    prd: artifacts.prdDoc,
+    userFlows: artifacts.userFlowsDoc,
+    technicalNotes: artifacts.technicalNotesDoc,
+  });
+
   return {
     valid: errors.length === 0,
     errors,
@@ -151,6 +153,9 @@ export function validateOrderForPlanning(artifacts: {
   userFlows: string | null;
   technicalNotes: string | null;
   clientQuestions: string | null;
+  prdDoc: PrdDoc | null;
+  userFlowsDoc: UserFlowsDoc | null;
+  technicalNotesDoc: TechNotesDoc | null;
 }): { ready: boolean; reason: string; actions: string[] } {
   
   const validation = validateOrderArtifacts(artifacts);

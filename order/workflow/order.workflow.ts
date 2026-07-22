@@ -231,6 +231,9 @@ const artifactValidation = validateOrderArtifacts({
   userFlows: after.userFlows,
   technicalNotes: after.technicalNotes,
   clientQuestions: after.clientQuestions,
+  prdDoc,
+  userFlowsDoc: flowsDoc,
+  technicalNotesDoc: techDoc,
 });
 
 if (artifactValidation.warnings.length > 0) {
@@ -243,6 +246,9 @@ const planningReadiness = validateOrderForPlanning({
   userFlows: after.userFlows,
   technicalNotes: after.technicalNotes,
   clientQuestions: after.clientQuestions,
+  prdDoc,
+  userFlowsDoc: flowsDoc,
+  technicalNotesDoc: techDoc,
 });
 
 log(`\nConfidence: ${artifactValidation.confidence.score.toFixed(2)} (${artifactValidation.confidence.level})`);
