@@ -108,4 +108,21 @@ function SpecOutputSchemaProbe() {
   return z.object({ featureId: z.string(), tasks: z.array(z.string()), note: z.string().optional() });
 }
 
+import { readBriefArtifacts } from "./prep-lib.ts";
+import { mkdtempSync, rmSync, writeFileSync as wf, mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join as pj2 } from "node:path";
+
+check("readBriefArtifacts reads prd.md from docs/sandwich/, not docs/sandwich/brief/", () => {
+  const dir = mkdtempSync(pj2(tmpdir(), "prep-brief-"));
+  try {
+    mkdirSync(pj2(dir, "docs", "sandwich"), { recursive: true });
+    wf(pj2(dir, "docs", "sandwich", "prd.md"), "# Test PRD", "utf8");
+    const artifacts = readBriefArtifacts(dir);
+    assert.equal(artifacts.prd, "# Test PRD");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 console.log(`\n${n} checks passed.`);
