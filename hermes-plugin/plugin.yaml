@@ -1,0 +1,6 @@
+name: sandwich
+version: 0.2.0
+description: Composable agent pipeline for software agencies — order, prep, status, wireframe
+author: Etalas
+provides_hooks:
+  - pre_llm_call
