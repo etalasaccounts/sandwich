@@ -35,14 +35,14 @@ def check_register_wires_skills_and_hook():
     ctx = _FakeCtx()
     plugin.register(ctx)
     assert set(ctx.registered_skills) == set(plugin.SKILLS.items())
-    assert len(ctx.registered_skills) == 4
+    assert len(ctx.registered_skills) == 3
     assert len(ctx.registered_hooks) == 1
     assert ctx.registered_hooks[0][0] == "pre_llm_call"
     assert ctx.registered_hooks[0][1] is plugin.inject_sandwich_root
 
 
 def check_skill_paths_exist():
-    assert set(plugin.SKILLS.keys()) == {"order", "prep", "status", "wireframe"}
+    assert set(plugin.SKILLS.keys()) == {"order", "prep", "status"}
     for name, path in plugin.SKILLS.items():
         assert path.exists(), f"{name} -> {path} does not exist"
         assert path.name == "SKILL.md", f"{name} -> {path} is not a SKILL.md"
@@ -67,8 +67,8 @@ def check_hook_injects_root_on_first_turn():
     assert str(plugin._REPO_ROOT) in result["context"]
 
 
-check("register() wires all four skills and the pre_llm_call hook", check_register_wires_skills_and_hook)
-check("all four SKILL.md paths resolve to real files", check_skill_paths_exist)
+check("register() wires all three skills and the pre_llm_call hook", check_register_wires_skills_and_hook)
+check("all three SKILL.md paths resolve to real files", check_skill_paths_exist)
 check("inject_sandwich_root returns None on non-first turn", check_hook_skips_non_first_turn)
 check("inject_sandwich_root injects SANDWICH_ROOT on first turn", check_hook_injects_root_on_first_turn)
 
