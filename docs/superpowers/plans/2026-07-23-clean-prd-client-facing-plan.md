@@ -52,7 +52,7 @@ schema validation, plain-`assert` self-check test files (no test framework).
   Every other renderer (`renderUserFlows`, `renderTechNotes`, `renderClientQuestions`) keeps
   its existing two-arg signature — this change is scoped to `renderPrd` only.
 
-- [ ] **Step 1: Update the existing `renderPrd` tests to describe the new behavior (they will fail until Step 3)**
+- [x] **Step 1: Update the existing `renderPrd` tests to describe the new behavior (they will fail until Step 3)**
 
 In `order/lib/validation.selfcheck.ts`, replace the check at (current) lines 99-103:
 
@@ -109,14 +109,14 @@ check("renderPrd never includes a changelog section", () => {
 });
 ```
 
-- [ ] **Step 2: Run the self-check to confirm it now fails**
+- [x] **Step 2: Run the self-check to confirm it now fails**
 
 Run: `node --experimental-strip-types order/lib/validation.selfcheck.ts`
 Expected: FAIL — assertions about missing `[stated]`/`Project State`/etc. fail because the
 current `renderPrd` still emits them; the "greenfield build" assertion fails because that
 sentence doesn't exist yet.
 
-- [ ] **Step 3: Rewrite `renderPrd` in `order/lib/order-render.ts`**
+- [x] **Step 3: Rewrite `renderPrd` in `order/lib/order-render.ts`**
 
 Replace the current function (lines 54-112):
 
@@ -232,14 +232,14 @@ export function renderPrd(doc: PrdDoc): string {
 Do not touch `mark`, `withChangelog`, `diffOrderDoc`, or `renderChangelog` — they're still
 used by `renderUserFlows`, `renderTechNotes`, and `renderClientQuestions`.
 
-- [ ] **Step 4: Run the self-check to confirm the `renderPrd` tests pass**
+- [x] **Step 4: Run the self-check to confirm the `renderPrd` tests pass**
 
 Run: `node --experimental-strip-types order/lib/validation.selfcheck.ts`
 Expected: All `renderPrd`-related checks print `✓`, including "renderPrd is deterministic
 for identical input" (unaffected — it already only ever called `renderPrd(VALID_PRD)` with
 one argument).
 
-- [ ] **Step 5: Fix the two remaining `renderPrd(doc, prev)` call sites so the file still runs**
+- [x] **Step 5: Fix the two remaining `renderPrd(doc, prev)` call sites so the file still runs**
 
 In `order/workflow/order.workflow.ts`, line 214, change:
 
@@ -269,12 +269,12 @@ to:
   md = renderPrd(result.data!);
 ```
 
-- [ ] **Step 6: Run the full self-check suite**
+- [x] **Step 6: Run the full self-check suite**
 
 Run: `node --experimental-strip-types order/lib/validation.selfcheck.ts`
 Expected: `N order checks passed.` with no failures.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add order/lib/order-render.ts order/lib/validation.selfcheck.ts order/workflow/order.workflow.ts order/scripts/render.ts
@@ -312,7 +312,7 @@ EOF
   required fields (`prdDoc`, `userFlowsDoc`, `technicalNotesDoc`) on their `artifacts`
   parameter.
 
-- [ ] **Step 1: Write failing tests for the new confidence-from-structured-docs behavior**
+- [x] **Step 1: Write failing tests for the new confidence-from-structured-docs behavior**
 
 In `order/lib/validation.selfcheck.ts`, add near the bottom (before the final
 `console.log`), and update the import line that currently reads:
@@ -403,7 +403,7 @@ check("validateOrderForPlanning blocks when structured-doc confidence is low", (
 });
 ```
 
-- [ ] **Step 2: Run the self-check to confirm it fails**
+- [x] **Step 2: Run the self-check to confirm it fails**
 
 Run: `node --experimental-strip-types order/lib/validation.selfcheck.ts`
 Expected: FAIL with a TypeScript-shape or runtime error — `validateOrderArtifacts` doesn't
@@ -412,7 +412,7 @@ still reads the (now placeholder) string fields and produces `score: 0.5, level:
 "provisional"` regardless of the fixtures passed in, failing the `level === "confirmed"`
 and `blockers` assertions.
 
-- [ ] **Step 3: Rewrite `order/lib/validation.ts`**
+- [x] **Step 3: Rewrite `order/lib/validation.ts`**
 
 Add this import at the top of the file (line 1, after `import { z } from "zod";`):
 
@@ -624,12 +624,12 @@ export function validateOrderForPlanning(artifacts: {
 ```
 (Its body is unchanged — it just forwards `artifacts` straight into `validateOrderArtifacts`.)
 
-- [ ] **Step 4: Run the self-check to confirm the new tests pass**
+- [x] **Step 4: Run the self-check to confirm the new tests pass**
 
 Run: `node --experimental-strip-types order/lib/validation.selfcheck.ts`
 Expected: All checks print `✓`, including the three new ones from Step 1.
 
-- [ ] **Step 5: Wire the two call sites in `order/workflow/order.workflow.ts`**
+- [x] **Step 5: Wire the two call sites in `order/workflow/order.workflow.ts`**
 
 Lines 229-234, change:
 ```ts
@@ -679,14 +679,14 @@ const planningReadiness = validateOrderForPlanning({
 destructured from the `Promise.all([...])` at line 201 and are typed `PrdDoc`,
 `UserFlowsDoc`, `TechNotesDoc` respectively already.)
 
-- [ ] **Step 6: Run the full self-check suite one more time**
+- [x] **Step 6: Run the full self-check suite one more time**
 
 Run: `node --experimental-strip-types order/lib/validation.selfcheck.ts`
 Expected: `N order checks passed.` with no failures (this step doesn't exercise
 `order.workflow.ts` directly — it has no unit test harness, since it's an orchestration
 script that calls out to an LLM — but confirms nothing in `order/lib` broke).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add order/lib/validation.ts order/lib/validation.selfcheck.ts order/workflow/order.workflow.ts
@@ -727,7 +727,7 @@ This task is a prompt/context-wiring change with no pure function to unit-test (
 "agent reads confidence off `prdDoc` instead of scanning prose" behavior lives entirely in
 an LLM prompt) — verified by the manual end-to-end pass in Task 4, not an automated test.
 
-- [ ] **Step 1: Import `readOrderDocs` in `prep/workflow/prep.workflow.ts`**
+- [x] **Step 1: Import `readOrderDocs` in `prep/workflow/prep.workflow.ts`**
 
 After the existing import block ending at line 27:
 ```ts
@@ -745,14 +745,14 @@ add:
 import { readOrderDocs } from "../../order/lib/order-lib.js";
 ```
 
-- [ ] **Step 2: Load the structured PRD doc in Phase 1**
+- [x] **Step 2: Load the structured PRD doc in Phase 1**
 
 Right after line 110 (`const briefArtifacts = readBriefArtifacts(projectRoot);`), add:
 ```ts
 const { prd: prdDoc } = readOrderDocs(projectRoot);
 ```
 
-- [ ] **Step 3: Pass `prdDoc` into the Phase 3 extraction context**
+- [x] **Step 3: Pass `prdDoc` into the Phase 3 extraction context**
 
 In the `extractionResult = await runAgentWithValidation(...)` call (around lines 246-269),
 change the context object from:
@@ -797,7 +797,7 @@ to:
       )}`,
 ```
 
-- [ ] **Step 4: Update `prep/agents/01-extract-features.md`**
+- [x] **Step 4: Update `prep/agents/01-extract-features.md`**
 
 Replace the entire file contents:
 
@@ -932,7 +932,7 @@ JSON with this structure:
 Output ONLY the JSON. No markdown. No explanation.
 ```
 
-- [ ] **Step 5: Run the full repo self-check suite to confirm nothing else broke**
+- [x] **Step 5: Run the full repo self-check suite to confirm nothing else broke**
 
 Run: `npm test`
 Expected: All five self-check files (`prep/lib/validation.selfcheck.ts`,
@@ -940,7 +940,7 @@ Expected: All five self-check files (`prep/lib/validation.selfcheck.ts`,
 `order/lib/validation.selfcheck.ts`, `wireframe/lib/wireframe.selfcheck.ts`) print their
 `N checks passed.` line with no failures.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add prep/workflow/prep.workflow.ts prep/agents/01-extract-features.md
@@ -978,7 +978,7 @@ plus a new regression test.
 - Produces: `readBriefArtifacts(projectRoot: string)` now reads from
   `join(projectRoot, "docs", "sandwich")`, matching `getOrderPaths` in `order/lib/order-lib.ts`.
 
-- [ ] **Step 1: Write a failing test for the correct path**
+- [x] **Step 1: Write a failing test for the correct path**
 
 In `prep/lib/validation.selfcheck.ts`, add near the bottom (before the final
 `console.log` call):
@@ -1002,13 +1002,13 @@ check("readBriefArtifacts reads prd.md from docs/sandwich/, not docs/sandwich/br
 });
 ```
 
-- [ ] **Step 2: Run the self-check to confirm it fails**
+- [x] **Step 2: Run the self-check to confirm it fails**
 
 Run: `node --experimental-strip-types prep/lib/validation.selfcheck.ts`
 Expected: FAIL — `artifacts.prd` is `null` because `readBriefArtifacts` looks in
 `docs/sandwich/brief/prd.md`, which doesn't exist in the fixture.
 
-- [ ] **Step 3: Fix the path in `prep/lib/prep-lib.ts`**
+- [x] **Step 3: Fix the path in `prep/lib/prep-lib.ts`**
 
 Change line 561 from:
 ```ts
@@ -1019,12 +1019,12 @@ to:
   const briefDir = join(projectRoot, "docs", "sandwich");
 ```
 
-- [ ] **Step 4: Run the self-check to confirm it passes**
+- [x] **Step 4: Run the self-check to confirm it passes**
 
 Run: `node --experimental-strip-types prep/lib/validation.selfcheck.ts`
 Expected: All checks print `✓`, including the new one.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add prep/lib/prep-lib.ts prep/lib/validation.selfcheck.ts
@@ -1046,7 +1046,7 @@ EOF
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: Run `/order` on a sample project and inspect `prd.md`**
+- [x] **Step 1: Run `/order` on a sample project and inspect `prd.md`**
 
 Pick (or reuse) a sample brief input and run the `/order` workflow against a scratch
 project directory. Open the resulting `docs/sandwich/prd.md` and confirm:
@@ -1057,7 +1057,7 @@ project directory. Open the resulting `docs/sandwich/prd.md` and confirm:
 - The console output's "Confidence: X.XX (level)" and "Ready for /prep: ✓/✗" line still
   prints a plausible score (not always the `0.5`/"no markers found" fallback).
 
-- [ ] **Step 2: Run `/prep` against that same project**
+- [x] **Step 2: Run `/prep` against that same project**
 
 Confirm:
 - Extraction completes without a validation/confidence-threshold failure.
@@ -1067,7 +1067,7 @@ Confirm:
   should match what was in `prd.json` for the same feature text (open `prd.json` alongside
   `feature-queue.md` to compare).
 
-- [ ] **Step 3: Report results**
+- [x] **Step 3: Report results**
 
 If both steps look right, this plan is complete. If either surfaces a mismatch (e.g. a
 feature's confidence doesn't match its `prd.json` source), stop and diagnose — do not patch
