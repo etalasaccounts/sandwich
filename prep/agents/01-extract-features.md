@@ -4,7 +4,8 @@ You are extracting all features/improvements/requirements from brief artifacts.
 
 ## Input
 
-- `briefArtifacts`: { prd, userFlows, technicalNotes, clientQuestions }
+- `prdDoc`: the structured PRD document — `{ actors: [{name, role, confidence}], modules: [{name, status, description, features: [{text, confidence}]}], integrations: [{text, confidence}], constraints: [{text, confidence}] }`. `prd.md` itself is now plain client-facing prose with no confidence tags — use `prdDoc` for confidence on anything sourced from the PRD.
+- `briefArtifacts`: { prd, userFlows, technicalNotes, clientQuestions } — rendered markdown text of the four brief documents
 - `executionState`: { gitBranches, recentCommits, featureQueue } | null
 
 ## Output
@@ -39,7 +40,7 @@ JSON with this structure:
 
 ## Extraction rules
 
-1. Every feature/requirement in prd.md becomes a feature
+1. Every feature in `prdDoc.modules[].features` becomes a feature. Use its `confidence` field directly from `prdDoc` — do not scan `prd.md` prose for tags, it has none. Locate the feature's text inside the `briefArtifacts.prd` string to cite `source.line`.
 2. Every user flow step that requires implementation becomes a feature
 3. Every technical debt item in technical-notes.md becomes a feature (type: improvement)
 4. Every question in client-questions.md that implies a feature becomes a feature (confidence: assumed)
@@ -51,7 +52,7 @@ JSON with this structure:
 - If feature-queue.md exists, use next available ID
 - Match existing features by title similarity
 
-## Confidence markers
+## Confidence markers (user-flows.md and technical-notes.md only)
 
 - `[stated]`: Explicitly requested by client
 - `[discussed]`: Mentioned in meeting notes

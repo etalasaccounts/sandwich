@@ -37,13 +37,27 @@ export const PrdDocSchema = z.object({
 });
 export type PrdDoc = z.infer<typeof PrdDocSchema>;
 
+export const FlowFieldSchema = z.object({
+  name: z.string().min(1),
+  type: z.enum(["text", "email", "number", "date", "select", "textarea", "checkbox"]),
+  required: z.boolean().default(false),
+  options: z.array(z.string()).optional(),
+});
+export type FlowField = z.infer<typeof FlowFieldSchema>;
+
+export const FlowStepSchema = z.object({
+  text: z.string().min(1),
+  fields: z.array(FlowFieldSchema).optional(),
+});
+export type FlowStep = z.infer<typeof FlowStepSchema>;
+
 export const UserFlowsDocSchema = z.object({
   flows: z.array(z.object({
     id: z.string().regex(/^UF-\d{3}$/, "Flow id must be UF-XXX"),
     title: z.string().min(1),
     actor: z.string().min(1),
     trigger: z.string().min(1),
-    steps: z.array(z.string().min(1)).min(1, "A flow needs at least one step"),
+    steps: z.array(FlowStepSchema).min(1, "A flow needs at least one step"),
     outcome: z.string().min(1),
     confidence: ConfidenceSchema,
     needsUI: z.boolean(),

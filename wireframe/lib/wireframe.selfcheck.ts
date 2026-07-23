@@ -14,16 +14,17 @@ import { validateWireframeManifest } from "./wireframe-schemas.ts";
 const VALID_SCREEN = {
   id: "SCR-001",
   name: "Homepage",
-  file: "homepage.html",
+  route: "/homepage",
   flows: ["UF-001"],
 };
 
-check("validateWireframeManifest accepts a minimal valid manifest and fills flag defaults", () => {
+check("validateWireframeManifest accepts a minimal valid manifest and fills flag/navigatesTo defaults", () => {
   const r = validateWireframeManifest({ screens: [VALID_SCREEN] });
   assert.equal(r.valid, true);
   assert.equal(r.data!.screens[0].flags.stale, false);
   assert.equal(r.data!.screens[0].flags.orphaned, false);
   assert.deepEqual(r.data!.screens[0].staleReasons, []);
+  assert.deepEqual(r.data!.screens[0].navigatesTo, []);
 });
 check("validateWireframeManifest rejects a malformed screen id", () => {
   const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, id: "S1" }] });
@@ -37,8 +38,21 @@ check("validateWireframeManifest rejects a malformed flow id inside flows", () =
   const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, flows: ["F1"] }] });
   assert.equal(r.valid, false);
 });
+check("validateWireframeManifest rejects a route without a leading slash", () => {
+  const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, route: "homepage" }] });
+  assert.equal(r.valid, false);
+});
+check("validateWireframeManifest accepts an explicit navigatesTo list", () => {
+  const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, navigatesTo: ["SCR-002"] }] });
+  assert.equal(r.valid, true);
+  assert.deepEqual(r.data!.screens[0].navigatesTo, ["SCR-002"]);
+});
+check("validateWireframeManifest rejects a malformed screen id inside navigatesTo", () => {
+  const r = validateWireframeManifest({ screens: [{ ...VALID_SCREEN, navigatesTo: ["not-a-screen-id"] }] });
+  assert.equal(r.valid, false);
+});
 
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -49,16 +63,27 @@ import {
   diffFlows,
   readManifest,
   writeManifest,
+  routeToFilePath,
 } from "./wireframe-lib.ts";
 
-const FLOW_A = { id: "UF-001", title: "Browse", actor: "User", trigger: "opens site", steps: ["view products"], outcome: "sees grid" };
-const FLOW_B = { id: "UF-002", title: "Checkout", actor: "User", trigger: "clicks buy", steps: ["pay"], outcome: "order placed" };
+const FLOW_A = { id: "UF-001", title: "Browse", actor: "User", trigger: "opens site", steps: [{ text: "view products" }], outcome: "sees grid" };
+const FLOW_B = { id: "UF-002", title: "Checkout", actor: "User", trigger: "clicks buy", steps: [{ text: "pay" }], outcome: "order placed" };
 
-check("getWireframePaths returns paths rooted under docs/wireframes", () => {
+check("getWireframePaths returns paths rooted under wireframes/", () => {
   const paths = getWireframePaths("/tmp/proj");
-  assert.ok(paths.manifest.endsWith("docs/wireframes/manifest.json"));
-  assert.ok(paths.snapshot.endsWith("docs/wireframes/.snapshot.json"));
-  assert.ok(paths.indexHtml.endsWith("docs/wireframes/index.html"));
+  assert.ok(paths.manifest.endsWith("wireframes/manifest.json"));
+  assert.ok(paths.snapshot.endsWith("wireframes/.snapshot.json"));
+  assert.ok(paths.navHubPage.endsWith("wireframes/app/page.tsx"));
+  assert.ok(paths.appDir.endsWith("wireframes/app"));
+});
+
+check("routeToFilePath maps a screen route to its page.tsx location", () => {
+  assert.equal(routeToFilePath("/plp"), join("app", "plp", "page.tsx"));
+  assert.equal(routeToFilePath("/"), join("app", "page.tsx"));
+});
+
+check("routeToFilePath rejects a route without a leading slash", () => {
+  assert.throws(() => routeToFilePath("plp"));
 });
 
 check("writeSnapshot + readSnapshot round-trip flow content hashes", () => {
@@ -78,7 +103,7 @@ check("diffFlows flags a changed flow and leaves an untouched one alone", () => 
   try {
     writeSnapshot(dir, [FLOW_A, FLOW_B]);
     const snapshot = readSnapshot(dir);
-    const changedB = { ...FLOW_B, steps: ["pay", "confirm"] };
+    const changedB = { ...FLOW_B, steps: [{ text: "pay" }, { text: "confirm" }] };
     const diff = diffFlows([FLOW_A, changedB], snapshot);
     assert.equal(diff.changedIds.has("UF-002"), true);
     assert.equal(diff.changedIds.has("UF-001"), false);
@@ -105,7 +130,7 @@ check("diffFlows detects new and removed flow ids", () => {
 check("writeManifest + readManifest round-trip a valid manifest", () => {
   const dir = mkdtempSync(join(tmpdir(), "wireframe-io-"));
   try {
-    const manifest = { screens: [{ id: "SCR-001", name: "Homepage", file: "homepage.html", flows: ["UF-001"], flags: { stale: false, orphaned: false }, staleReasons: [] }] };
+    const manifest = { screens: [{ id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], flags: { stale: false, orphaned: false }, staleReasons: [] }] };
     const path = writeManifest(dir, manifest);
     assert.ok(path.endsWith("manifest.json"));
     const back = readManifest(dir);
@@ -128,22 +153,68 @@ check("readManifest returns undefined for structurally invalid manifest JSON", (
   }
 });
 
-import { renderIndexHtml } from "./wireframe-render.ts";
-
-const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", file: "homepage.html", flows: ["UF-001"], flags: { stale: false, orphaned: false }, staleReasons: [] };
-
-check("renderIndexHtml emits a link and name for every screen in the manifest", () => {
-  const html = renderIndexHtml({ screens: [RENDERED_SCREEN] });
-  assert.ok(html.includes('href="homepage.html"'));
-  assert.ok(html.includes("Homepage"));
+check("ensureWireframeDir writes a gitignore covering node_modules, .next, and the snapshot", () => {
+  const dir = mkdtempSync(join(tmpdir(), "wireframe-io-"));
+  try {
+    ensureWireframeDir(dir);
+    const paths = getWireframePaths(dir);
+    const gitignore = readFileSync(paths.gitignore, "utf8");
+    assert.ok(gitignore.includes("node_modules"));
+    assert.ok(gitignore.includes(".next"));
+    assert.ok(gitignore.includes(".snapshot.json"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
-check("renderIndexHtml surfaces the stale flag as a visible badge", () => {
-  const html = renderIndexHtml({ screens: [{ ...RENDERED_SCREEN, flags: { stale: true, orphaned: false }, staleReasons: ["UF-001 content changed"] }] });
-  assert.ok(html.includes("STALE"));
+
+import { fileURLToPath } from "node:url";
+import { dirname, join as pj2 } from "node:path";
+import { scaffoldWireframeApp } from "./wireframe-lib.ts";
+
+const REAL_TEMPLATE_DIR = pj2(dirname(fileURLToPath(import.meta.url)), "..", "template");
+
+check("scaffoldWireframeApp copies the real template into a fresh project and is idempotent", () => {
+  const dir = mkdtempSync(join(tmpdir(), "wireframe-scaffold-"));
+  try {
+    const created = scaffoldWireframeApp(REAL_TEMPLATE_DIR, dir);
+    assert.ok(created.length > 10, "expected the full template tree to be copied");
+
+    const paths = getWireframePaths(dir);
+    assert.ok(existsSync(pj2(paths.root, "package.json")));
+    assert.ok(existsSync(pj2(paths.root, "components", "ui", "button.tsx")));
+    assert.ok(existsSync(pj2(paths.root, "components", "wireframe", "Navbar.tsx")));
+    assert.ok(existsSync(pj2(paths.root, "app", "layout.tsx")));
+
+    const buttonSrc = readFileSync(pj2(paths.root, "components", "ui", "button.tsx"), "utf8");
+    assert.ok(buttonSrc.includes("export const Button"));
+
+    // Simulate a human hand-editing a scaffolded file, then re-run — must not be clobbered.
+    writeFileSync(pj2(paths.root, "components", "wireframe", "Navbar.tsx"), "// hand-edited\n", "utf8");
+    scaffoldWireframeApp(REAL_TEMPLATE_DIR, dir);
+    const navbarAfterRescaffold = readFileSync(pj2(paths.root, "components", "wireframe", "Navbar.tsx"), "utf8");
+    assert.equal(navbarAfterRescaffold, "// hand-edited\n");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
-check("renderIndexHtml surfaces the orphaned flag as a visible badge", () => {
-  const html = renderIndexHtml({ screens: [{ ...RENDERED_SCREEN, flags: { stale: false, orphaned: true }, staleReasons: [] }] });
-  assert.ok(html.includes("ORPHANED"));
+
+import { renderNavHubPage } from "./wireframe-render.ts";
+
+const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], flags: { stale: false, orphaned: false }, staleReasons: [] };
+
+check("renderNavHubPage emits a Link and name for every screen in the manifest", () => {
+  const tsx = renderNavHubPage({ screens: [RENDERED_SCREEN] });
+  assert.ok(tsx.includes('href={"/homepage"}'));
+  assert.ok(tsx.includes('"Homepage"'));
+  assert.ok(tsx.includes('import Link from "next/link"'));
+});
+check("renderNavHubPage surfaces the stale flag inline with the name", () => {
+  const tsx = renderNavHubPage({ screens: [{ ...RENDERED_SCREEN, flags: { stale: true, orphaned: false }, staleReasons: ["UF-001 content changed"] }] });
+  assert.ok(tsx.includes("STALE"));
+});
+check("renderNavHubPage surfaces the orphaned flag inline with the name", () => {
+  const tsx = renderNavHubPage({ screens: [{ ...RENDERED_SCREEN, flags: { stale: false, orphaned: true }, staleReasons: [] }] });
+  assert.ok(tsx.includes("ORPHANED"));
 });
 
 console.log(`\n${n} wireframe checks passed.`);

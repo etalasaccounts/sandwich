@@ -25,6 +25,7 @@ import {
   getGitState,
   type ImpactAnalysis,
 } from "../lib/prep-lib.js";
+import { readOrderDocs } from "../../order/lib/order-lib.js";
 import {
   validateExtraction,
   validateDependencies,
@@ -108,6 +109,7 @@ const doneCommits = markDone
 // ==================== PHASE 1: READ ====================
 phase("Read");
 const briefArtifacts = readBriefArtifacts(projectRoot);
+const { prd: prdDoc } = readOrderDocs(projectRoot);
 
 if (!briefArtifacts.prd && !briefArtifacts.userFlows) {
   throw new Error("No brief artifacts found. Run /order first.");
@@ -247,6 +249,7 @@ try {
     (repair) => agent(
       `${withRepair(extractPrompt, repair)}\n\nContext:\n${JSON.stringify(
         {
+          prdDoc: prdDoc ?? null,
           briefArtifacts: {
             prd: briefArtifacts.prd?.slice(0, 10000),
             userFlows: briefArtifacts.userFlows?.slice(0, 5000),

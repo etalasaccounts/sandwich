@@ -558,7 +558,7 @@ export function readBriefArtifacts(projectRoot: string): {
   technicalNotes: string | null;
   clientQuestions: string | null;
 } {
-  const briefDir = join(projectRoot, "docs", "sandwich", "brief");
+  const briefDir = join(projectRoot, "docs", "sandwich");
   const readIfExists = (file: string): string | null => {
     const path = join(briefDir, file);
     return existsSync(path) ? readFileSync(path, "utf8") : null;

@@ -95,7 +95,7 @@ if (kind === "prd") {
     console.error(`✗ prd.json validation failed:\n${result.errors.join("\n")}`);
     process.exit(1);
   }
-  md = renderPrd(result.data!, prev as Parameters<typeof renderPrd>[1]);
+  md = renderPrd(result.data!);
 } else if (kind === "user-flows") {
   const result = validateUserFlowsDoc(parsed);
   if (!result.valid) {
