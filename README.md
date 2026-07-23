@@ -24,7 +24,22 @@ claude plugin marketplace add etalasaccounts/sandwich
 claude plugin install sandwich
 ```
 
+**Hermes Agent:**
+```bash
+git clone https://github.com/etalasaccounts/sandwich.git
+mkdir -p ~/.hermes/plugins
+ln -s "$(pwd)/sandwich/hermes-plugin" ~/.hermes/plugins/sandwich
+hermes plugins enable sandwich
+```
+
 After installing, restart your AI session so the skills are discovered.
+
+> Hermes support is new and untested against a live install — if `/order` (or any of the
+> four commands) doesn't show up after enabling the plugin, check
+> `HERMES_PLUGINS_DEBUG=1 hermes plugins list` for why, and check whether Hermes needs the
+> namespaced form (`/sandwich:order`) instead of the bare command shown below.
+
+> The repo's test suite (`npm test`) requires `python3` on PATH for the Hermes plugin self-check.
 
 ---
 

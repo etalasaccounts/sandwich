@@ -4,3 +4,4 @@ node_modules/
 docs/breakdown/
 .superpowers/
 .playwright-mcp/
+__pycache__/
