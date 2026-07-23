@@ -1,6 +1,6 @@
 ---
 name: prep
-description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use when you need to decide what to build next.
+description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use when you need to decide what to build next. SAFETY: Must confirm which project (check docs/sandwich/ or .sandwich/registry/ existence) before invoking. Never run on wrong project root.
 ---
 
 # sandwich/prep

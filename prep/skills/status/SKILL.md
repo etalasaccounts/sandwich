@@ -1,6 +1,6 @@
 ---
 name: status
-description: Single pane of glass over the sandwich registry. Shows what's done, in flight, blocked, stale, and what specifically needs a human decision. Use when you want to know the state of the project or generate a maintenance report.
+description: Single pane of glass over the sandwich registry. Shows what's done, in flight, blocked, stale, and what specifically needs a human decision. Use when you want to know the state of the project or generate a maintenance report. SAFETY: Must confirm which project (check docs/sandwich/ or .sandwich/registry/ existence) before invoking. Never run on wrong project root.
 ---
 
 # sandwich/status
