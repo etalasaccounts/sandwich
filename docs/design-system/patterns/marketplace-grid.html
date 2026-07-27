@@ -18,12 +18,12 @@ iconify-icon { stroke-width: 1.5; }
 ::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
 </style></head>
-<body class="bg-zinc-100 text-sm antialiased text-zinc-900">
+<body class="bg-white text-sm antialiased text-zinc-900">
 
-  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col gap-4 py-4">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col">
 
     <!-- NAV -->
-    <nav class="bg-white rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-sm">
+    <nav class="flex items-center justify-between gap-4 py-4 border-b border-zinc-100">
       <div class="flex items-center gap-2.5 flex-shrink-0">
         <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
           <iconify-icon icon="solar:layers-minimalistic-linear" class="text-zinc-950 text-base"></iconify-icon>
@@ -55,7 +55,7 @@ iconify-icon { stroke-width: 1.5; }
     </nav>
 
     <!-- Page header -->
-    <div class="flex items-center justify-between gap-4 px-1">
+    <div class="flex items-center justify-between gap-4 py-6">
       <div class="flex flex-col gap-0.5">
         <span class="text-xs font-light text-zinc-500">Home / Wallets &amp; Accessories</span>
         <span class="text-xl font-medium text-zinc-950 tracking-tight">Wallets &amp; Accessories</span>
@@ -64,10 +64,10 @@ iconify-icon { stroke-width: 1.5; }
     </div>
 
     <!-- BODY: filter rail + grid -->
-    <div class="flex gap-4">
+    <div class="flex gap-8 pb-16">
 
       <!-- FILTER RAIL -->
-      <nav class="bg-white rounded-2xl p-4 gap-5 flex-col w-64 flex-shrink-0 hidden md:flex shadow-sm">
+      <nav class="flex flex-col gap-6 w-56 flex-shrink-0 hidden md:flex border-r border-zinc-100 pr-6">
 
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-zinc-950 tracking-tight">Filters</span>
@@ -98,7 +98,7 @@ iconify-icon { stroke-width: 1.5; }
           </label>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 pt-4 border-t border-zinc-100">
           <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Price</span>
           <div class="flex items-center gap-2">
             <div class="relative flex-1">
@@ -113,7 +113,7 @@ iconify-icon { stroke-width: 1.5; }
           </div>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 pt-4 border-t border-zinc-100">
           <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Rating</span>
           <label class="flex items-center gap-2.5 py-1 cursor-pointer">
             <div class="w-4 h-4 rounded border border-zinc-300 flex-shrink-0"></div>
@@ -125,7 +125,7 @@ iconify-icon { stroke-width: 1.5; }
           </label>
         </div>
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-100">
           <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">In stock only</span>
           <button class="w-10 h-6 rounded-full bg-green-400 p-0.5 flex items-center transition-colors" aria-pressed="true">
             <span class="w-5 h-5 rounded-full bg-white shadow-sm ml-auto"></span>
@@ -135,10 +135,10 @@ iconify-icon { stroke-width: 1.5; }
       </nav>
 
       <!-- MAIN -->
-      <div class="bg-white rounded-2xl flex flex-col flex-1 shadow-sm">
+      <div class="flex flex-col flex-1">
 
         <!-- Toolbar -->
-        <div class="flex items-center justify-end gap-2 px-6 py-4 border-b border-zinc-100">
+        <div class="flex items-center justify-end gap-2 pb-4 border-b border-zinc-100">
           <div class="relative">
             <select class="bg-white border border-zinc-100 rounded-xl py-2 pl-3.5 pr-9 text-xs font-light text-zinc-700 outline-none focus:border-zinc-300 transition-colors appearance-none">
               <option>Sort: Popular</option>
@@ -149,7 +149,7 @@ iconify-icon { stroke-width: 1.5; }
             <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-xs pointer-events-none"></iconify-icon>
           </div>
           <div class="flex items-center gap-1">
-            <button class="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center text-zinc-700">
+            <button class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-700">
               <iconify-icon icon="solar:widget-2-linear" class="text-sm"></iconify-icon>
             </button>
             <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-400">
@@ -158,181 +158,169 @@ iconify-icon { stroke-width: 1.5; }
           </div>
         </div>
 
-        <!-- Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+        <!-- Grid (flat: image tile is the only bounded shape, no card wrapper) -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-6 py-6">
 
           <!-- Card 1 -->
-          <div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-            <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+          <div class="flex flex-col gap-2.5">
+            <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
               <iconify-icon icon="solar:wallet-linear" class="text-zinc-300 text-3xl"></iconify-icon>
               <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
                 <iconify-icon icon="solar:heart-linear" class="text-zinc-500 text-base"></iconify-icon>
               </button>
             </div>
-            <div class="flex flex-col gap-1.5 p-4">
-              <span class="text-xs font-light text-zinc-400">Nordbyte Studio</span>
-              <span class="text-sm font-medium text-zinc-950 tracking-tight">Ridge Wallet — Walnut</span>
-              <div class="flex items-center gap-1">
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
-                <span class="text-xs font-light text-zinc-500">(128)</span>
-              </div>
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-sm font-medium text-zinc-950">$89.00</span>
-                <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                  <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-                </button>
-              </div>
+            <span class="text-xs font-light text-zinc-400">Nordbyte Studio</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Ridge Wallet — Walnut</span>
+            <div class="flex items-center gap-1">
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
+              <span class="text-xs font-light text-zinc-500">(128)</span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-medium text-zinc-950">$89.00</span>
+              <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+              </button>
             </div>
           </div>
 
           <!-- Card 2 -->
-          <div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-            <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+          <div class="flex flex-col gap-2.5">
+            <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
               <iconify-icon icon="solar:bag-4-linear" class="text-zinc-300 text-3xl"></iconify-icon>
               <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
                 <iconify-icon icon="solar:heart-linear" class="text-zinc-500 text-base"></iconify-icon>
               </button>
             </div>
-            <div class="flex flex-col gap-1.5 p-4">
-              <span class="text-xs font-light text-zinc-400">Halcyon Labs</span>
-              <span class="text-sm font-medium text-zinc-950 tracking-tight">Weekender Bag — Black</span>
-              <div class="flex items-center gap-1">
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <span class="text-xs font-light text-zinc-500">(64)</span>
-              </div>
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-sm font-medium text-zinc-950">$220.00</span>
-                <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                  <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-                </button>
-              </div>
+            <span class="text-xs font-light text-zinc-400">Halcyon Labs</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Weekender Bag — Black</span>
+            <div class="flex items-center gap-1">
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <span class="text-xs font-light text-zinc-500">(64)</span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-medium text-zinc-950">$220.00</span>
+              <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+              </button>
             </div>
           </div>
 
           <!-- Card 3 -->
-          <div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-            <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+          <div class="flex flex-col gap-2.5">
+            <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
               <iconify-icon icon="solar:watch-square-linear" class="text-zinc-300 text-3xl"></iconify-icon>
               <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
                 <iconify-icon icon="solar:heart-linear" class="text-orange-500 text-base"></iconify-icon>
               </button>
             </div>
-            <div class="flex flex-col gap-1.5 p-4">
-              <span class="text-xs font-light text-zinc-400">Meridian Studio</span>
-              <span class="text-sm font-medium text-zinc-950 tracking-tight">Field Watch — Steel</span>
-              <div class="flex items-center gap-1">
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
-                <span class="text-xs font-light text-zinc-500">(31)</span>
-              </div>
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-sm font-medium text-zinc-950">$340.00</span>
-                <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                  <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-                </button>
-              </div>
+            <span class="text-xs font-light text-zinc-400">Meridian Studio</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Field Watch — Steel</span>
+            <div class="flex items-center gap-1">
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
+              <span class="text-xs font-light text-zinc-500">(31)</span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-medium text-zinc-950">$340.00</span>
+              <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+              </button>
             </div>
           </div>
 
           <!-- Card 4 -->
-          <div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-            <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+          <div class="flex flex-col gap-2.5">
+            <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
               <iconify-icon icon="solar:wallet-linear" class="text-zinc-300 text-3xl"></iconify-icon>
               <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
                 <iconify-icon icon="solar:heart-linear" class="text-zinc-500 text-base"></iconify-icon>
               </button>
             </div>
-            <div class="flex flex-col gap-1.5 p-4">
-              <span class="text-xs font-light text-zinc-400">Ostara Group</span>
-              <span class="text-sm font-medium text-zinc-950 tracking-tight">Ridge Wallet — Black</span>
-              <div class="flex items-center gap-1">
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
-                <span class="text-xs font-light text-zinc-500">(92)</span>
-              </div>
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-sm font-medium text-zinc-950">$89.00</span>
-                <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                  <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-                </button>
-              </div>
+            <span class="text-xs font-light text-zinc-400">Ostara Group</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Ridge Wallet — Black</span>
+            <div class="flex items-center gap-1">
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
+              <span class="text-xs font-light text-zinc-500">(92)</span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-medium text-zinc-950">$89.00</span>
+              <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+              </button>
             </div>
           </div>
 
           <!-- Card 5 -->
-          <div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-            <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+          <div class="flex flex-col gap-2.5">
+            <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
               <iconify-icon icon="solar:sunglasses-linear" class="text-zinc-300 text-3xl"></iconify-icon>
               <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
                 <iconify-icon icon="solar:heart-linear" class="text-zinc-500 text-base"></iconify-icon>
               </button>
             </div>
-            <div class="flex flex-col gap-1.5 p-4">
-              <span class="text-xs font-light text-zinc-400">Fernpath</span>
-              <span class="text-sm font-medium text-zinc-950 tracking-tight">Sun Frames — Tortoise</span>
-              <div class="flex items-center gap-1">
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <span class="text-xs font-light text-zinc-500">(210)</span>
-              </div>
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-sm font-medium text-zinc-950">$150.00</span>
-                <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                  <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-                </button>
-              </div>
+            <span class="text-xs font-light text-zinc-400">Fernpath</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Sun Frames — Tortoise</span>
+            <div class="flex items-center gap-1">
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <span class="text-xs font-light text-zinc-500">(210)</span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-medium text-zinc-950">$150.00</span>
+              <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+              </button>
             </div>
           </div>
 
           <!-- Card 6 -->
-          <div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-            <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+          <div class="flex flex-col gap-2.5">
+            <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
               <iconify-icon icon="solar:belt-linear" class="text-zinc-300 text-3xl"></iconify-icon>
               <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
                 <iconify-icon icon="solar:heart-linear" class="text-zinc-500 text-base"></iconify-icon>
               </button>
             </div>
-            <div class="flex flex-col gap-1.5 p-4">
-              <span class="text-xs font-light text-zinc-400">Vellum Health</span>
-              <span class="text-sm font-medium text-zinc-950 tracking-tight">Full-Grain Belt — Tan</span>
-              <div class="flex items-center gap-1">
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
-                <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
-                <span class="text-xs font-light text-zinc-500">(18)</span>
-              </div>
-              <div class="flex items-center justify-between pt-1">
-                <span class="text-sm font-medium text-zinc-950">$68.00</span>
-                <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                  <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-                </button>
-              </div>
+            <span class="text-xs font-light text-zinc-400">Vellum Health</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Full-Grain Belt — Tan</span>
+            <div class="flex items-center gap-1">
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-900 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
+              <iconify-icon icon="solar:star-linear" class="text-zinc-300 text-xs"></iconify-icon>
+              <span class="text-xs font-light text-zinc-500">(18)</span>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-medium text-zinc-950">$68.00</span>
+              <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+                <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+              </button>
             </div>
           </div>
 
         </div>
 
         <!-- Pagination footer -->
-        <div class="flex items-center justify-between px-6 py-4 border-t border-zinc-100">
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-100">
           <span class="text-xs font-light text-zinc-500">Showing 1–6 of 142</span>
           <div class="flex items-center gap-1.5">
             <button class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-colors text-zinc-600">

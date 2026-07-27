@@ -18,12 +18,12 @@ iconify-icon { stroke-width: 1.5; }
 ::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
 </style></head>
-<body class="bg-zinc-100 text-sm antialiased text-zinc-900">
+<body class="bg-white text-sm antialiased text-zinc-900">
 
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col gap-4 py-4">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col">
 
     <!-- NAV -->
-    <nav class="bg-white rounded-2xl px-5 py-3 flex items-center justify-between shadow-sm">
+    <nav class="flex items-center justify-between py-5 border-b border-zinc-100">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
           <iconify-icon icon="solar:letter-linear" class="text-zinc-950 text-base"></iconify-icon>
@@ -45,7 +45,7 @@ iconify-icon { stroke-width: 1.5; }
     </nav>
 
     <!-- HERO -->
-    <section class="bg-white rounded-2xl px-6 py-20 flex flex-col items-center text-center gap-6">
+    <section class="flex flex-col items-center text-center gap-6 py-20">
       <span class="bg-zinc-100 rounded-full py-0.5 px-3 text-xs font-light text-zinc-600">New — Mail 2.0</span>
 
       <h1 class="text-5xl sm:text-6xl font-extralight tracking-tight text-zinc-950 max-w-2xl leading-tight">Every conversation, one calm inbox.</h1>
@@ -65,7 +65,7 @@ iconify-icon { stroke-width: 1.5; }
     </section>
 
     <!-- SOCIAL PROOF -->
-    <section class="flex flex-col items-center gap-4 py-8">
+    <section class="flex flex-col items-center gap-4 py-8 border-t border-zinc-100">
       <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Trusted by teams at</span>
       <div class="flex flex-wrap justify-center gap-x-10 gap-y-3">
         <span class="text-sm font-light text-zinc-400">Vellum Health</span>
@@ -77,22 +77,22 @@ iconify-icon { stroke-width: 1.5; }
     </section>
 
     <!-- FEATURES -->
-    <section class="grid md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-2xl p-6 flex flex-col gap-4">
+    <section class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-100 border-t border-zinc-100">
+      <div class="flex flex-col gap-4 py-10 px-0 md:px-8">
         <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
           <iconify-icon icon="solar:inbox-in-linear" class="text-zinc-500 text-lg"></iconify-icon>
         </div>
         <span class="text-sm font-medium text-zinc-950 tracking-tight">One shared inbox</span>
         <p class="text-xs font-light text-zinc-500 leading-relaxed">Every thread your team touches lives in one place. Assign an owner, leave a private note, and see who replied without forwarding a single message.</p>
       </div>
-      <div class="bg-white rounded-2xl p-6 flex flex-col gap-4">
+      <div class="flex flex-col gap-4 py-10 px-0 md:px-8">
         <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
           <iconify-icon icon="solar:magnifer-linear" class="text-zinc-500 text-lg"></iconify-icon>
         </div>
         <span class="text-sm font-medium text-zinc-950 tracking-tight">Search that finds it</span>
         <p class="text-xs font-light text-zinc-500 leading-relaxed">Search across mail, attachments and notes in one field. Results come back in under 40ms, whether the thread is from this morning or four years ago.</p>
       </div>
-      <div class="bg-white rounded-2xl p-6 flex flex-col gap-4">
+      <div class="flex flex-col gap-4 py-10 px-0 md:px-8">
         <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
           <iconify-icon icon="solar:tuning-square-2-linear" class="text-zinc-500 text-lg"></iconify-icon>
         </div>
@@ -101,49 +101,55 @@ iconify-icon { stroke-width: 1.5; }
       </div>
     </section>
 
-    <!-- STATS BAND -->
-    <section class="bg-zinc-950 rounded-3xl p-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+  </div>
+
+  <!-- STATS BAND (full-bleed color band, not a card) -->
+  <section class="bg-zinc-950 py-16">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 divide-x divide-zinc-800">
+      <div class="flex flex-col gap-2 px-6 first:pl-0 last:pr-0">
         <div class="flex items-center justify-between w-full">
           <span class="text-xs text-zinc-400 font-light">Teams on Mail</span>
           <div class="w-2 h-2 rounded-full bg-green-400"></div>
         </div>
         <span class="text-3xl font-extralight text-zinc-100 tracking-tight">4,200</span>
       </div>
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+      <div class="flex flex-col gap-2 px-6 first:pl-0 last:pr-0">
         <div class="flex items-center justify-between w-full">
           <span class="text-xs text-zinc-400 font-light">Messages a day</span>
           <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
         </div>
         <span class="text-3xl font-extralight text-zinc-100 tracking-tight">1.8M</span>
       </div>
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+      <div class="flex flex-col gap-2 px-6 first:pl-0 last:pr-0">
         <div class="flex items-center justify-between w-full">
           <span class="text-xs text-zinc-400 font-light">Uptime, 90 days</span>
           <div class="w-2 h-2 rounded-full bg-green-400"></div>
         </div>
         <span class="text-3xl font-extralight text-zinc-100 tracking-tight">99.98%</span>
       </div>
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+      <div class="flex flex-col gap-2 px-6 first:pl-0 last:pr-0">
         <div class="flex items-center justify-between w-full">
           <span class="text-xs text-zinc-400 font-light">Avg. reply time</span>
           <div class="w-2 h-2 rounded-full bg-orange-500"></div>
         </div>
         <span class="text-3xl font-extralight text-zinc-100 tracking-tight">12m</span>
       </div>
-    </section>
+    </div>
+  </section>
+
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col">
 
     <!-- PRICING -->
-    <section class="flex flex-col gap-8 py-12">
+    <section class="flex flex-col gap-10 py-16 border-b border-zinc-100">
       <div class="flex flex-col items-center text-center gap-3">
         <h2 class="text-3xl font-extralight tracking-tight text-zinc-950">Simple pricing, per seat</h2>
         <p class="text-sm font-light text-zinc-500 leading-relaxed max-w-xl">Every plan includes the shared inbox, search and rules. Move up when you need more history, more automation or SSO.</p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-4">
+      <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
 
-        <!-- Starter (light) -->
-        <div class="bg-white rounded-2xl p-6 flex flex-col gap-5">
+        <!-- Starter -->
+        <div class="flex flex-col gap-5 py-8 md:py-0 md:px-8 first:pl-0 last:pr-0">
           <div class="flex flex-col gap-1">
             <span class="text-sm font-medium text-zinc-950 tracking-tight">Starter</span>
             <span class="text-xs font-light text-zinc-500">For one person keeping it tidy.</span>
@@ -175,42 +181,42 @@ iconify-icon { stroke-width: 1.5; }
           </button>
         </div>
 
-        <!-- Pro (dark, popular) -->
-        <div class="bg-zinc-950 rounded-2xl p-6 flex flex-col gap-5">
+        <!-- Pro (featured — badge + accent CTA only, no background change) -->
+        <div class="flex flex-col gap-5 py-8 md:py-0 md:px-8 first:pl-0 last:pr-0">
           <div class="flex flex-col gap-1">
             <div class="flex items-center justify-between gap-3">
-              <span class="text-sm font-medium text-zinc-50 tracking-tight">Pro</span>
+              <span class="text-sm font-medium text-zinc-950 tracking-tight">Pro</span>
               <span class="rounded-full py-0.5 px-2.5 text-xs font-normal bg-green-400 text-zinc-950">Popular</span>
             </div>
-            <span class="text-xs font-light text-zinc-400">For a team sharing the load.</span>
+            <span class="text-xs font-light text-zinc-500">For a team sharing the load.</span>
           </div>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-3xl font-extralight tracking-tight text-zinc-100">$24</span>
+            <span class="text-3xl font-extralight tracking-tight text-zinc-950">$24</span>
             <span class="text-xs font-light text-zinc-500">/mo</span>
           </div>
           <div class="flex flex-col gap-2.5">
             <div class="flex items-center gap-2.5">
               <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Unlimited shared inboxes</span>
+              <span class="text-xs font-light text-zinc-500">Unlimited shared inboxes</span>
             </div>
             <div class="flex items-center gap-2.5">
               <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Full history, full-text search</span>
+              <span class="text-xs font-light text-zinc-500">Full history, full-text search</span>
             </div>
             <div class="flex items-center gap-2.5">
               <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Unlimited rules and snoozes</span>
+              <span class="text-xs font-light text-zinc-500">Unlimited rules and snoozes</span>
             </div>
             <div class="flex items-center gap-2.5">
               <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Assignments and private notes</span>
+              <span class="text-xs font-light text-zinc-500">Assignments and private notes</span>
             </div>
           </div>
           <button class="bg-green-400 text-zinc-950 rounded-xl py-2.5 w-full text-xs font-medium tracking-wide hover:bg-green-300 transition-colors mt-auto">Start 14-day trial</button>
         </div>
 
-        <!-- Business (light) -->
-        <div class="bg-white rounded-2xl p-6 flex flex-col gap-5">
+        <!-- Business -->
+        <div class="flex flex-col gap-5 py-8 md:py-0 md:px-8 first:pl-0 last:pr-0">
           <div class="flex flex-col gap-1">
             <span class="text-sm font-medium text-zinc-950 tracking-tight">Business</span>
             <span class="text-xs font-light text-zinc-500">For companies with a policy.</span>
@@ -246,7 +252,7 @@ iconify-icon { stroke-width: 1.5; }
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-white rounded-2xl p-8 flex flex-col gap-8">
+    <footer class="flex flex-col gap-8 py-12">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-2.5">

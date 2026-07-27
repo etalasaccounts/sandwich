@@ -9,14 +9,14 @@ content, pull anything extra from [`../components.md`](../components.md).
 |---|---|---|---|
 | [`mailbox.html`](./mailbox.html) | App shell, 3-pane | Any app screen: inbox, CRM, admin, tools | App shell, dark sidebar (nav, KPIs, labels, account), list panel with row states, detail pane, reply composer, attachments |
 | [`auth.html`](./auth.html) | Auth | Login, register, forgot password | Split brand/form layout, form fields, SSO button, divider |
-| [`landing.html`](./landing.html) | Marketing | Public/landing pages | Top nav, hero display type, feature cards, dark stats band, pricing, footer |
+| [`landing.html`](./landing.html) | Marketing (flat) | Public/landing pages | Flat public-facing surface (no cards, `bg-white` page, `border-t`/`border-b` dividers only): flat nav, hero display type, `divide-x` feature trio, full-bleed dark stats band, `divide-x` pricing tiers, footer |
 | [`settings.html`](./settings.html) | Settings/forms | Settings, profile, preferences, any form-heavy screen | Card groups, field rows, toggles, plan card, danger zone |
 | [`data-table.html`](./data-table.html) | Data table | Lists of records: customers, invoices, orders | Toolbar (search/filters/actions), table recipe, status dots, pagination |
 | [`mobile.html`](./mobile.html) | Mobile | Small-screen apps / mobile web | Phone frame, stacked cards, list, dark bottom nav |
 | [`product-form.html`](./product-form.html) | Complex CRUD form (commerce) | Creating/editing a record with media, pricing, variants, and inventory — products, listings, catalog items | Sticky save/publish header, image dropzone + thumbnail grid, price inputs, variant chips + table, `segmented-control`, `select-field`, `tag-input`, `checkbox-item`, SEO fields |
 | [`blog-post-form.html`](./blog-post-form.html) | Complex CRUD form (content) | Creating/editing long-form content with a schedule — blog posts, articles, docs, changelog entries | Same header/status/organization/SEO shell as `product-form.html`, plus a rich-text toolbar, word count, featured-image dropzone, author row, 3-way `segmented-control` with a conditional schedule field |
 | [`chat-interface.html`](./chat-interface.html) | Chat / messaging | Support chat, DMs, AI assistant threads | Conversation list (avatars, online dot, unread badge), `chat-bubble` (sent/received), `date-separator`, `typing-indicator`, composer |
-| [`marketplace-grid.html`](./marketplace-grid.html) | Browse grid (storefront) | Customer-facing product/listing browsing — marketplaces, catalogs, storefronts, search results | Scrolling `landing.html`-style top nav (search, cart/saved badges, avatar) on `zinc-100`, `secondary-rail` as a floating filter panel (category, price range, rating, `checkbox-item`s), toolbar (sort + view toggle), `product-card` grid, `rating-stars`, pagination |
+| [`marketplace-grid.html`](./marketplace-grid.html) | Browse grid (storefront, flat) | Customer-facing product/listing browsing — marketplaces, catalogs, storefronts, job boards, search results | Same flat surface as `landing.html`: flat nav (search, cart/saved badges, avatar), `secondary-rail`'s flat `border-r` variant as a filter panel (category, price range, rating, `checkbox-item`s), toolbar (sort + view toggle), flat `product-card` grid (no card wrapper, just the image tile), `rating-stars`, pagination |
 
 ## No pattern fits?
 
@@ -41,14 +41,25 @@ differ. When a genuinely new create/edit screen doesn't fit either
 domain, copy this shared skeleton rather than the domain-specific fields —
 it's the reusable part.
 
-## The secondary rail shows up twice
+## Two surface languages, not one
 
-`settings.html`'s Profile/Notifications/Billing/Security column and
-`marketplace-grid.html`'s filter column are the same structural piece —
-[`../components.md#secondary-rail`](../components.md#secondary-rail) — used
-for two different purposes (sub-navigation vs. filtering) on two different
-surfaces (nested in a white app-shell vs. floating on the `zinc-100` page,
-see the recipe's two variants). Any screen that needs a light column of
-sub-navigation or filters next to its main content should reuse that
-recipe rather than inventing a new one — pick the surface variant that
-matches whether the screen has a white app-shell or not.
+`mailbox.html`, `settings.html`, `data-table.html`, `product-form.html`,
+`blog-post-form.html`, `chat-interface.html` and `mobile.html` are all app
+shell — a workspace someone works inside, floating white/dark panels on a
+`zinc-100` backdrop. `landing.html` and `marketplace-grid.html` are flat —
+a public-facing page, `bg-white`, no cards, dividers instead of boxes (see
+foundations.md's two "Surfaces & layout" sections). Building a new
+public-facing pattern (a job board, docs, a public profile)? Start from
+the flat convention, not the app shell — a public page that looks like an
+admin panel is the mistake this split exists to prevent.
+
+## The secondary rail shows up three ways
+
+`settings.html`'s Profile/Notifications/Billing/Security column,
+`marketplace-grid.html`'s filter column, and any future filter/sub-nav
+rail are the same structural piece —
+[`../components.md#secondary-rail`](../components.md#secondary-rail) —
+used for different purposes (sub-navigation vs. filtering) on different
+surfaces. Pick the variant that matches the surface: `bg-zinc-50` nested in
+a white app-shell, or a flat `border-r` on a public flat page — never
+invent a third treatment.

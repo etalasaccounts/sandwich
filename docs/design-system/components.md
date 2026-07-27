@@ -432,7 +432,7 @@ Custom checkbox row (checked/unchecked), used for multi-select lists like collec
 
 ## secondary-rail
 
-A light column of sub-navigation or filters, sitting beside the main content as a second, narrower shell column. Two surface variants depending on what it floats on:
+A light column of sub-navigation or filters, sitting beside the main content as a second, narrower column. Which variant to use depends on the surface it sits in (see foundations.md's two "Surfaces & layout" sections):
 
 **Nested in a white app-shell** (dark sidebar + white main panel, e.g. `patterns/settings.html`) — the rail is `bg-zinc-50` so it reads as a distinct layer against the white panel next to it:
 
@@ -451,15 +451,16 @@ A light column of sub-navigation or filters, sitting beside the main content as 
 </nav>
 ```
 
-**Floating directly on the `zinc-100` page background** (no white shell wrapper, e.g. `patterns/marketplace-grid.html`'s filter rail) — the rail itself is `bg-white` (it's the card, not a layer inside one) with `shadow-sm`, matching how `landing.html` treats every section as its own white card:
+**On a public-facing flat page** (no app shell at all, e.g. `patterns/marketplace-grid.html`'s filter rail) — no card, no background, no rounding: a plain `border-r` separates it from the content beside it, same flat convention as everything else on that page:
 
 ```html
-<nav class="bg-white rounded-2xl p-4 gap-5 flex-col w-64 flex-shrink-0 hidden md:flex shadow-sm">
-  <!-- filter section: section-label heading + checkbox-item rows -->
+<nav class="flex flex-col gap-6 w-56 flex-shrink-0 hidden md:flex border-r border-zinc-100 pr-6">
+  <!-- filter section: section-label heading + checkbox-item rows, sections
+       separated from each other by border-t border-zinc-100 pt-4 -->
 </nav>
 ```
 
-Width varies with content (`w-56` for short nav labels, `w-64` when it also holds filter sections with `section-label` headings and `checkbox-item` rows) — never full app-sidebar width.
+Width varies with content (`w-56` for short nav labels, `w-64` when it also holds several filter sections) — never full app-sidebar width.
 
 ## chat-bubble
 
@@ -531,29 +532,29 @@ Same rule applies to any other "filled" state icon (e.g. a saved/liked heart): c
 
 ## product-card
 
-Grid item for a browse/marketplace screen (see `patterns/marketplace-grid.html`) — image tile with an overlay action, then a content block using `rating-stars` and a small circular add-to-cart button (not `button-primary`; this is a repeated grid action, not the one primary action on the view):
+Grid item for a browse/marketplace screen (see `patterns/marketplace-grid.html`) — flat, per the public-facing surface rules: no card wrapper, no border, no shadow. The image tile is the only bounded shape (`rounded-xl`, matching control radius, not a card radius); text sits directly on the page background below it, and the grid's own `gap` is what separates one card from the next:
 
 ```html
-<div class="bg-white border border-zinc-100 rounded-2xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
-  <div class="relative aspect-square bg-zinc-100 flex items-center justify-center">
+<div class="flex flex-col gap-2.5">
+  <div class="relative aspect-square rounded-xl bg-zinc-100 flex items-center justify-center">
     <iconify-icon icon="solar:wallet-linear" class="text-zinc-300 text-3xl"></iconify-icon>
     <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
       <iconify-icon icon="solar:heart-linear" class="text-zinc-500 text-base"></iconify-icon>
     </button>
   </div>
-  <div class="flex flex-col gap-1.5 p-4">
-    <span class="text-xs font-light text-zinc-400">Vendor name</span>
-    <span class="text-sm font-medium text-zinc-950 tracking-tight">Product name</span>
-    <!-- rating-stars here -->
-    <div class="flex items-center justify-between pt-1">
-      <span class="text-sm font-medium text-zinc-950">$89.00</span>
-      <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
-        <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
-      </button>
-    </div>
+  <span class="text-xs font-light text-zinc-400">Vendor name</span>
+  <span class="text-sm font-medium text-zinc-950 tracking-tight">Product name</span>
+  <!-- rating-stars here -->
+  <div class="flex items-center justify-between pt-1">
+    <span class="text-sm font-medium text-zinc-950">$89.00</span>
+    <button class="w-8 h-8 rounded-full bg-zinc-950 hover:bg-zinc-800 flex items-center justify-center transition-colors">
+      <iconify-icon icon="solar:cart-plus-linear" class="text-white text-sm"></iconify-icon>
+    </button>
   </div>
 </div>
 ```
+
+The add-to-cart button is a small circular action (not `button-primary`) — it's a repeated grid action, not the one primary action on the view.
 
 ## Adding a component
 
