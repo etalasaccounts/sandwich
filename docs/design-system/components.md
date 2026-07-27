@@ -160,14 +160,14 @@ List/inbox item on a `bg-panel-2` panel. Three states:
     <span class="text-xs text-ink-2 font-light truncate">Preview text goes here…</span>
   </div>
 </div>
-<!-- unread (not selected): medium weight + green dot next to the name; wrapper: -->
+<!-- unread (not selected): medium weight + accent dot next to the name; wrapper: -->
 <div class="flex gap-3.5 p-4 border-b border-line cursor-pointer hover:bg-page/50 transition-colors border-l-2 border-transparent">…</div>
-<!-- read: same wrapper, but name/title drop to font-light text-ink-2, meta to text-ink-3 -->
+<!-- read: same wrapper, but name drops to font-light text-ink-2, title to font-light text-ink-mid, meta stays text-ink-3 -->
 ```
 
 ## avatar
 
-Initials on an accent or zinc fill:
+Initials on an accent or inverse fill:
 
 ```html
 <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center flex-shrink-0 text-xs font-medium text-on-accent tracking-tight">MR</div>
@@ -188,7 +188,7 @@ Count badge accent `rounded-full py-0.5 px-2.5 text-xs font-normal bg-accent tex
 
 ## label-dot
 
-Status dot + label: `<div class="w-2 h-2 rounded-full bg-accent"></div>` next to `<span class="text-sm font-light text-inverse-ink-2">Work</span>` (dark) or `text-ink-2` (light). Semantics: green active/success, cyan info, orange warning, `bg-line-2` neutral/inactive.
+Status dot + label: `<div class="w-2 h-2 rounded-full bg-accent"></div>` next to `<span class="text-sm font-light text-inverse-ink-2">Work</span>` (dark) or `text-ink-2` (light). Semantics: accent = active/success, info = informational, warn = warning, `bg-line-2` = neutral/inactive.
 
 ## section-label
 

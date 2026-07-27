@@ -27,7 +27,7 @@ bolding.
 
 ## Color
 
-Neutrals: **zinc only.**
+Neutrals: a single tonal scale (house default: zinc).
 
 ### Inverse stack (sidebar, stat bands, mobile bottom nav)
 
@@ -36,7 +36,9 @@ Neutrals: **zinc only.**
 | Panel background | `bg-inverse` |
 | Card / input / active item | `bg-inverse-2` |
 | Nested / hover / avatar | `bg-inverse-3` (hover often `hover:bg-inverse-2/50` on items) |
+| Hover on dark controls | `bg-inverse-4` |
 | Primary text | `text-inverse-ink` |
+| Bright secondary text | `text-inverse-ink-mid` |
 | Secondary text | `text-inverse-ink-2` |
 | Muted text / placeholder | `text-inverse-ink-3` |
 | Section labels | `text-inverse-label` |
@@ -52,9 +54,12 @@ No borders on dark surfaces — separation is by shade.
 | Secondary panel / card | `bg-panel-2` (cards often `bg-panel-2/80 border border-line`) |
 | Control fill | `bg-control/50`, hover `bg-control` |
 | Border | `border-line` (sometimes `/50`) |
+| Stronger border / toggle track | `border-line-2` |
 | Primary text | `text-ink` |
+| Emphasized secondary text | `text-ink-mid` |
 | Secondary text | `text-ink-2` |
 | Tertiary text | `text-ink-3` |
+| Faintest / disabled text | `text-ink-faint` |
 
 ### Accents — exactly three, fixed semantics
 
@@ -67,8 +72,9 @@ No borders on dark surfaces — separation is by shade.
 Slot house values and brand overrides: see [`theming.md`](./theming.md).
 
 Accent application: 2×2 dots (`w-2 h-2 rounded-full bg-accent`), count
-badges, avatar fills, icon tints on active items. One accent (green)
-dominates per view; cyan and orange are supporting. **Never**: large accent
+badges, avatar fills, icon tints on active items. One accent (house
+default: green) dominates per view; the other two accent slots are
+supporting. **Never**: large accent
 surfaces, accent-colored body text, gradients, colors outside this palette.
 Two narrow, enumerated carve-outs exist (one accent-filled CTA on a
 marketing page's featured pricing tier; a smaller `w-1.5 h-1.5` inline dot)
@@ -243,7 +249,7 @@ tier's primary action, using
 a button may use a large accent fill, and `accent-hover` exists solely as
 that button's hover state. Nowhere else — not app-shell primaries, not secondary
 CTAs, not the non-featured pricing tiers, not a second button on the same
-page. Everywhere else the primary button is the zinc `button-primary`
+page. Everywhere else the primary button is the inverse `button-primary`
 recipe.
 
 **2. Second dot size for inline unread indicators.** The unread-indicator

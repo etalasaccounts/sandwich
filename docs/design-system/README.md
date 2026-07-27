@@ -30,13 +30,14 @@ component sections / pattern files you actually need.
 
 ## Adapting to a stack
 
-The exemplars are plain HTML + Tailwind CDN. The classes and markup
-structure are the design system — keep them identical everywhere:
+The exemplars are plain HTML + the Tailwind v4 browser build. The classes
+and markup structure are the design system — keep them identical
+everywhere:
 
 - **Plain HTML:** copy the canonical shared head from
-  [`foundations.md`](./foundations.md#shared-html-head) (Tailwind CDN, Inter,
-  iconify script, scrollbar CSS) — every `patterns/*.html` file carries that
-  exact block, differing only in `<title>`.
+  [`foundations.md`](./foundations.md#shared-html-head) (Tailwind v4 browser
+  build, Inter, iconify script, scrollbar CSS) — every `patterns/*.html`
+  file carries that exact block, differing only in `<title>`.
 - **React/Next.js:** same markup, `class` → `className`. Icons: keep the
   `<iconify-icon>` custom element (load the iconify script in the root
   layout) or use `@iconify/react`'s `<Icon icon="solar:…-linear" />` —

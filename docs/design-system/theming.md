@@ -95,6 +95,19 @@ verified with a throwaway test page rendered via
   specified. **No fallback was needed** — the canonical head below is
   exactly what the design spec proposed, unchanged.
 
+### Known v3→v4 rendering deltas
+
+`patterns/landing.html`'s hero H1 (`text-5xl sm:text-6xl ... leading-tight`)
+renders about 30px taller under this design system's Tailwind v4 CDN build
+than it did under the old v3 CDN. Root cause: under v3, the `sm:text-6xl`
+media-query rule silently overrode `leading-tight` (so the intended
+line-height never actually applied at that breakpoint); under v4,
+`leading-tight` correctly wins. This is v4 rendering the markup as written —
+a correction of a latent v3 cascade accident, not a regression introduced by
+this migration. `landing.html:111`'s hero heading is the only responsive
+text-size utility (`sm:text-*`) in the whole design system, so no other file
+is affected. No fix applied — documenting this is the fix.
+
 ## 3. Canonical shared head
 
 Every plain-HTML design-system file (`patterns/*.html` and any file the
@@ -237,6 +250,30 @@ This pack changes the accent, three inverse shades, the font family (with
 its own weight remap since Sora ships 300 as its lightest), and squares up
 the radius scale slightly. Every other slot (page, panel, ink family, info,
 warn, …) silently falls back to house.
+
+### Pack authoring constraints
+
+Slots aren't fully independent — a handful of relationships have to be
+respected or a technically-valid pack will still look broken:
+
+- **Move `on-*` slots with the fill they pair with.** If a pack overrides
+  `--accent`, reconsider `--on-accent` too — the pair exists for contrast
+  against that specific fill, not as decoration. The same goes for
+  `--info`/`--on-info` and `--warn`/`--on-warn`. Changing the fill alone can
+  leave text unreadable on top of it.
+- **The `inverse*` family stays a dark tonal range.** `--inverse`,
+  `--inverse-2`, `--inverse-3`, and `--inverse-4` are assumed dark — the "no
+  borders, separation by shade" convention and the `inverse-ink*` text slots
+  (assumed light, for contrast against them) both depend on that assumption.
+  Setting `--inverse` to a light color breaks both the contrast and the
+  shade-separation convention at once.
+- **The surface and text ladders have an implied order.** `page` →
+  `panel-2` → `panel` is a progressively lighter surface stack, and `ink` →
+  `ink-mid` → `ink-2` → `ink-3` → `ink-faint` is a progressively fainter
+  text stack. Each slot is valid CSS in isolation, but a partial override
+  that breaks the ordering (e.g. making `panel-2` darker than `page`, or
+  `ink-2` lighter than `ink-3`) will look inconsistent even though nothing
+  is technically wrong with any single value.
 
 ## 5. Resolution rules and runtime switching
 
