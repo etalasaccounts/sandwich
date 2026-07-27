@@ -135,6 +135,55 @@ Shows open client questions (and what they block), stale features, and recommend
 
 Full maintenance report — useful for billing evidence and SLA logs.
 
+### 6. Generate documentation (optional)
+
+After features are built, use **[Binder](https://github.com/Deliametap/binder)** to generate documentation from your codebase.
+
+**Install Binder:**
+
+```bash
+# Claude Code
+claude plugin marketplace add Deliametap/binder
+claude plugin install binder
+
+# Hermes Agent
+git clone https://github.com/Deliametap/binder.git
+mkdir -p ~/.hermes/plugins
+ln -s "$(pwd)/binder/hermes-plugin" ~/.hermes/plugins/binder
+hermes plugins enable binder
+```
+
+**After marking features complete:**
+
+```bash
+/prep --done F-001 abc123def456
+```
+
+You'll see a suggestion to update documentation:
+
+```
+Feature F-001 marked complete.
+
+To update project documentation, run:
+
+  /binder:analyze
+  /binder:generate all id
+```
+
+**Binder generates 5 documents:**
+
+| Document | Content |
+|----------|---------|
+| `UAT.md` | User acceptance test cases per module |
+| `User_Manual.md` | Per-role user guide (if UI detected) |
+| `API_Documentation.md` | All endpoints with findings |
+| `Installation_Guide.md` | Setup instructions |
+| `Technical_Documentation.md` | Architecture narrative + diagrams |
+
+Binder reads your code, not the brief — so documentation stays in sync with what was actually built. It shares the same validation philosophy as Sandwich: Zod schemas, confidence markers, deterministic IDs, audit journal.
+
+See [Binder Integration Plan](docs/binder-integration-plan.md) for technical details.
+
 ---
 
 ## Full command reference
@@ -154,13 +203,13 @@ Full maintenance report — useful for billing evidence and SLA logs.
 ## Pipeline
 
 ```
-/order → /prep → docs/sandwich/specs/F-XXX.md → superpowers:brainstorming → build
-                 └─ feature-queue.md (priorities + links)
+/order → /prep → docs/sandwich/specs/F-XXX.md → superpowers:brainstorming → build → /binder:analyze → docs
+                 └─ feature-queue.md (priorities + links)                                 └─ UAT, user manual, API docs, etc.
 ```
 
 After `/prep`, every active feature has its own `docs/sandwich/specs/F-XXX.md` — scope plus an acceptance-criteria checklist, generated deterministically from the registry. Pick the top feature off `feature-queue.md` and hand its spec file straight to Superpowers brainstorming as the starting point. As implementation proves each acceptance criterion, flip it to `"done": true` in the feature's `F-XXX.json` and re-run `render-specs.ts` (or the next `/prep`) to check it off in the rendered markdown.
 
-Sandwich handles requirements capture and prioritization. Superpowers handles design and execution.
+Sandwich handles requirements capture and prioritization. Superpowers handles design and execution. Binder handles post-build documentation.
 
 ---
 
