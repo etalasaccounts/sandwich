@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Product creation — complex CRUD form</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+iconify-icon { stroke-width: 1.5; }
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style></head>
+<body class="bg-zinc-100 h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-zinc-900">
+
+  <!-- App Shell -->
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="bg-zinc-950 rounded-2xl p-4 gap-5 flex-col w-[320px] flex-shrink-0 hidden lg:flex overflow-y-auto">
+
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 mt-1 px-1">
+        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+          <iconify-icon icon="solar:layers-minimalistic-linear" class="text-zinc-950 text-base"></iconify-icon>
+        </div>
+        <span class="text-lg font-medium text-zinc-50 tracking-tight">Nordbyte</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex flex-col w-full gap-0.5 mt-2">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:home-2-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Overview</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:users-group-rounded-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Customers</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-zinc-900 cursor-pointer">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:box-linear" class="text-green-400 text-base"></iconify-icon>
+            <span class="text-sm font-normal text-zinc-50 tracking-tight">Products</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:cart-large-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Orders</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="flex-1"></div>
+
+      <!-- User Footer -->
+      <div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 w-full">
+        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <iconify-icon icon="solar:user-circle-linear" class="text-zinc-400 text-lg"></iconify-icon>
+        </div>
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="text-sm font-normal text-zinc-50 truncate">Avery Nolan</span>
+          <span class="text-xs font-light text-zinc-500 truncate">avery@nordbyte.com</span>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 hover:bg-zinc-700 transition-colors">
+          <iconify-icon icon="solar:settings-linear" class="text-zinc-400 text-sm"></iconify-icon>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between gap-4 p-7 border-b border-zinc-100 flex-shrink-0">
+        <div class="flex items-center gap-3.5">
+          <button class="w-9 h-9 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500 flex-shrink-0">
+            <iconify-icon icon="solar:arrow-left-linear" class="text-base"></iconify-icon>
+          </button>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs font-light text-zinc-400">Products</span>
+            <span class="text-xl font-medium text-zinc-950 tracking-tight">Add product</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors">
+            <span class="text-xs font-normal text-zinc-700">Save as draft</span>
+          </button>
+          <button class="flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-white">
+            <iconify-icon icon="solar:cloud-upload-linear" class="text-sm"></iconify-icon>
+            <span class="text-xs font-medium tracking-wide">Publish product</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content: two columns -->
+      <div class="flex gap-4 p-7 overflow-y-auto flex-1">
+
+        <!-- LEFT COLUMN -->
+        <div class="flex flex-col gap-4 flex-1 min-w-0">
+
+          <!-- Basic information -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Basic information</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Product title</span>
+              <input type="text" placeholder="e.g. Ridge wallet — walnut" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Description</span>
+              <textarea placeholder="What makes this product worth buying?" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors resize-none min-h-[100px]">Hand-finished walnut card wallet with a single steel money clip. Holds 1–8 cards flat, no bulk.</textarea>
+            </label>
+          </div>
+
+          <!-- Media -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Media</span>
+            <div class="border-2 border-dashed border-zinc-200 rounded-xl p-8 flex flex-col items-center gap-2 text-center hover:border-zinc-300 transition-colors cursor-pointer">
+              <iconify-icon icon="solar:gallery-add-linear" class="text-zinc-400 text-2xl"></iconify-icon>
+              <span class="text-sm font-light text-zinc-500">Drag images here or click to upload</span>
+              <span class="text-xs font-light text-zinc-400">PNG or JPG, up to 10MB each</span>
+            </div>
+            <div class="grid grid-cols-4 gap-3">
+              <div class="relative rounded-xl overflow-hidden border border-zinc-100 aspect-square bg-zinc-100 flex items-center justify-center">
+                <iconify-icon icon="solar:gallery-linear" class="text-zinc-300 text-2xl"></iconify-icon>
+                <span class="absolute top-1.5 left-1.5 bg-zinc-950/80 text-white text-[10px] font-medium rounded-full py-0.5 px-2">Cover</span>
+                <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/60 flex items-center justify-center hover:bg-zinc-950/80 transition-colors">
+                  <iconify-icon icon="solar:close-circle-linear" class="text-white text-xs"></iconify-icon>
+                </button>
+              </div>
+              <div class="relative rounded-xl overflow-hidden border border-zinc-100 aspect-square bg-zinc-100 flex items-center justify-center">
+                <iconify-icon icon="solar:gallery-linear" class="text-zinc-300 text-2xl"></iconify-icon>
+                <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/60 flex items-center justify-center hover:bg-zinc-950/80 transition-colors">
+                  <iconify-icon icon="solar:close-circle-linear" class="text-white text-xs"></iconify-icon>
+                </button>
+              </div>
+              <div class="relative rounded-xl overflow-hidden border border-zinc-100 aspect-square bg-zinc-100 flex items-center justify-center">
+                <iconify-icon icon="solar:gallery-linear" class="text-zinc-300 text-2xl"></iconify-icon>
+                <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-zinc-950/60 flex items-center justify-center hover:bg-zinc-950/80 transition-colors">
+                  <iconify-icon icon="solar:close-circle-linear" class="text-white text-xs"></iconify-icon>
+                </button>
+              </div>
+              <div class="rounded-xl border-2 border-dashed border-zinc-200 aspect-square flex items-center justify-center hover:border-zinc-300 transition-colors cursor-pointer">
+                <iconify-icon icon="solar:add-circle-linear" class="text-zinc-300 text-xl"></iconify-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Pricing</span>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-zinc-500">Price</span>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-light text-zinc-400">$</span>
+                  <input type="text" value="89.00" class="bg-white border border-zinc-100 rounded-xl py-2.5 pl-7 pr-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+                </div>
+              </label>
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-zinc-500">Compare-at price</span>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-light text-zinc-400">$</span>
+                  <input type="text" value="120.00" class="bg-white border border-zinc-100 rounded-xl py-2.5 pl-7 pr-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+                </div>
+              </label>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-zinc-500">Cost per item</span>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-light text-zinc-400">$</span>
+                  <input type="text" value="35.00" class="bg-white border border-zinc-100 rounded-xl py-2.5 pl-7 pr-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+                </div>
+              </label>
+              <div class="flex flex-col gap-1.5 w-full justify-end">
+                <span class="text-xs font-light text-zinc-500">Profit</span>
+                <span class="text-sm font-light text-zinc-700 py-2.5">$54.00 <span class="text-zinc-400">(61% margin)</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-zinc-950 tracking-tight">Inventory</span>
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-light text-zinc-500">Track quantity</span>
+                <button class="w-10 h-6 rounded-full bg-green-400 p-0.5 flex items-center transition-colors" aria-pressed="true">
+                  <span class="w-5 h-5 rounded-full bg-white shadow-sm ml-auto"></span>
+                </button>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-zinc-500">SKU (Stock Keeping Unit)</span>
+                <input type="text" value="RW-WAL-001" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+              </label>
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-zinc-500">Barcode (ISBN, UPC, GTIN)</span>
+                <input type="text" placeholder="Optional" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+              </label>
+            </div>
+            <label class="flex flex-col gap-1.5 w-full sm:w-1/2">
+              <span class="text-xs font-light text-zinc-500">Quantity available</span>
+              <input type="number" value="48" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+            </label>
+          </div>
+
+          <!-- Variants -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-zinc-950 tracking-tight">Variants</span>
+              <button class="flex items-center gap-1.5 bg-white border border-zinc-100 rounded-full py-1.5 px-3.5 hover:bg-zinc-100 transition-colors">
+                <iconify-icon icon="solar:add-circle-linear" class="text-zinc-500 text-sm"></iconify-icon>
+                <span class="text-xs font-normal text-zinc-700">Add variant</span>
+              </button>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-light text-zinc-500">Size</span>
+              <div class="flex items-center gap-1.5">
+                <button class="rounded-full py-1 px-3.5 text-xs bg-zinc-950 text-white font-normal transition-colors">Small</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-zinc-100 text-zinc-600 font-light hover:bg-zinc-200 transition-colors">Medium</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-zinc-100 text-zinc-600 font-light hover:bg-zinc-200 transition-colors">Large</button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-light text-zinc-500">Color</span>
+              <div class="flex items-center gap-1.5">
+                <button class="rounded-full py-1 px-3.5 text-xs bg-zinc-950 text-white font-normal transition-colors">Walnut</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-zinc-100 text-zinc-600 font-light hover:bg-zinc-200 transition-colors">Black</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-zinc-100 text-zinc-600 font-light hover:bg-zinc-200 transition-colors">White</button>
+              </div>
+            </div>
+
+            <table class="w-full text-left mt-1">
+              <thead>
+                <tr class="border-b border-zinc-100">
+                  <th class="py-2.5 px-2 text-xs uppercase tracking-widest text-zinc-400 font-normal">Variant</th>
+                  <th class="py-2.5 px-2 text-xs uppercase tracking-widest text-zinc-400 font-normal">Price</th>
+                  <th class="py-2.5 px-2 text-xs uppercase tracking-widest text-zinc-400 font-normal text-right">Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-zinc-100">
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700">Small / Walnut</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700">$89.00</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700 text-right">24</td>
+                </tr>
+                <tr class="border-b border-zinc-100">
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700">Medium / Walnut</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700">$89.00</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700 text-right">18</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700">Large / Black</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700">$94.00</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-zinc-700 text-right">6</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="flex flex-col gap-4 w-80 flex-shrink-0">
+
+          <!-- Status -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-3">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Status</span>
+            <div class="flex items-center bg-zinc-100 rounded-full p-1 w-full">
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center text-zinc-500 font-light transition-colors">Draft</button>
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center bg-white text-zinc-950 font-normal shadow-sm transition-colors">Active</button>
+            </div>
+            <span class="text-xs font-light text-zinc-500">This product will be visible in your store immediately after publishing.</span>
+          </div>
+
+          <!-- Organization -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Organization</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Product category</span>
+              <div class="relative">
+                <select class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors appearance-none pr-9">
+                  <option>Accessories</option>
+                  <option>Bags &amp; wallets</option>
+                  <option>Apparel</option>
+                </select>
+                <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-sm pointer-events-none"></iconify-icon>
+              </div>
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Tags</span>
+              <div class="flex flex-wrap items-center gap-1.5 p-2 border border-zinc-100 bg-white rounded-xl">
+                <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">leather <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
+                <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">wallet <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
+                <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">gift-ready <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
+                <input type="text" placeholder="Add tag…" class="bg-transparent outline-none text-xs font-light text-zinc-700 placeholder-zinc-400 flex-1 min-w-[60px]" />
+              </div>
+            </label>
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-light text-zinc-500">Collections</span>
+              <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                <div class="w-4 h-4 rounded border border-zinc-950 bg-zinc-950 flex items-center justify-center flex-shrink-0">
+                  <iconify-icon icon="solar:check-linear" class="text-white text-[10px]"></iconify-icon>
+                </div>
+                <span class="text-xs font-light text-zinc-600">Summer Sale</span>
+              </label>
+              <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                <div class="w-4 h-4 rounded border border-zinc-950 bg-zinc-950 flex items-center justify-center flex-shrink-0">
+                  <iconify-icon icon="solar:check-linear" class="text-white text-[10px]"></iconify-icon>
+                </div>
+                <span class="text-xs font-light text-zinc-600">New Arrivals</span>
+              </label>
+              <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                <div class="w-4 h-4 rounded border border-zinc-300 flex-shrink-0"></div>
+                <span class="text-xs font-light text-zinc-600">Best Sellers</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SEO -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Search engine listing</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Meta title</span>
+              <input type="text" value="Ridge Wallet — Walnut | Nordbyte" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+              <span class="text-xs font-light text-zinc-400 text-right">32 / 60 characters</span>
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Meta description</span>
+              <textarea class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors resize-none min-h-[70px]">Hand-finished walnut wallet with a steel money clip. Holds 1–8 cards flat.</textarea>
+              <span class="text-xs font-light text-zinc-400 text-right">76 / 160 characters</span>
+            </label>
+            <span class="text-xs font-light text-zinc-500">nordbyte.com/products/<span class="text-zinc-900 font-normal">ridge-wallet-walnut</span></span>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>

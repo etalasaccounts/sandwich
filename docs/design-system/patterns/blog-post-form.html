@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blog post creation — complex CRUD form</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+iconify-icon { stroke-width: 1.5; }
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style></head>
+<body class="bg-zinc-100 h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-zinc-900">
+
+  <!-- App Shell -->
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="bg-zinc-950 rounded-2xl p-4 gap-5 flex-col w-[320px] flex-shrink-0 hidden lg:flex overflow-y-auto">
+
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 mt-1 px-1">
+        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+          <iconify-icon icon="solar:layers-minimalistic-linear" class="text-zinc-950 text-base"></iconify-icon>
+        </div>
+        <span class="text-lg font-medium text-zinc-50 tracking-tight">Nordbyte</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex flex-col w-full gap-0.5 mt-2">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:home-2-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Overview</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-zinc-900 cursor-pointer">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:document-text-linear" class="text-green-400 text-base"></iconify-icon>
+            <span class="text-sm font-normal text-zinc-50 tracking-tight">Posts</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:copy-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Pages</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:chat-round-line-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Comments</span>
+          </div>
+          <span class="rounded-full py-0.5 px-2.5 text-xs font-light bg-zinc-800 text-zinc-400">6</span>
+        </div>
+      </nav>
+
+      <div class="flex-1"></div>
+
+      <!-- User Footer -->
+      <div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 w-full">
+        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <iconify-icon icon="solar:user-circle-linear" class="text-zinc-400 text-lg"></iconify-icon>
+        </div>
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="text-sm font-normal text-zinc-50 truncate">Avery Nolan</span>
+          <span class="text-xs font-light text-zinc-500 truncate">avery@nordbyte.com</span>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 hover:bg-zinc-700 transition-colors">
+          <iconify-icon icon="solar:settings-linear" class="text-zinc-400 text-sm"></iconify-icon>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between gap-4 p-7 border-b border-zinc-100 flex-shrink-0">
+        <div class="flex items-center gap-3.5">
+          <button class="w-9 h-9 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500 flex-shrink-0">
+            <iconify-icon icon="solar:arrow-left-linear" class="text-base"></iconify-icon>
+          </button>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs font-light text-zinc-400">Posts</span>
+            <span class="text-xl font-medium text-zinc-950 tracking-tight">New post</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors">
+            <span class="text-xs font-normal text-zinc-700">Save as draft</span>
+          </button>
+          <button class="flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-white">
+            <iconify-icon icon="solar:plain-linear" class="text-sm"></iconify-icon>
+            <span class="text-xs font-medium tracking-wide">Publish post</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content: two columns -->
+      <div class="flex gap-4 p-7 overflow-y-auto flex-1">
+
+        <!-- LEFT COLUMN -->
+        <div class="flex flex-col gap-4 flex-1 min-w-0">
+
+          <!-- Title -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-2">
+            <input type="text" value="How we cut support tickets by 40% without hiring" class="w-full bg-transparent border-none outline-none text-2xl font-medium text-zinc-950 tracking-tight placeholder-zinc-300" />
+            <span class="text-xs font-light text-zinc-500">nordbyte.com/blog/<span class="text-zinc-900 font-normal">how-we-cut-support-tickets-40</span></span>
+          </div>
+
+          <!-- Content editor -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4 flex-1">
+            <div class="flex items-center gap-1 pb-3 border-b border-zinc-100">
+              <button class="w-8 h-8 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 transition-colors">
+                <iconify-icon icon="solar:text-bold-linear" class="text-base"></iconify-icon>
+              </button>
+              <button class="w-8 h-8 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 transition-colors">
+                <iconify-icon icon="solar:text-italic-linear" class="text-base"></iconify-icon>
+              </button>
+              <div class="w-px h-5 bg-zinc-100 mx-1"></div>
+              <button class="w-8 h-8 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 transition-colors">
+                <iconify-icon icon="solar:link-linear" class="text-base"></iconify-icon>
+              </button>
+              <button class="w-8 h-8 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 transition-colors">
+                <iconify-icon icon="solar:gallery-linear" class="text-base"></iconify-icon>
+              </button>
+              <div class="w-px h-5 bg-zinc-100 mx-1"></div>
+              <button class="w-8 h-8 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 transition-colors">
+                <iconify-icon icon="solar:list-linear" class="text-base"></iconify-icon>
+              </button>
+              <button class="w-8 h-8 rounded-lg hover:bg-zinc-100 flex items-center justify-center text-zinc-500 transition-colors">
+                <iconify-icon icon="solar:quote-up-linear" class="text-base"></iconify-icon>
+              </button>
+            </div>
+            <textarea placeholder="Write your post…" class="w-full bg-transparent border-none outline-none text-sm font-light text-zinc-700 leading-relaxed placeholder-zinc-400 resize-none flex-1 min-h-[280px]">Three months ago our support queue was averaging 340 tickets a week. Most of them weren't bugs — they were the same five questions, asked in five different ways.
+
+We didn't hire. We rewrote the onboarding flow, added inline hints to the three screens that generated the most confusion, and shipped a real changelog people actually read. Tickets dropped to 204 a week within a month, and they've stayed there since.
+
+Here's exactly what we changed, in order of impact.</textarea>
+            <div class="pt-3 border-t border-zinc-100">
+              <span class="text-xs font-light text-zinc-400">842 words · 4 min read</span>
+            </div>
+          </div>
+
+          <!-- Featured image -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Featured image</span>
+            <div class="border-2 border-dashed border-zinc-200 rounded-xl aspect-video flex flex-col items-center justify-center gap-2 text-center hover:border-zinc-300 transition-colors cursor-pointer">
+              <iconify-icon icon="solar:gallery-add-linear" class="text-zinc-400 text-2xl"></iconify-icon>
+              <span class="text-sm font-light text-zinc-500">Drag an image here or click to upload</span>
+              <span class="text-xs font-light text-zinc-400">Recommended: 1200×630px</span>
+            </div>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Alt text</span>
+              <input type="text" placeholder="Describe the image for screen readers" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+            </label>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="flex flex-col gap-4 w-80 flex-shrink-0">
+
+          <!-- Status -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-3">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Status</span>
+            <div class="flex items-center bg-zinc-100 rounded-full p-1 w-full">
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center text-zinc-500 font-light transition-colors">Draft</button>
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center bg-white text-zinc-950 font-normal shadow-sm transition-colors">Scheduled</button>
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center text-zinc-500 font-light transition-colors">Published</button>
+            </div>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Publish on</span>
+              <div class="relative">
+                <iconify-icon icon="solar:calendar-linear" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-sm"></iconify-icon>
+                <input type="text" value="Dec 15, 2026, 9:00 AM" class="bg-white border border-zinc-100 rounded-xl py-2.5 pl-9 pr-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+              </div>
+            </label>
+            <span class="text-xs font-light text-zinc-500">This post will go live automatically at the scheduled time.</span>
+          </div>
+
+          <!-- Organization -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Organization</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Category</span>
+              <div class="relative">
+                <select class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors appearance-none pr-9">
+                  <option>Company news</option>
+                  <option selected>Engineering</option>
+                  <option>Product updates</option>
+                </select>
+                <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-sm pointer-events-none"></iconify-icon>
+              </div>
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Tags</span>
+              <div class="flex flex-wrap items-center gap-1.5 p-2 border border-zinc-100 bg-white rounded-xl">
+                <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">performance <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
+                <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">support <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
+                <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">case-study <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
+                <input type="text" placeholder="Add tag…" class="bg-transparent outline-none text-xs font-light text-zinc-700 placeholder-zinc-400 flex-1 min-w-[60px]" />
+              </div>
+            </label>
+            <div class="flex flex-col gap-1.5">
+              <span class="text-xs font-light text-zinc-500">Author</span>
+              <div class="flex items-center gap-3 bg-white border border-zinc-100 rounded-xl p-3">
+                <div class="w-9 h-9 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 text-xs font-medium text-zinc-950 tracking-tight">AN</div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-sm font-normal text-zinc-950 truncate">Avery Nolan</span>
+                  <span class="text-xs font-light text-zinc-500 truncate">Author</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEO -->
+          <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Search engine listing</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Meta title</span>
+              <input type="text" value="How We Cut Support Tickets by 40% | Nordbyte" class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors" />
+              <span class="text-xs font-light text-zinc-400 text-right">45 / 60 characters</span>
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Meta description</span>
+              <textarea class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors resize-none min-h-[70px]">The three onboarding changes that dropped our weekly ticket volume from 340 to 204 — no new hires required.</textarea>
+              <span class="text-xs font-light text-zinc-400 text-right">110 / 160 characters</span>
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>

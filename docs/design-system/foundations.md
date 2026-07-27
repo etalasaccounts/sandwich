@@ -95,13 +95,67 @@ Responsive defaults: sidebar hidden below `lg`; when a list panel exists the
 main pane is `hidden md:flex`. Mobile screens drop side panels entirely and
 use a bottom nav (see `patterns/mobile.html`).
 
+## Surfaces & layout — public-facing (flat)
+
+The app shell above is for workspaces — screens someone works inside all
+day. Public-facing pages (marketing/landing, storefronts/marketplaces, job
+boards, docs) are not workspaces and must not look like one: no page-level
+shell, no floating white card wrapping *the whole page or a whole section*,
+no `zinc-100` backdrop under everything. See `patterns/landing.html` and
+`patterns/marketplace-grid.html`. This is "flat," not "no cards ever" — a
+card is still the right call for a self-contained item that benefits from
+a boundary (a pricing tier, a testimonial, a feature summary); it's the
+wrong call for a structural wrapper around a whole section.
+
+- **Page background is `bg-white`**, not `zinc-100` — there's no shell to
+  contrast against, so the page itself is the surface.
+- **Nav is a flat bar**: `border-b border-zinc-100`, no rounding, no
+  shadow, no card wrapper. Sits at the top of the max-width container with
+  padding only (e.g. `flex items-center justify-between py-4 border-b
+  border-zinc-100`).
+- **Sections themselves never get a card wrapper.** A section as a whole
+  (hero, a feature-grid section, footer) never gets `rounded-*` or
+  `shadow-*` around its outer edge. Vertical rhythm comes from padding
+  (`py-16`–`py-24`) and, where a section needs to visually separate from
+  the one above, a plain `border-t`/`border-b border-zinc-100` — never a
+  boxed container around the section.
+- **Items inside a section may be cards when the content benefits from a
+  boundary** — three pricing tiers being compared, a testimonial that
+  needs to read as one attributed quote, a feature that should feel like
+  a complete unit: `border border-zinc-100 rounded-2xl p-6` per item,
+  `grid` with a normal `gap` between them (see `patterns/landing.html`'s
+  feature/testimonial/pricing sections). This is a per-item choice, not a
+  section wrapper — the section around the grid stays flat.
+- **A flat list (not a comparison) stays flat**, e.g. an FAQ: rows
+  separated by `border-b border-zinc-100`, no card per row.
+- **A full-width color band is still allowed** (e.g. a dark stats section
+  or a closing CTA band) — that's a background-color change across an
+  entire section, not a card. It has **no rounded corners and no shadow**;
+  content inside still respects the page's max-width via its own inner
+  wrapper.
+- **The one featured item in a card comparison** may get a background
+  change of its own (e.g. the dark featured pricing card) — see
+  [Documented exceptions](#documented-exceptions) for the accent-CTA rule
+  that comes with it.
+- **A product-preview/screenshot frame** (a mockup of the app inside a
+  bordered window) is legitimate to border+shadow even on a flat page —
+  it represents an image, not a section wrapper.
+- **Grid items that are pure imagery + text with no inherent boundary**
+  (e.g. a product-browsing grid where the photo itself is the boundary)
+  can skip the card: the image tile is the only bounded shape (`rounded-xl`,
+  no border, no shadow), text sits directly on the page background, and the
+  grid's `gap` separates items — see `patterns/marketplace-grid.html`.
+- A **secondary rail** (filters, sub-nav) next to flat content uses a
+  `border-r border-zinc-100` instead of its own card background — see
+  `components.md#secondary-rail`'s variants.
+
 ## Radius / shadow / motion
 
-- `rounded-3xl` shell (and full-width marketing bands — see
-  [Documented exceptions](#documented-exceptions)) → `rounded-2xl` panels & cards → `rounded-xl`
-  controls (nav items, inputs, rect buttons, chips) → `rounded-full`
-  pills, icon buttons, avatars, badges, dots. `rounded-lg` only for tiny
-  nested thumbnails.
+- `rounded-3xl` app shell → `rounded-2xl` panels & cards → `rounded-xl`
+  controls (nav items, inputs, rect buttons, chips, image tiles) →
+  `rounded-full` pills, icon buttons, avatars, badges, dots. `rounded-lg`
+  only for tiny nested thumbnails. This scale applies inside an app shell;
+  public-facing flat pages don't use card/panel radii at all — see below.
 - Shadows: `shadow-sm`; selected list rows may use
   `shadow-[0_1px_3px_rgba(0,0,0,0.02)]`. Nothing heavier.
 - Motion: `transition-colors` on interactive elements. `animate-pulse` for
@@ -170,7 +224,7 @@ stylesheet.
 
 ## Documented exceptions
 
-Three places where the exemplars in `patterns/` legitimately go beyond the
+Two places where the exemplars in `patterns/` legitimately go beyond the
 rules above. These are the *complete* list — anything not listed here is a
 violation, and none of these generalize past their stated scope.
 
@@ -178,24 +232,19 @@ violation, and none of these generalize past their stated scope.
 CTA button is allowed per marketing/landing page: the featured pricing
 tier's primary action, using
 `bg-green-400 text-zinc-950 rounded-xl py-2.5 w-full text-xs font-medium tracking-wide hover:bg-green-300 transition-colors`
-(see `patterns/landing.html`, the dark pricing card). This is the only place
-a button may use a large accent fill, and `green-300` exists solely as that
-button's hover state. Nowhere else — not app-shell primaries, not secondary
-CTAs, not the non-featured pricing tiers, not a second button on the same
-page. Everywhere else the primary button is the zinc `button-primary`
-recipe.
+(see `patterns/landing.html`, the dark pricing card). This is the only
+place a button may use a large accent fill, and `green-300` exists solely
+as that button's hover state. Nowhere
+else — not app-shell primaries, not secondary CTAs, not the non-featured
+pricing tiers, not a second button on the same page. Everywhere else the
+primary button is the zinc `button-primary` recipe.
 
 **2. Second dot size for inline unread indicators.** The unread-indicator
 dot has a second valid size, `w-1.5 h-1.5 rounded-full bg-green-400`, in
 addition to the documented `w-2 h-2`. Use `w-1.5 h-1.5` when the dot sits
-inline next to a name or title inside a list row (see `patterns/dashboard.html`,
+inline next to a name or title inside a list row (see `patterns/mailbox.html`,
 `patterns/mobile.html`); use `w-2 h-2` for a standalone status dot (KPI
 cards, stat bands, live indicators).
-
-**3. `rounded-3xl` is not app-shell-only.** In addition to the app shell,
-`rounded-3xl` applies to full-width marketing bands — e.g. the dark stats
-band in `patterns/landing.html`. Panels and cards *inside* any such band are
-still `rounded-2xl`. The radius scale is otherwise exactly as stated above.
 
 ## Do / Don't
 

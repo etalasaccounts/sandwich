@@ -75,7 +75,7 @@ All written to `design/` (a standalone Next.js app, sibling to `docs/` and
 | `manifest.json` | Screen registry — source of truth for the screen↔flow mapping, navigation, design-system component usage (`componentsUsed`), and stale/orphaned flags |
 | `app/page.tsx` | Nav hub, a pure projection of `manifest.json`, regenerated every run |
 | `app/<route>/page.tsx` | One route per screen, written once and never overwritten |
-| `components/craft/{PageShell,PageHeader}.tsx` | The app shell (dark sidebar + rounded-2xl panels, from `patterns/dashboard.html`) and the panel-header pattern — the shared structure every screen composes into. |
+| `components/craft/{PageShell,PageHeader}.tsx` | The app shell (dark sidebar + rounded-2xl panels, from `patterns/mailbox.html`) and the panel-header pattern — the shared structure every screen composes into. |
 | `components/craft/AppSidebar.tsx` | The one project-wide sidebar composition (brand, nav items, KPI cards, account card, from `components.md` recipes) that screens pass into `PageShell`'s `sidebar` slot — written once on the first run, never re-touched. |
 | `package.json`, `tsconfig.json`, `next.config.ts`, `tailwind.config.ts`, `postcss.config.js` | App scaffold, written once on the first run |
 | `.snapshot.json` | Git-ignored, last-seen content hash per flow id — the diff baseline for the next run |
@@ -125,7 +125,7 @@ All written to `design/` (a standalone Next.js app, sibling to `docs/` and
    `className`; icons via `@iconify/react`'s
    `<Icon icon="solar:…-linear" />`). Record every recipe id and pattern
    file used in the screen's `componentsUsed`.
-10. **Write TSX for new screens only** — one `page.tsx` per brand-new screen under `design/app/<route>/`, composed from the recipes/pattern just identified plus `components/craft/{PageShell,PageHeader}`. `PageShell` is for app-shell screens (dashboard-style, with a sidebar) — a screen that's a public/marketing page instead follows `patterns/landing.html`'s scrolling-page structure (no fixed-height shell, no sidebar) rather than being forced into `PageShell`. For each screen, work through this checklist explicitly — don't skip any of it:
+10. **Write TSX for new screens only** — one `page.tsx` per brand-new screen under `design/app/<route>/`, composed from the recipes/pattern just identified plus `components/craft/{PageShell,PageHeader}`. `PageShell` is for app-shell screens (mailbox-style, with a sidebar) — a screen that's a public/marketing page instead follows `patterns/landing.html`'s scrolling-page structure (no fixed-height shell, no sidebar) rather than being forced into `PageShell`. For each screen, work through this checklist explicitly — don't skip any of it:
     - Cover every flow's `steps` as visible elements/states; render real fields (per `fields`, using the matching input component) instead of placeholder copy where the flow specifies them.
     - **Empty state** — what does this screen look like with zero data? Use the `empty-state` recipe, don't leave it unconsidered.
     - **Loading state** — is there an obvious async boundary (a table, a fetched list)? Use the `skeleton-row` recipe, or leave a clear `// TODO: loading state` if it depends on real data-fetching wiring you don't have yet — never silently omit the thought.
@@ -168,7 +168,7 @@ manual follow-up step outside this skill's scope.
 ✓ design/app/<new-screen-1>/page.tsx
 ✓ design/app/<new-screen-2>/page.tsx
 
-Design-system pieces used: dashboard.html, kpi-card, list-row, data-table
+Design-system pieces used: mailbox.html, kpi-card, list-row, data-table
 [one sentence: N screens created, N flagged stale, N orphaned, N unchanged]
 [if any: Gaps to consider (not generated): Login, 404/Not found, Settings]
 ```
@@ -187,7 +187,7 @@ Design-system pieces used: dashboard.html, kpi-card, list-row, data-table
       "route": "/homepage",
       "flows": ["UF-001", "UF-002"],
       "navigatesTo": ["SCR-002"],
-      "componentsUsed": ["dashboard.html", "kpi-card", "list-row"],
+      "componentsUsed": ["mailbox.html", "kpi-card", "list-row"],
       "flags": { "stale": false, "orphaned": false },
       "staleReasons": []
     }
