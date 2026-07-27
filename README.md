@@ -35,7 +35,7 @@ hermes plugins enable sandwich
 After installing, restart your AI session so the skills are discovered.
 
 > Hermes support is new and untested against a live install — if `/order` (or any of the
-> four commands) doesn't show up after enabling the plugin, check
+> five commands) doesn't show up after enabling the plugin, check
 > `HERMES_PLUGINS_DEBUG=1 hermes plugins list` for why, and check whether Hermes needs the
 > namespaced form (`/sandwich:order`) instead of the bare command shown below.
 
@@ -53,17 +53,17 @@ After installing, restart your AI session so the skills are discovered.
 | `/prep` | Tech lead prioritization — score features, build the queue |
 | `/status` | Morning-check dashboard — what's blocking, what's next |
 
-**Explicit-invocation only.** None of the four skills above ever trigger on
+**Explicit-invocation only.** None of the five skills above ever trigger on
 topical similarity, keywords, or inferred intent — pasting a KAK, asking
 "what should we build next," or discussing UI design in conversation does
 **not** run anything. Each one only runs when you type its literal command
-(`/order`, `/craft`, `/prep`, `/status`, or the namespaced form your host
-requires, e.g. `/sandwich:order`). This is deliberate: you should never be
-surprised by one of these firing on its own, and never have to second-guess
-whether talking about your project will accidentally kick off a pipeline
-step. Every `SKILL.md` states this explicitly in its own description and
-"When to invoke" section — if you're auditing behavior, that's the
-authoritative source per skill.
+(`/order`, `/craft`, `/design`, `/prep`, `/status`, or the namespaced form
+your host requires, e.g. `/sandwich:order`). This is deliberate: you should
+never be surprised by one of these firing on its own, and never have to
+second-guess whether talking about your project will accidentally kick off
+a pipeline step. Every `SKILL.md` states this explicitly in its own
+description and "When to invoke" section — if you're auditing behavior,
+that's the authoritative source per skill.
 
 ---
 
