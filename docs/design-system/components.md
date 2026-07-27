@@ -95,7 +95,7 @@ Labeled form field on light:
 
 ## textarea
 
-Borderless inside a card (see the reply box in `patterns/dashboard.html`), or standalone using the `input-field` shell with `resize-none min-h-[100px]`.
+Borderless inside a card (see the reply box in `patterns/mailbox.html`), or standalone using the `input-field` shell with `resize-none min-h-[100px]`.
 
 ## nav-item
 
@@ -351,6 +351,210 @@ Loading state (the one allowed animation besides transition-colors):
 ```
 
 On dark surfaces use `bg-inverse-2` blocks.
+
+## dropzone
+
+Upload target for images/files, used in complex forms (see `patterns/product-form.html`, `patterns/blog-post-form.html`). Square/aspect-square for a single item; `aspect-video` for a featured/cover image. A `+` tile in the same dashed style extends an existing grid.
+
+```html
+<div class="border-2 border-dashed border-control rounded-xl p-8 flex flex-col items-center gap-2 text-center hover:border-line-2 transition-colors cursor-pointer">
+  <iconify-icon icon="solar:gallery-add-linear" class="text-ink-3 text-2xl"></iconify-icon>
+  <span class="text-sm font-light text-ink-2">Drag images here or click to upload</span>
+  <span class="text-xs font-light text-ink-3">PNG or JPG, up to 10MB each</span>
+</div>
+```
+
+Uploaded-item tile (grid child, `grid grid-cols-4 gap-3` parent), with an optional "Cover" badge on the first item and a remove button on every item:
+
+```html
+<div class="relative rounded-xl overflow-hidden border border-line aspect-square bg-page flex items-center justify-center">
+  <iconify-icon icon="solar:gallery-linear" class="text-ink-faint text-2xl"></iconify-icon>
+  <span class="absolute top-1.5 left-1.5 bg-inverse/80 text-inverse-ink text-[10px] font-medium rounded-full py-0.5 px-2">Cover</span>
+  <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-inverse/60 flex items-center justify-center hover:bg-inverse/80 transition-colors">
+    <iconify-icon icon="solar:close-circle-linear" class="text-inverse-ink text-xs"></iconify-icon>
+  </button>
+</div>
+```
+
+## segmented-control
+
+Two- or three-way state toggle (Draft/Active, Draft/Scheduled/Published) — a pill-track wrapper with equal-width buttons, the active one lifted onto a white "thumb". Never more than 3 options; beyond that, use a `select-field`.
+
+```html
+<div class="flex items-center bg-page rounded-full p-1 w-full">
+  <button class="flex-1 rounded-full py-1.5 text-xs text-center text-ink-2 font-light transition-colors">Draft</button>
+  <button class="flex-1 rounded-full py-1.5 text-xs text-center bg-panel text-ink font-normal shadow-sm transition-colors">Active</button>
+</div>
+```
+
+## select-field
+
+`<select>` styled like `input-field`, with a non-interactive chevron overlay (the select itself needs `appearance-none` and right padding to clear the icon).
+
+```html
+<div class="relative">
+  <select class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors appearance-none pr-9">
+    <option>Accessories</option>
+  </select>
+  <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-3 text-sm pointer-events-none"></iconify-icon>
+</div>
+```
+
+## tag-input
+
+A bordered field that holds removable chips plus a borderless inline input for adding more — the field container takes the border/background that `input-field` normally puts on the `<input>` itself.
+
+```html
+<div class="flex flex-wrap items-center gap-1.5 p-2 border border-line bg-panel rounded-xl">
+  <span class="bg-page rounded-full py-1 px-2.5 text-xs font-light text-ink-mid flex items-center gap-1.5">leather <iconify-icon icon="solar:close-circle-linear" class="text-ink-3 text-xs cursor-pointer"></iconify-icon></span>
+  <input type="text" placeholder="Add tag…" class="bg-transparent outline-none text-xs font-light text-ink-mid placeholder:text-ink-3 flex-1 min-w-[60px]" />
+</div>
+```
+
+## checkbox-item
+
+Custom checkbox row (checked/unchecked), used for multi-select lists like collections or permissions.
+
+```html
+<!-- checked -->
+<label class="flex items-center gap-2.5 py-1 cursor-pointer">
+  <div class="w-4 h-4 rounded border border-ink bg-inverse flex items-center justify-center flex-shrink-0">
+    <iconify-icon icon="solar:check-linear" class="text-inverse-ink text-[10px]"></iconify-icon>
+  </div>
+  <span class="text-xs font-light text-ink-2">Summer Sale</span>
+</label>
+<!-- unchecked -->
+<label class="flex items-center gap-2.5 py-1 cursor-pointer">
+  <div class="w-4 h-4 rounded border border-line-2 flex-shrink-0"></div>
+  <span class="text-xs font-light text-ink-2">Best Sellers</span>
+</label>
+```
+
+## secondary-rail
+
+A light column of sub-navigation or filters, sitting beside the main content as a second, narrower column. Which variant to use depends on the surface it sits in (see foundations.md's two "Surfaces & layout" sections):
+
+**Nested in a white app-shell** (dark sidebar + white main panel, e.g. `patterns/settings.html`) — the rail is `bg-panel-2` so it reads as a distinct layer against the white panel next to it:
+
+```html
+<nav class="bg-panel-2 rounded-2xl p-3 gap-1 flex-col w-56 flex-shrink-0 hidden md:flex overflow-y-auto">
+  <!-- sub-nav item (active) -->
+  <div class="flex items-center gap-3 rounded-xl py-2 px-3 bg-panel shadow-sm cursor-pointer">
+    <iconify-icon icon="solar:user-circle-linear" class="text-accent text-base"></iconify-icon>
+    <span class="text-sm font-normal text-ink tracking-tight">Profile</span>
+  </div>
+  <!-- sub-nav item (inactive) -->
+  <div class="flex items-center gap-3 rounded-xl py-2 px-3 hover:bg-panel/60 cursor-pointer transition-colors text-ink-2">
+    <iconify-icon icon="solar:bell-linear" class="text-base"></iconify-icon>
+    <span class="text-sm font-light text-ink-2">Notifications</span>
+  </div>
+</nav>
+```
+
+**On a public-facing flat page** (no app shell at all, e.g. `patterns/marketplace-grid.html`'s filter rail) — no card, no background, no rounding: a plain `border-r` separates it from the content beside it, same flat convention as everything else on that page:
+
+```html
+<nav class="flex flex-col gap-6 w-56 flex-shrink-0 hidden md:flex border-r border-line pr-6">
+  <!-- filter section: section-label heading + checkbox-item rows, sections
+       separated from each other by border-t border-line pt-4 -->
+</nav>
+```
+
+Width varies with content (`w-56` for short nav labels, `w-64` when it also holds several filter sections) — never full app-sidebar width.
+
+## chat-bubble
+
+A message in a two-party thread, aligned by sender. Received (left, avatar attached) vs. sent (right, no avatar, dark fill — never an accent fill):
+
+```html
+<!-- received -->
+<div class="flex items-end gap-2.5 max-w-[70%]">
+  <div class="w-7 h-7 rounded-full bg-accent flex items-center justify-center flex-shrink-0 text-[10px] font-medium text-on-accent tracking-tight">SL</div>
+  <div class="flex flex-col gap-1">
+    <div class="bg-page rounded-2xl rounded-bl-sm py-2.5 px-3.5">
+      <span class="text-sm font-light text-ink">Message text</span>
+    </div>
+    <span class="text-xs font-light text-ink-3 px-1">10:31 AM</span>
+  </div>
+</div>
+<!-- sent -->
+<div class="flex flex-col gap-1 self-end max-w-[70%] items-end">
+  <div class="bg-inverse text-inverse-ink rounded-2xl rounded-br-sm py-2.5 px-3.5">
+    <span class="text-sm font-light">Message text</span>
+  </div>
+  <span class="text-xs font-light text-ink-3 px-1">10:33 AM</span>
+</div>
+```
+
+## date-separator
+
+Centered divider inside a scrolling thread or feed:
+
+```html
+<div class="flex items-center gap-3 py-2">
+  <div class="h-px bg-line flex-1"></div>
+  <span class="text-xs font-light text-ink-3">Today</span>
+  <div class="h-px bg-line flex-1"></div>
+</div>
+```
+
+## typing-indicator
+
+The one other allowed `animate-pulse` use besides `skeleton-row` — three dots inside a received-style bubble:
+
+```html
+<div class="flex items-end gap-2.5">
+  <div class="w-7 h-7 rounded-full bg-accent flex items-center justify-center flex-shrink-0 text-[10px] font-medium text-on-accent tracking-tight">SL</div>
+  <div class="bg-page rounded-2xl rounded-bl-sm py-3 px-4 flex items-center gap-1">
+    <div class="w-1.5 h-1.5 rounded-full bg-ink-3 animate-pulse"></div>
+    <div class="w-1.5 h-1.5 rounded-full bg-ink-3 animate-pulse"></div>
+    <div class="w-1.5 h-1.5 rounded-full bg-ink-3 animate-pulse"></div>
+  </div>
+</div>
+```
+
+## rating-stars
+
+Star rating shown with color, never a filled/bold icon variant — Solar linear only, so "filled" means `text-ink`, "empty" means `text-ink-faint`, same `solar:star-linear` icon throughout:
+
+```html
+<div class="flex items-center gap-1">
+  <iconify-icon icon="solar:star-linear" class="text-ink text-xs"></iconify-icon>
+  <iconify-icon icon="solar:star-linear" class="text-ink text-xs"></iconify-icon>
+  <iconify-icon icon="solar:star-linear" class="text-ink text-xs"></iconify-icon>
+  <iconify-icon icon="solar:star-linear" class="text-ink-faint text-xs"></iconify-icon>
+  <iconify-icon icon="solar:star-linear" class="text-ink-faint text-xs"></iconify-icon>
+  <span class="text-xs font-light text-ink-2">(128)</span>
+</div>
+```
+
+Same rule applies to any other "filled" state icon (e.g. a saved/liked heart): change the icon's color, never its variant — see the wishlist heart in `patterns/marketplace-grid.html`, which stays `solar:heart-linear` and only tints orange when saved.
+
+## product-card
+
+Grid item for a browse/marketplace screen (see `patterns/marketplace-grid.html`) — flat, per the public-facing surface rules: no card wrapper, no border, no shadow. The image tile is the only bounded shape (`rounded-xl`, matching control radius, not a card radius); text sits directly on the page background below it, and the grid's own `gap` is what separates one card from the next:
+
+```html
+<div class="flex flex-col gap-2.5">
+  <div class="relative aspect-square rounded-xl bg-page flex items-center justify-center">
+    <iconify-icon icon="solar:wallet-linear" class="text-ink-faint text-3xl"></iconify-icon>
+    <button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-panel/90 flex items-center justify-center hover:bg-panel transition-colors">
+      <iconify-icon icon="solar:heart-linear" class="text-ink-2 text-base"></iconify-icon>
+    </button>
+  </div>
+  <span class="text-xs font-light text-ink-3">Vendor name</span>
+  <span class="text-sm font-medium text-ink tracking-tight">Product name</span>
+  <!-- rating-stars here -->
+  <div class="flex items-center justify-between pt-1">
+    <span class="text-sm font-medium text-ink">$89.00</span>
+    <button class="w-8 h-8 rounded-full bg-inverse hover:bg-inverse-3 flex items-center justify-center transition-colors">
+      <iconify-icon icon="solar:cart-plus-linear" class="text-inverse-ink text-sm"></iconify-icon>
+    </button>
+  </div>
+</div>
+```
+
+The add-to-cart button is a small circular action (not `button-primary`) — it's a repeated grid action, not the one primary action on the view.
 
 ## Adding a component
 

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Product creation — complex CRUD form</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style type="text/tailwindcss">
+@theme inline {
+  --color-*: initial;
+  --color-page: var(--page);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-control: var(--control);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-ink: var(--ink);
+  --color-ink-mid: var(--ink-mid);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-faint: var(--ink-faint);
+  --color-inverse: var(--inverse);
+  --color-inverse-2: var(--inverse-2);
+  --color-inverse-3: var(--inverse-3);
+  --color-inverse-4: var(--inverse-4);
+  --color-inverse-ink: var(--inverse-ink);
+  --color-inverse-ink-mid: var(--inverse-ink-mid);
+  --color-inverse-ink-2: var(--inverse-ink-2);
+  --color-inverse-ink-3: var(--inverse-ink-3);
+  --color-inverse-label: var(--inverse-label);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-info: var(--info);
+  --color-on-info: var(--on-info);
+  --color-warn: var(--warn);
+  --color-on-warn: var(--on-warn);
+}
+:root {
+  --page: #f4f4f5;
+  --panel: #ffffff;
+  --panel-2: #fafafa;
+  --control: #e4e4e7;
+  --line: #f4f4f5;
+  --line-2: #d4d4d8;
+  --ink: #09090b;
+  --ink-mid: #3f3f46;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --ink-faint: #d4d4d8;
+  --inverse: #09090b;
+  --inverse-2: #18181b;
+  --inverse-3: #27272a;
+  --inverse-4: #3f3f46;
+  --inverse-ink: #fafafa;
+  --inverse-ink-mid: #d4d4d8;
+  --inverse-ink-2: #a1a1aa;
+  --inverse-ink-3: #71717a;
+  --inverse-label: #52525b;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --on-accent: #09090b;
+  --info: #22d3ee;
+  --on-info: #09090b;
+  --warn: #f97316;
+  --on-warn: #ffffff;
+  --font-sans: 'Inter', sans-serif;
+}
+body { font-family: var(--font-sans); }
+iconify-icon { stroke-width: 1.5; }
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--control); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--line-2); }
+</style></head>
+<body class="bg-page h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-ink">
+
+  <!-- App Shell -->
+  <div class="bg-panel rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="bg-inverse rounded-2xl p-4 gap-5 flex-col w-[320px] flex-shrink-0 hidden lg:flex overflow-y-auto">
+
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 mt-1 px-1">
+        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+          <iconify-icon icon="solar:layers-minimalistic-linear" class="text-on-accent text-base"></iconify-icon>
+        </div>
+        <span class="text-lg font-medium text-inverse-ink tracking-tight">Nordbyte</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex flex-col w-full gap-0.5 mt-2">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-inverse-2/50 cursor-pointer transition-colors text-inverse-ink-3">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:home-2-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-inverse-ink-2">Overview</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-inverse-2/50 cursor-pointer transition-colors text-inverse-ink-3">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:users-group-rounded-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-inverse-ink-2">Customers</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-inverse-2 cursor-pointer">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:box-linear" class="text-accent text-base"></iconify-icon>
+            <span class="text-sm font-normal text-inverse-ink tracking-tight">Products</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-inverse-2/50 cursor-pointer transition-colors text-inverse-ink-3">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:cart-large-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-inverse-ink-2">Orders</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="flex-1"></div>
+
+      <!-- User Footer -->
+      <div class="flex items-center gap-3 bg-inverse-2 rounded-2xl p-3 w-full">
+        <div class="w-9 h-9 rounded-full bg-inverse-3 flex items-center justify-center flex-shrink-0">
+          <iconify-icon icon="solar:user-circle-linear" class="text-inverse-ink-2 text-lg"></iconify-icon>
+        </div>
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="text-sm font-normal text-inverse-ink truncate">Avery Nolan</span>
+          <span class="text-xs font-light text-inverse-ink-3 truncate">avery@nordbyte.com</span>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-inverse-3 flex items-center justify-center flex-shrink-0 hover:bg-inverse-4 transition-colors">
+          <iconify-icon icon="solar:settings-linear" class="text-inverse-ink-2 text-sm"></iconify-icon>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="bg-panel rounded-2xl flex flex-col flex-1 overflow-hidden">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between gap-4 p-7 border-b border-line flex-shrink-0">
+        <div class="flex items-center gap-3.5">
+          <button class="w-9 h-9 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2 flex-shrink-0">
+            <iconify-icon icon="solar:arrow-left-linear" class="text-base"></iconify-icon>
+          </button>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs font-light text-ink-3">Products</span>
+            <span class="text-xl font-medium text-ink tracking-tight">Add product</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button class="flex items-center justify-center gap-2 bg-panel-2/80 border border-line rounded-xl py-2.5 px-4 hover:bg-page transition-colors">
+            <span class="text-xs font-normal text-ink-mid">Save as draft</span>
+          </button>
+          <button class="flex items-center gap-2 bg-inverse hover:bg-inverse-3 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-inverse-ink">
+            <iconify-icon icon="solar:cloud-upload-linear" class="text-sm"></iconify-icon>
+            <span class="text-xs font-medium tracking-wide">Publish product</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content: two columns -->
+      <div class="flex gap-4 p-7 overflow-y-auto flex-1">
+
+        <!-- LEFT COLUMN -->
+        <div class="flex flex-col gap-4 flex-1 min-w-0">
+
+          <!-- Basic information -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-ink tracking-tight">Basic information</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-ink-2">Product title</span>
+              <input type="text" placeholder="e.g. Ridge wallet — walnut" class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none placeholder:text-ink-3 w-full focus:border-line-2 transition-colors" />
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-ink-2">Description</span>
+              <textarea placeholder="What makes this product worth buying?" class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none placeholder:text-ink-3 w-full focus:border-line-2 transition-colors resize-none min-h-[100px]">Hand-finished walnut card wallet with a single steel money clip. Holds 1–8 cards flat, no bulk.</textarea>
+            </label>
+          </div>
+
+          <!-- Media -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-ink tracking-tight">Media</span>
+            <div class="border-2 border-dashed border-control rounded-xl p-8 flex flex-col items-center gap-2 text-center hover:border-line-2 transition-colors cursor-pointer">
+              <iconify-icon icon="solar:gallery-add-linear" class="text-ink-3 text-2xl"></iconify-icon>
+              <span class="text-sm font-light text-ink-2">Drag images here or click to upload</span>
+              <span class="text-xs font-light text-ink-3">PNG or JPG, up to 10MB each</span>
+            </div>
+            <div class="grid grid-cols-4 gap-3">
+              <div class="relative rounded-xl overflow-hidden border border-line aspect-square bg-page flex items-center justify-center">
+                <iconify-icon icon="solar:gallery-linear" class="text-ink-faint text-2xl"></iconify-icon>
+                <span class="absolute top-1.5 left-1.5 bg-inverse/80 text-inverse-ink text-[10px] font-medium rounded-full py-0.5 px-2">Cover</span>
+                <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-inverse/60 flex items-center justify-center hover:bg-inverse/80 transition-colors">
+                  <iconify-icon icon="solar:close-circle-linear" class="text-inverse-ink text-xs"></iconify-icon>
+                </button>
+              </div>
+              <div class="relative rounded-xl overflow-hidden border border-line aspect-square bg-page flex items-center justify-center">
+                <iconify-icon icon="solar:gallery-linear" class="text-ink-faint text-2xl"></iconify-icon>
+                <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-inverse/60 flex items-center justify-center hover:bg-inverse/80 transition-colors">
+                  <iconify-icon icon="solar:close-circle-linear" class="text-inverse-ink text-xs"></iconify-icon>
+                </button>
+              </div>
+              <div class="relative rounded-xl overflow-hidden border border-line aspect-square bg-page flex items-center justify-center">
+                <iconify-icon icon="solar:gallery-linear" class="text-ink-faint text-2xl"></iconify-icon>
+                <button class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-inverse/60 flex items-center justify-center hover:bg-inverse/80 transition-colors">
+                  <iconify-icon icon="solar:close-circle-linear" class="text-inverse-ink text-xs"></iconify-icon>
+                </button>
+              </div>
+              <div class="rounded-xl border-2 border-dashed border-control aspect-square flex items-center justify-center hover:border-line-2 transition-colors cursor-pointer">
+                <iconify-icon icon="solar:add-circle-linear" class="text-ink-faint text-xl"></iconify-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-ink tracking-tight">Pricing</span>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-ink-2">Price</span>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-light text-ink-3">$</span>
+                  <input type="text" value="89.00" class="bg-panel border border-line rounded-xl py-2.5 pl-7 pr-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors" />
+                </div>
+              </label>
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-ink-2">Compare-at price</span>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-light text-ink-3">$</span>
+                  <input type="text" value="120.00" class="bg-panel border border-line rounded-xl py-2.5 pl-7 pr-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors" />
+                </div>
+              </label>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-ink-2">Cost per item</span>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-light text-ink-3">$</span>
+                  <input type="text" value="35.00" class="bg-panel border border-line rounded-xl py-2.5 pl-7 pr-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors" />
+                </div>
+              </label>
+              <div class="flex flex-col gap-1.5 w-full justify-end">
+                <span class="text-xs font-light text-ink-2">Profit</span>
+                <span class="text-sm font-light text-ink-mid py-2.5">$54.00 <span class="text-ink-3">(61% margin)</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-ink tracking-tight">Inventory</span>
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-light text-ink-2">Track quantity</span>
+                <button class="w-10 h-6 rounded-full bg-accent p-0.5 flex items-center transition-colors" aria-pressed="true">
+                  <span class="w-5 h-5 rounded-full bg-panel shadow-sm ml-auto"></span>
+                </button>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-ink-2">SKU (Stock Keeping Unit)</span>
+                <input type="text" value="RW-WAL-001" class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors" />
+              </label>
+              <label class="flex flex-col gap-1.5 w-full">
+                <span class="text-xs font-light text-ink-2">Barcode (ISBN, UPC, GTIN)</span>
+                <input type="text" placeholder="Optional" class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none placeholder:text-ink-3 w-full focus:border-line-2 transition-colors" />
+              </label>
+            </div>
+            <label class="flex flex-col gap-1.5 w-full sm:w-1/2">
+              <span class="text-xs font-light text-ink-2">Quantity available</span>
+              <input type="number" value="48" class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors" />
+            </label>
+          </div>
+
+          <!-- Variants -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-ink tracking-tight">Variants</span>
+              <button class="flex items-center gap-1.5 bg-panel border border-line rounded-full py-1.5 px-3.5 hover:bg-page transition-colors">
+                <iconify-icon icon="solar:add-circle-linear" class="text-ink-2 text-sm"></iconify-icon>
+                <span class="text-xs font-normal text-ink-mid">Add variant</span>
+              </button>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-light text-ink-2">Size</span>
+              <div class="flex items-center gap-1.5">
+                <button class="rounded-full py-1 px-3.5 text-xs bg-inverse text-inverse-ink font-normal transition-colors">Small</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-page text-ink-2 font-light hover:bg-control transition-colors">Medium</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-page text-ink-2 font-light hover:bg-control transition-colors">Large</button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-light text-ink-2">Color</span>
+              <div class="flex items-center gap-1.5">
+                <button class="rounded-full py-1 px-3.5 text-xs bg-inverse text-inverse-ink font-normal transition-colors">Walnut</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-page text-ink-2 font-light hover:bg-control transition-colors">Black</button>
+                <button class="rounded-full py-1 px-3.5 text-xs bg-page text-ink-2 font-light hover:bg-control transition-colors">White</button>
+              </div>
+            </div>
+
+            <table class="w-full text-left mt-1">
+              <thead>
+                <tr class="border-b border-line">
+                  <th class="py-2.5 px-2 text-xs uppercase tracking-widest text-ink-3 font-normal">Variant</th>
+                  <th class="py-2.5 px-2 text-xs uppercase tracking-widest text-ink-3 font-normal">Price</th>
+                  <th class="py-2.5 px-2 text-xs uppercase tracking-widest text-ink-3 font-normal text-right">Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-line">
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid">Small / Walnut</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid">$89.00</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid text-right">24</td>
+                </tr>
+                <tr class="border-b border-line">
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid">Medium / Walnut</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid">$89.00</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid text-right">18</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid">Large / Black</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid">$94.00</td>
+                  <td class="py-2.5 px-2 text-sm font-light text-ink-mid text-right">6</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="flex flex-col gap-4 w-80 flex-shrink-0">
+
+          <!-- Status -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-3">
+            <span class="text-sm font-medium text-ink tracking-tight">Status</span>
+            <div class="flex items-center bg-page rounded-full p-1 w-full">
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center text-ink-2 font-light transition-colors">Draft</button>
+              <button class="flex-1 rounded-full py-1.5 text-xs text-center bg-panel text-ink font-normal shadow-sm transition-colors">Active</button>
+            </div>
+            <span class="text-xs font-light text-ink-2">This product will be visible in your store immediately after publishing.</span>
+          </div>
+
+          <!-- Organization -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-ink tracking-tight">Organization</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-ink-2">Product category</span>
+              <div class="relative">
+                <select class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors appearance-none pr-9">
+                  <option>Accessories</option>
+                  <option>Bags &amp; wallets</option>
+                  <option>Apparel</option>
+                </select>
+                <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-3 text-sm pointer-events-none"></iconify-icon>
+              </div>
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-ink-2">Tags</span>
+              <div class="flex flex-wrap items-center gap-1.5 p-2 border border-line bg-panel rounded-xl">
+                <span class="bg-page rounded-full py-1 px-2.5 text-xs font-light text-ink-mid flex items-center gap-1.5">leather <iconify-icon icon="solar:close-circle-linear" class="text-ink-3 text-xs cursor-pointer"></iconify-icon></span>
+                <span class="bg-page rounded-full py-1 px-2.5 text-xs font-light text-ink-mid flex items-center gap-1.5">wallet <iconify-icon icon="solar:close-circle-linear" class="text-ink-3 text-xs cursor-pointer"></iconify-icon></span>
+                <span class="bg-page rounded-full py-1 px-2.5 text-xs font-light text-ink-mid flex items-center gap-1.5">gift-ready <iconify-icon icon="solar:close-circle-linear" class="text-ink-3 text-xs cursor-pointer"></iconify-icon></span>
+                <input type="text" placeholder="Add tag…" class="bg-transparent outline-none text-xs font-light text-ink-mid placeholder:text-ink-3 flex-1 min-w-[60px]" />
+              </div>
+            </label>
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-light text-ink-2">Collections</span>
+              <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                <div class="w-4 h-4 rounded border border-ink bg-inverse flex items-center justify-center flex-shrink-0">
+                  <iconify-icon icon="solar:check-linear" class="text-inverse-ink text-[10px]"></iconify-icon>
+                </div>
+                <span class="text-xs font-light text-ink-2">Summer Sale</span>
+              </label>
+              <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                <div class="w-4 h-4 rounded border border-ink bg-inverse flex items-center justify-center flex-shrink-0">
+                  <iconify-icon icon="solar:check-linear" class="text-inverse-ink text-[10px]"></iconify-icon>
+                </div>
+                <span class="text-xs font-light text-ink-2">New Arrivals</span>
+              </label>
+              <label class="flex items-center gap-2.5 py-1 cursor-pointer">
+                <div class="w-4 h-4 rounded border border-line-2 flex-shrink-0"></div>
+                <span class="text-xs font-light text-ink-2">Best Sellers</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SEO -->
+          <div class="bg-panel-2/80 border border-line rounded-2xl p-5 flex flex-col gap-4">
+            <span class="text-sm font-medium text-ink tracking-tight">Search engine listing</span>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-ink-2">Meta title</span>
+              <input type="text" value="Ridge Wallet — Walnut | Nordbyte" class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors" />
+              <span class="text-xs font-light text-ink-3 text-right">32 / 60 characters</span>
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-ink-2">Meta description</span>
+              <textarea class="bg-panel border border-line rounded-xl py-2.5 px-3.5 text-sm font-light text-ink outline-none w-full focus:border-line-2 transition-colors resize-none min-h-[70px]">Hand-finished walnut wallet with a steel money clip. Holds 1–8 cards flat.</textarea>
+              <span class="text-xs font-light text-ink-3 text-right">76 / 160 characters</span>
+            </label>
+            <span class="text-xs font-light text-ink-2">nordbyte.com/products/<span class="text-ink font-normal">ridge-wallet-walnut</span></span>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>
