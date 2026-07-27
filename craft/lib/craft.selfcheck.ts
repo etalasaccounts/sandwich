@@ -82,7 +82,6 @@ check("getCraftPaths returns paths rooted under design/, not the old wireframes/
   assert.ok(paths.snapshot.endsWith("design/.snapshot.json"));
   assert.ok(paths.navHubPage.endsWith("design/app/page.tsx"));
   assert.ok(paths.appDir.endsWith("design/app"));
-  assert.ok(paths.componentsJson.endsWith("design/components.json"));
 });
 
 check("routeToFilePath maps a screen route to its page.tsx location", () => {
@@ -194,32 +193,30 @@ import { dirname, join as pj2 } from "node:path";
 import { scaffoldCraftApp } from "./craft-lib.ts";
 
 const REAL_TEMPLATE_DIR = pj2(dirname(fileURLToPath(import.meta.url)), "..", "template");
-const REAL_THEME_CSS = pj2(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs", "design-exemplars", "themes", "default-theme.css");
 
-check("scaffoldCraftApp copies the real template into a fresh project, seeds the theme, and is idempotent", () => {
+check("scaffoldCraftApp copies the real template into a fresh project and is idempotent", () => {
   const dir = mkdtempSync(join(tmpdir(), "craft-scaffold-"));
   try {
-    const created = scaffoldCraftApp(REAL_TEMPLATE_DIR, REAL_THEME_CSS, dir);
-    assert.ok(created.length > 5, "expected the template tree plus globals.css to be copied");
+    const created = scaffoldCraftApp(REAL_TEMPLATE_DIR, dir);
+    assert.ok(created.length > 5, "expected the template tree to be copied");
 
     const paths = getCraftPaths(dir);
     assert.ok(existsSync(pj2(paths.root, "package.json")));
-    assert.ok(existsSync(pj2(paths.root, "components.json")));
+    assert.ok(!existsSync(pj2(paths.root, "components.json")), "no shadcn config may be scaffolded");
     assert.ok(existsSync(pj2(paths.root, "components", "craft", "PageShell.tsx")));
     assert.ok(existsSync(pj2(paths.root, "components", "craft", "PageHeader.tsx")));
     assert.ok(existsSync(pj2(paths.root, "app", "layout.tsx")));
     assert.ok(existsSync(paths.globalsCss));
 
-    const componentsJson = JSON.parse(readFileSync(pj2(paths.root, "components.json"), "utf8"));
-    assert.equal(componentsJson.tailwind.cssVariables, true, "cssVariables must be true so our theme tokens apply");
-    assert.equal(componentsJson.style, "new-york");
-
     const globals = readFileSync(paths.globalsCss, "utf8");
-    assert.ok(globals.includes("--background"), "globals.css should be seeded from the real theme file");
+    assert.ok(globals.includes("@tailwind base"), "globals.css ships in the template");
+
+    const pkg = JSON.parse(readFileSync(pj2(paths.root, "package.json"), "utf8"));
+    assert.equal(pkg.devDependencies?.shadcn, undefined, "shadcn must not be a dependency");
 
     // Simulate a human hand-editing a scaffolded file, then re-run — must not be clobbered.
     writeFileSync(pj2(paths.root, "components", "craft", "PageHeader.tsx"), "// hand-edited\n", "utf8");
-    scaffoldCraftApp(REAL_TEMPLATE_DIR, REAL_THEME_CSS, dir);
+    scaffoldCraftApp(REAL_TEMPLATE_DIR, dir);
     const afterRescaffold = readFileSync(pj2(paths.root, "components", "craft", "PageHeader.tsx"), "utf8");
     assert.equal(afterRescaffold, "// hand-edited\n");
   } finally {

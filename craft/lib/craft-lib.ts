@@ -29,7 +29,6 @@ export interface CraftPaths {
   appDir: string;
   navHubPage: string;
   globalsCss: string;
-  componentsJson: string;
 }
 
 // Output lives in design/ at the client repo root — a real Next.js app with
@@ -47,7 +46,6 @@ export function getCraftPaths(projectRoot: string): CraftPaths {
     appDir: join(root, "app"),
     navHubPage: join(root, "app", "page.tsx"),
     globalsCss: join(root, "app", "globals.css"),
-    componentsJson: join(root, "components.json"),
   };
 }
 
@@ -91,29 +89,17 @@ function copyDirSkipExisting(srcDir: string, destRoot: string, relPath: string, 
 }
 
 // Scaffolds the Next.js skeleton (package.json, tsconfig, tailwind config,
-// layout, the two structural PageShell/PageHeader helpers) from
-// craft/template/**, then seeds app/globals.css from the real house theme
-// at docs/design-exemplars/themes/default-theme.css — read live, not
-// duplicated as a second copy, so an edit to the theme is picked up by the
-// next fresh scaffold without needing to keep two files in sync.
-//
-// This deliberately does NOT vendor any shadcn/ui component bodies (no
-// components/ui/*.tsx here) — those are added live per screen via the real
-// `npx shadcn add` / `npx shadcn add @shadcnblocks/<name>`, per
-// docs/design-exemplars/patterns.md. Every file this function writes is
-// skip-if-exists, so re-running it (e.g. on an incremental /craft run)
-// never clobbers a hand-edit.
-export function scaffoldCraftApp(templateDir: string, themeCssPath: string, projectRoot: string): string[] {
+// globals.css, layout, the two structural PageShell/PageHeader helpers)
+// from craft/template/**. Screens are composed by the agent following
+// docs/design-system/ (foundations + components.md recipes + patterns) —
+// nothing is pulled from any external registry. Every file this function
+// writes is skip-if-exists, so re-running it (e.g. on an incremental
+// /craft run) never clobbers a hand-edit.
+export function scaffoldCraftApp(templateDir: string, projectRoot: string): string[] {
   const paths = getCraftPaths(projectRoot);
   const created: string[] = [];
 
   copyDirSkipExisting(templateDir, paths.root, "", created);
-
-  if (!existsSync(paths.globalsCss)) {
-    mkdirSync(dirname(paths.globalsCss), { recursive: true });
-    copyFileSync(themeCssPath, paths.globalsCss);
-    created.push(join("app", "globals.css"));
-  }
 
   return created;
 }

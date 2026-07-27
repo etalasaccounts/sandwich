@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Design",
@@ -9,8 +16,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+    <html lang="en" className={inter.variable}>
+      <body className="h-screen w-full bg-zinc-100 font-sans text-sm text-zinc-900 antialiased">
         {children}
       </body>
     </html>
