@@ -4,86 +4,146 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Data table — records &amp; toolbar</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-<style>
-body { font-family: 'Inter', sans-serif; }
+<style type="text/tailwindcss">
+@theme inline {
+  --color-*: initial;
+  --color-page: var(--page);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-control: var(--control);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-ink: var(--ink);
+  --color-ink-mid: var(--ink-mid);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-faint: var(--ink-faint);
+  --color-inverse: var(--inverse);
+  --color-inverse-2: var(--inverse-2);
+  --color-inverse-3: var(--inverse-3);
+  --color-inverse-4: var(--inverse-4);
+  --color-inverse-ink: var(--inverse-ink);
+  --color-inverse-ink-mid: var(--inverse-ink-mid);
+  --color-inverse-ink-2: var(--inverse-ink-2);
+  --color-inverse-ink-3: var(--inverse-ink-3);
+  --color-inverse-label: var(--inverse-label);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-info: var(--info);
+  --color-on-info: var(--on-info);
+  --color-warn: var(--warn);
+  --color-on-warn: var(--on-warn);
+}
+:root {
+  --page: #f4f4f5;
+  --panel: #ffffff;
+  --panel-2: #fafafa;
+  --control: #e4e4e7;
+  --line: #f4f4f5;
+  --line-2: #d4d4d8;
+  --ink: #09090b;
+  --ink-mid: #3f3f46;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --ink-faint: #d4d4d8;
+  --inverse: #09090b;
+  --inverse-2: #18181b;
+  --inverse-3: #27272a;
+  --inverse-4: #3f3f46;
+  --inverse-ink: #fafafa;
+  --inverse-ink-mid: #d4d4d8;
+  --inverse-ink-2: #a1a1aa;
+  --inverse-ink-3: #71717a;
+  --inverse-label: #52525b;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --on-accent: #09090b;
+  --info: #22d3ee;
+  --on-info: #09090b;
+  --warn: #f97316;
+  --on-warn: #ffffff;
+  --font-sans: 'Inter', sans-serif;
+}
+body { font-family: var(--font-sans); }
 iconify-icon { stroke-width: 1.5; }
 /* Custom Scrollbar for a cleaner look */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+::-webkit-scrollbar-thumb { background: var(--control); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--line-2); }
 </style></head>
-<body class="bg-zinc-100 h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-zinc-900">
+<body class="bg-page h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-ink">
 
   <!-- App Shell -->
-  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden">
+  <div class="bg-panel rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden">
 
     <!-- LEFT SIDEBAR -->
-    <aside class="bg-zinc-950 rounded-2xl p-4 gap-5 flex-col w-[320px] flex-shrink-0 hidden lg:flex overflow-y-auto">
+    <aside class="bg-inverse rounded-2xl p-4 gap-5 flex-col w-[320px] flex-shrink-0 hidden lg:flex overflow-y-auto">
 
       <!-- Brand -->
       <div class="flex items-center gap-2.5 mt-1 px-1">
-        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
-          <iconify-icon icon="solar:layers-minimalistic-linear" class="text-zinc-950 text-base"></iconify-icon>
+        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+          <iconify-icon icon="solar:layers-minimalistic-linear" class="text-on-accent text-base"></iconify-icon>
         </div>
-        <span class="text-lg font-medium text-zinc-50 tracking-tight">Nordbyte</span>
+        <span class="text-lg font-medium text-inverse-ink tracking-tight">Nordbyte</span>
       </div>
 
       <!-- Search -->
-      <div class="flex items-center gap-2 bg-zinc-900 rounded-xl py-2.5 px-3.5 w-full">
-        <iconify-icon icon="solar:magnifer-linear" class="text-zinc-500 text-sm"></iconify-icon>
-        <input type="text" placeholder="Search customers..." class="bg-transparent border-none outline-none text-xs text-zinc-300 w-full placeholder-zinc-500 font-light" />
+      <div class="flex items-center gap-2 bg-inverse-2 rounded-xl py-2.5 px-3.5 w-full">
+        <iconify-icon icon="solar:magnifer-linear" class="text-inverse-ink-3 text-sm"></iconify-icon>
+        <input type="text" placeholder="Search customers..." class="bg-transparent border-none outline-none text-xs text-inverse-ink-mid w-full placeholder:text-inverse-ink-3 font-light" />
       </div>
 
       <!-- KPI Grid -->
       <div class="flex gap-3 w-full">
-        <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+        <div class="bg-inverse-2 rounded-2xl p-4 flex flex-col gap-2 flex-1">
           <div class="flex items-center justify-between w-full">
-            <span class="text-xs text-zinc-400 font-light">Active</span>
-            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+            <span class="text-xs text-inverse-ink-2 font-light">Active</span>
+            <div class="w-2 h-2 rounded-full bg-accent"></div>
           </div>
-          <span class="text-3xl font-extralight text-zinc-100 tracking-tight">1,284</span>
+          <span class="text-3xl font-extralight text-inverse-ink tracking-tight">1,284</span>
         </div>
-        <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+        <div class="bg-inverse-2 rounded-2xl p-4 flex flex-col gap-2 flex-1">
           <div class="flex items-center justify-between w-full">
-            <span class="text-xs text-zinc-400 font-light">Churn</span>
-            <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+            <span class="text-xs text-inverse-ink-2 font-light">Churn</span>
+            <div class="w-2 h-2 rounded-full bg-warn"></div>
           </div>
-          <span class="text-3xl font-extralight text-zinc-100 tracking-tight">2.1%</span>
+          <span class="text-3xl font-extralight text-inverse-ink tracking-tight">2.1%</span>
         </div>
       </div>
 
       <!-- Nav -->
       <nav class="flex flex-col w-full gap-0.5 mt-2">
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-inverse-2/50 cursor-pointer transition-colors text-inverse-ink-3">
           <div class="flex items-center gap-3">
             <iconify-icon icon="solar:home-2-linear" class="text-base"></iconify-icon>
-            <span class="text-sm font-light text-zinc-400">Overview</span>
+            <span class="text-sm font-light text-inverse-ink-2">Overview</span>
           </div>
         </div>
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-zinc-900 cursor-pointer">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-inverse-2 cursor-pointer">
           <div class="flex items-center gap-3">
-            <iconify-icon icon="solar:users-group-rounded-linear" class="text-green-400 text-base"></iconify-icon>
-            <span class="text-sm font-normal text-zinc-50 tracking-tight">Customers</span>
+            <iconify-icon icon="solar:users-group-rounded-linear" class="text-accent text-base"></iconify-icon>
+            <span class="text-sm font-normal text-inverse-ink tracking-tight">Customers</span>
           </div>
-          <span class="rounded-full py-0.5 px-2.5 text-xs font-normal bg-green-400 text-zinc-950">42</span>
+          <span class="rounded-full py-0.5 px-2.5 text-xs font-normal bg-accent text-on-accent">42</span>
         </div>
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-inverse-2/50 cursor-pointer transition-colors text-inverse-ink-3">
           <div class="flex items-center gap-3">
             <iconify-icon icon="solar:document-text-linear" class="text-base"></iconify-icon>
-            <span class="text-sm font-light text-zinc-400">Invoices</span>
+            <span class="text-sm font-light text-inverse-ink-2">Invoices</span>
           </div>
-          <span class="rounded-full py-0.5 px-2.5 text-xs font-light bg-zinc-800 text-zinc-400">3</span>
+          <span class="rounded-full py-0.5 px-2.5 text-xs font-light bg-inverse-3 text-inverse-ink-2">3</span>
         </div>
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-inverse-2/50 cursor-pointer transition-colors text-inverse-ink-3">
           <div class="flex items-center gap-3">
             <iconify-icon icon="solar:chart-2-linear" class="text-base"></iconify-icon>
-            <span class="text-sm font-light text-zinc-400">Reports</span>
+            <span class="text-sm font-light text-inverse-ink-2">Reports</span>
           </div>
         </div>
       </nav>
@@ -91,49 +151,49 @@ iconify-icon { stroke-width: 1.5; }
       <div class="flex-1"></div>
 
       <!-- User Footer -->
-      <div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 w-full">
-        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
-          <iconify-icon icon="solar:user-circle-linear" class="text-zinc-400 text-lg"></iconify-icon>
+      <div class="flex items-center gap-3 bg-inverse-2 rounded-2xl p-3 w-full">
+        <div class="w-9 h-9 rounded-full bg-inverse-3 flex items-center justify-center flex-shrink-0">
+          <iconify-icon icon="solar:user-circle-linear" class="text-inverse-ink-2 text-lg"></iconify-icon>
         </div>
         <div class="flex flex-col flex-1 min-w-0">
-          <span class="text-sm font-normal text-zinc-50 truncate">Avery Nolan</span>
-          <span class="text-xs font-light text-zinc-500 truncate">avery@nordbyte.com</span>
+          <span class="text-sm font-normal text-inverse-ink truncate">Avery Nolan</span>
+          <span class="text-xs font-light text-inverse-ink-3 truncate">avery@nordbyte.com</span>
         </div>
-        <button class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 hover:bg-zinc-700 transition-colors">
-          <iconify-icon icon="solar:settings-linear" class="text-zinc-400 text-sm"></iconify-icon>
+        <button class="w-8 h-8 rounded-full bg-inverse-3 flex items-center justify-center flex-shrink-0 hover:bg-inverse-4 transition-colors">
+          <iconify-icon icon="solar:settings-linear" class="text-inverse-ink-2 text-sm"></iconify-icon>
         </button>
       </div>
 
     </aside>
 
     <!-- MAIN PANEL -->
-    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
+    <main class="bg-panel rounded-2xl flex flex-col flex-1 overflow-hidden">
 
       <!-- Header -->
-      <div class="flex items-center justify-between p-7 border-b border-zinc-100">
-        <span class="text-xl font-medium text-zinc-950 tracking-tight">Customers</span>
-        <button class="flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2 px-4 shadow-sm text-white">
+      <div class="flex items-center justify-between p-7 border-b border-line">
+        <span class="text-xl font-medium text-ink tracking-tight">Customers</span>
+        <button class="flex items-center gap-2 bg-inverse hover:bg-inverse-3 transition-colors rounded-xl py-2 px-4 shadow-sm text-inverse-ink">
           <iconify-icon icon="solar:user-plus-linear" class="text-sm"></iconify-icon>
           <span class="text-xs font-medium tracking-wide">Add Customer</span>
         </button>
       </div>
 
       <!-- Toolbar -->
-      <div class="flex items-center justify-between gap-3 px-7 py-4 border-b border-zinc-100">
+      <div class="flex items-center justify-between gap-3 px-7 py-4 border-b border-line">
         <div class="max-w-[280px] w-full">
-          <div class="flex items-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 w-full">
-            <iconify-icon icon="solar:magnifer-linear" class="text-zinc-400 text-sm"></iconify-icon>
-            <input type="text" placeholder="Search customers..." class="bg-transparent border-none outline-none text-xs text-zinc-700 w-full placeholder-zinc-400 font-light" />
+          <div class="flex items-center gap-2 bg-panel-2/80 border border-line rounded-xl py-2.5 px-3.5 w-full">
+            <iconify-icon icon="solar:magnifer-linear" class="text-ink-3 text-sm"></iconify-icon>
+            <input type="text" placeholder="Search customers..." class="bg-transparent border-none outline-none text-xs text-ink-mid w-full placeholder:text-ink-3 font-light" />
           </div>
         </div>
 
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1">
-            <button class="rounded-full py-1.5 px-4 text-xs bg-zinc-950 text-white font-normal transition-colors tracking-wide">All</button>
-            <button class="rounded-full py-1.5 px-4 text-xs text-zinc-500 hover:bg-zinc-200/50 font-light transition-colors tracking-wide">Active</button>
-            <button class="rounded-full py-1.5 px-4 text-xs text-zinc-500 hover:bg-zinc-200/50 font-light transition-colors tracking-wide">Churned</button>
+            <button class="rounded-full py-1.5 px-4 text-xs bg-inverse text-inverse-ink font-normal transition-colors tracking-wide">All</button>
+            <button class="rounded-full py-1.5 px-4 text-xs text-ink-2 hover:bg-control/50 font-light transition-colors tracking-wide">Active</button>
+            <button class="rounded-full py-1.5 px-4 text-xs text-ink-2 hover:bg-control/50 font-light transition-colors tracking-wide">Churned</button>
           </div>
-          <button class="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center hover:bg-zinc-200 transition-colors text-zinc-600">
+          <button class="w-8 h-8 rounded-full bg-control/50 flex items-center justify-center hover:bg-control transition-colors text-ink-2">
             <iconify-icon icon="solar:sort-vertical-linear" class="text-sm"></iconify-icon>
           </button>
         </div>
@@ -143,194 +203,194 @@ iconify-icon { stroke-width: 1.5; }
       <div class="flex-1 overflow-y-auto px-3">
         <table class="w-full text-left">
           <thead>
-            <tr class="border-b border-zinc-100">
-              <th class="py-3 px-4 text-xs uppercase tracking-widest text-zinc-400 font-normal">Customer</th>
-              <th class="py-3 px-4 text-xs uppercase tracking-widest text-zinc-400 font-normal">Status</th>
-              <th class="py-3 px-4 text-xs uppercase tracking-widest text-zinc-400 font-normal">Plan</th>
-              <th class="py-3 px-4 text-xs uppercase tracking-widest text-zinc-400 font-normal text-right">MRR</th>
-              <th class="py-3 px-4 text-xs uppercase tracking-widest text-zinc-400 font-normal">Joined</th>
+            <tr class="border-b border-line">
+              <th class="py-3 px-4 text-xs uppercase tracking-widest text-ink-3 font-normal">Customer</th>
+              <th class="py-3 px-4 text-xs uppercase tracking-widest text-ink-3 font-normal">Status</th>
+              <th class="py-3 px-4 text-xs uppercase tracking-widest text-ink-3 font-normal">Plan</th>
+              <th class="py-3 px-4 text-xs uppercase tracking-widest text-ink-3 font-normal text-right">MRR</th>
+              <th class="py-3 px-4 text-xs uppercase tracking-widest text-ink-3 font-normal">Joined</th>
               <th class="py-3 px-4 w-12"></th>
             </tr>
           </thead>
           <tbody>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-green-400 flex items-center justify-center text-xs font-medium text-zinc-950 tracking-tight">AC</div>
+                  <div class="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-xs font-medium text-on-accent tracking-tight">AC</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Acme Corp</span>
-                    <span class="text-xs font-light text-zinc-500">billing@acme.com</span>
+                    <span class="text-sm font-normal text-ink">Acme Corp</span>
+                    <span class="text-xs font-light text-ink-2">billing@acme.com</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-green-400"></div>
-                  <span class="text-sm font-light text-zinc-600">Active</span>
+                  <div class="w-2 h-2 rounded-full bg-accent"></div>
+                  <span class="text-sm font-light text-ink-2">Active</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Pro</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$2,400</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Mar 4, 2024</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Pro</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$2,400</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Mar 4, 2024</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
             </tr>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-cyan-400 flex items-center justify-center text-xs font-medium text-zinc-950 tracking-tight">HL</div>
+                  <div class="w-9 h-9 rounded-full bg-info flex items-center justify-center text-xs font-medium text-on-info tracking-tight">HL</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Halcyon Labs</span>
-                    <span class="text-xs font-light text-zinc-500">ops@halcyonlabs.io</span>
+                    <span class="text-sm font-normal text-ink">Halcyon Labs</span>
+                    <span class="text-xs font-light text-ink-2">ops@halcyonlabs.io</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-green-400"></div>
-                  <span class="text-sm font-light text-zinc-600">Active</span>
+                  <div class="w-2 h-2 rounded-full bg-accent"></div>
+                  <span class="text-sm font-light text-ink-2">Active</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Business</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$6,800</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Jan 18, 2024</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Business</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$6,800</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Jan 18, 2024</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
             </tr>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-xs font-medium text-white tracking-tight">MS</div>
+                  <div class="w-9 h-9 rounded-full bg-warn flex items-center justify-center text-xs font-medium text-on-warn tracking-tight">MS</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Meridian Studio</span>
-                    <span class="text-xs font-light text-zinc-500">hello@meridian.design</span>
+                    <span class="text-sm font-normal text-ink">Meridian Studio</span>
+                    <span class="text-xs font-light text-ink-2">hello@meridian.design</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-orange-500"></div>
-                  <span class="text-sm font-light text-zinc-600">Past due</span>
+                  <div class="w-2 h-2 rounded-full bg-warn"></div>
+                  <span class="text-sm font-light text-ink-2">Past due</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Pro</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$2,400</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Nov 2, 2023</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Pro</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$2,400</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Nov 2, 2023</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
             </tr>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-green-400 flex items-center justify-center text-xs font-medium text-zinc-950 tracking-tight">OG</div>
+                  <div class="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-xs font-medium text-on-accent tracking-tight">OG</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Ostara Group</span>
-                    <span class="text-xs font-light text-zinc-500">finance@ostara.co</span>
+                    <span class="text-sm font-normal text-ink">Ostara Group</span>
+                    <span class="text-xs font-light text-ink-2">finance@ostara.co</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-green-400"></div>
-                  <span class="text-sm font-light text-zinc-600">Active</span>
+                  <div class="w-2 h-2 rounded-full bg-accent"></div>
+                  <span class="text-sm font-light text-ink-2">Active</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Pro</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$1,150</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Jun 21, 2024</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Pro</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$1,150</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Jun 21, 2024</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
             </tr>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-medium text-zinc-300 tracking-tight">FP</div>
+                  <div class="w-9 h-9 rounded-full bg-inverse-3 flex items-center justify-center text-xs font-medium text-inverse-ink-mid tracking-tight">FP</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Fernpath</span>
-                    <span class="text-xs font-light text-zinc-500">accounts@fernpath.com</span>
+                    <span class="text-sm font-normal text-ink">Fernpath</span>
+                    <span class="text-xs font-light text-ink-2">accounts@fernpath.com</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-zinc-300"></div>
-                  <span class="text-sm font-light text-zinc-600">Churned</span>
+                  <div class="w-2 h-2 rounded-full bg-line-2"></div>
+                  <span class="text-sm font-light text-ink-2">Churned</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Starter</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$0</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Feb 9, 2023</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Starter</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$0</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Feb 9, 2023</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
             </tr>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-cyan-400 flex items-center justify-center text-xs font-medium text-zinc-950 tracking-tight">VH</div>
+                  <div class="w-9 h-9 rounded-full bg-info flex items-center justify-center text-xs font-medium text-on-info tracking-tight">VH</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Vellum Health</span>
-                    <span class="text-xs font-light text-zinc-500">it@vellumhealth.com</span>
+                    <span class="text-sm font-normal text-ink">Vellum Health</span>
+                    <span class="text-xs font-light text-ink-2">it@vellumhealth.com</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-green-400"></div>
-                  <span class="text-sm font-light text-zinc-600">Active</span>
+                  <div class="w-2 h-2 rounded-full bg-accent"></div>
+                  <span class="text-sm font-light text-ink-2">Active</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Business</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$5,600</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Apr 30, 2024</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Business</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$5,600</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Apr 30, 2024</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
             </tr>
 
-            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer">
+            <tr class="border-b border-line hover:bg-panel-2/50 transition-colors cursor-pointer">
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-xs font-medium text-white tracking-tight">KF</div>
+                  <div class="w-9 h-9 rounded-full bg-warn flex items-center justify-center text-xs font-medium text-on-warn tracking-tight">KF</div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-normal text-zinc-950">Kestrel Freight</span>
-                    <span class="text-xs font-light text-zinc-500">ap@kestrelfreight.com</span>
+                    <span class="text-sm font-normal text-ink">Kestrel Freight</span>
+                    <span class="text-xs font-light text-ink-2">ap@kestrelfreight.com</span>
                   </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-orange-500"></div>
-                  <span class="text-sm font-light text-zinc-600">Past due</span>
+                  <div class="w-2 h-2 rounded-full bg-warn"></div>
+                  <span class="text-sm font-light text-ink-2">Past due</span>
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-600">Pro</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-700 text-right">$1,150</td>
-              <td class="py-3.5 px-4 text-sm font-light text-zinc-500">Aug 12, 2025</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Pro</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-mid text-right">$1,150</td>
+              <td class="py-3.5 px-4 text-sm font-light text-ink-2">Aug 12, 2025</td>
               <td class="py-3.5 px-4">
-                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
                   <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
                 </button>
               </td>
@@ -341,13 +401,13 @@ iconify-icon { stroke-width: 1.5; }
       </div>
 
       <!-- Footer / pagination -->
-      <div class="flex items-center justify-between px-7 py-4 border-t border-zinc-100 mt-auto">
-        <span class="text-xs font-light text-zinc-500">Showing 1–7 of 42</span>
+      <div class="flex items-center justify-between px-7 py-4 border-t border-line mt-auto">
+        <span class="text-xs font-light text-ink-2">Showing 1–7 of 42</span>
         <div class="flex items-center gap-1.5">
-          <button class="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center hover:bg-zinc-200 transition-colors text-zinc-600">
+          <button class="w-8 h-8 rounded-full bg-control/50 flex items-center justify-center hover:bg-control transition-colors text-ink-2">
             <iconify-icon icon="solar:alt-arrow-left-linear" class="text-sm"></iconify-icon>
           </button>
-          <button class="w-8 h-8 rounded-full bg-zinc-200/50 flex items-center justify-center hover:bg-zinc-200 transition-colors text-zinc-600">
+          <button class="w-8 h-8 rounded-full bg-control/50 flex items-center justify-center hover:bg-control transition-colors text-ink-2">
             <iconify-icon icon="solar:alt-arrow-right-linear" class="text-sm"></iconify-icon>
           </button>
         </div>
