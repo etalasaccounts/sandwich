@@ -169,6 +169,7 @@ Full maintenance report — useful for billing evidence and SLA logs.
 |---------|----------|
 | `/order` | Generate or update brief artifacts (auto-detects mode) |
 | `/craft` | Generate/update the design app from `needsUI` flows (requires `/order`) |
+| `/design` | Generate UI in any project following the house design system — no brief, no prerequisites, any stack |
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
 | `/prep --done F-001 [sha...]` | Mark a feature done and record its commits |
