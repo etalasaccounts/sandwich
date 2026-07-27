@@ -9,7 +9,7 @@ content, pull anything extra from [`../components.md`](../components.md).
 |---|---|---|---|
 | [`mailbox.html`](./mailbox.html) | App shell, 3-pane | Any app screen: inbox, CRM, admin, tools | App shell, dark sidebar (nav, KPIs, labels, account), list panel with row states, detail pane, reply composer, attachments |
 | [`auth.html`](./auth.html) | Auth | Login, register, forgot password | Split brand/form layout, form fields, SSO button, divider |
-| [`landing.html`](./landing.html) | Marketing (flat) | Public/landing pages | Flat public-facing surface (no cards, `bg-white` page, `border-t`/`border-b` dividers only): flat nav, hero display type, `divide-x` feature trio, full-bleed dark stats band, `divide-x` pricing tiers, footer |
+| [`landing.html`](./landing.html) | Marketing (flat) | Public/landing pages | Flat public-facing surface (`bg-white` page, `border-t`/`border-b` dividers between sections, no section-level card wrappers) with cards used per-item where comparison needs a boundary: flat nav, hero + bordered product-preview frame, card feature trio, full-bleed dark stats band, card testimonials, card pricing tiers (dark featured card), flat FAQ rows, full-bleed CTA band, footer |
 | [`settings.html`](./settings.html) | Settings/forms | Settings, profile, preferences, any form-heavy screen | Card groups, field rows, toggles, plan card, danger zone |
 | [`data-table.html`](./data-table.html) | Data table | Lists of records: customers, invoices, orders | Toolbar (search/filters/actions), table recipe, status dots, pagination |
 | [`mobile.html`](./mobile.html) | Mobile | Small-screen apps / mobile web | Phone frame, stacked cards, list, dark bottom nav |
@@ -47,8 +47,11 @@ it's the reusable part.
 `blog-post-form.html`, `chat-interface.html` and `mobile.html` are all app
 shell — a workspace someone works inside, floating white/dark panels on a
 `zinc-100` backdrop. `landing.html` and `marketplace-grid.html` are flat —
-a public-facing page, `bg-white`, no cards, dividers instead of boxes (see
-foundations.md's two "Surfaces & layout" sections). Building a new
+a public-facing page, `bg-white`, sections separated by dividers rather
+than boxes (see foundations.md's two "Surfaces & layout" sections). Flat
+doesn't mean cardless: `landing.html` still uses per-item cards for
+pricing/testimonials/features, because those specific items benefit from a
+boundary — the *section* around them stays flat either way. Building a new
 public-facing pattern (a job board, docs, a public profile)? Start from
 the flat convention, not the app shell — a public page that looks like an
 admin panel is the mistake this split exists to prevent.
