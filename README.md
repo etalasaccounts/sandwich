@@ -48,8 +48,21 @@ After installing, restart your AI session so the skills are discovered.
 | Command | Role |
 |---------|------|
 | `/order` | Turn any client input into four standardized brief artifacts |
+| `/craft` | Design the UI — a real Next.js + shadcn app, composed from the live registry |
 | `/prep` | Tech lead prioritization — score features, build the queue |
 | `/status` | Morning-check dashboard — what's blocking, what's next |
+
+**Explicit-invocation only.** None of the four skills above ever trigger on
+topical similarity, keywords, or inferred intent — pasting a KAK, asking
+"what should we build next," or discussing UI design in conversation does
+**not** run anything. Each one only runs when you type its literal command
+(`/order`, `/craft`, `/prep`, `/status`, or the namespaced form your host
+requires, e.g. `/sandwich:order`). This is deliberate: you should never be
+surprised by one of these firing on its own, and never have to second-guess
+whether talking about your project will accidentally kick off a pipeline
+step. Every `SKILL.md` states this explicitly in its own description and
+"When to invoke" section — if you're auditing behavior, that's the
+authoritative source per skill.
 
 ---
 
@@ -83,7 +96,19 @@ Paste the client's answers alongside `/order`. The skill detects answer mode and
 [paste client's answers here]
 ```
 
-### 3. Prioritize features
+### 3. Craft the UI
+
+```
+/craft
+```
+
+Reads `needsUI` flows from the brief and produces a real Next.js + shadcn app in `design/`, composed from the live shadcn component registry (never a fixed/narrow set — full base components, real page-level blocks, a secondary registry for marketing sections). Requires `/order` to have run first, and will stop and ask before designing over an unresolved high-priority open question rather than guess. Re-running is safe: changed flows flag existing screens `stale` for you to act on, they're never silently rewritten.
+
+```bash
+cd design && npm run dev
+```
+
+### 4. Prioritize features
 
 ```
 /prep
@@ -93,7 +118,7 @@ Reads the brief, extracts all features, scores them, and writes the registry. On
 
 Produces `docs/sandwich/feature-queue.md` — shareable with PMs — plus a `docs/sandwich/specs/F-XXX.md` for every active feature: scope and an acceptance-criteria checklist, ready to hand to Superpowers.
 
-### 4. Pick a feature and hand off to Superpowers
+### 5. Pick a feature and hand off to Superpowers
 
 Sandwich stops at the feature queue. For design, implementation planning, and execution, use **[Superpowers](https://github.com/obra/Superpowers)** — it's more mature and purpose-built for that phase.
 
@@ -121,7 +146,7 @@ Superpowers walks you through: approach options → design approval → implemen
 
 > **Why not stay in sandwich?** Superpowers' brainstorming skill enforces a human approval gate before any code is written, proposes 2-3 implementation approaches with tradeoffs, and produces implementation plans with full code in every step. That's the right tool for execution — sandwich's job ends at "what to build and in what order."
 
-### 5. Morning check
+### 6. Morning check
 
 ```
 /status
@@ -142,6 +167,7 @@ Full maintenance report — useful for billing evidence and SLA logs.
 | Command | Behavior |
 |---------|----------|
 | `/order` | Generate or update brief artifacts (auto-detects mode) |
+| `/craft` | Generate/update the design app from `needsUI` flows (requires `/order`) |
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
 | `/prep --done F-001 [sha...]` | Mark a feature done and record its commits |
@@ -154,9 +180,11 @@ Full maintenance report — useful for billing evidence and SLA logs.
 ## Pipeline
 
 ```
-/order → /prep → docs/sandwich/specs/F-XXX.md → superpowers:brainstorming → build
-                 └─ feature-queue.md (priorities + links)
+/order → /craft → /prep → docs/sandwich/specs/F-XXX.md → superpowers:brainstorming → build
+          └─ design/         └─ feature-queue.md (priorities + links)
 ```
+
+`/craft` reads `/order`'s output but `/prep` doesn't depend on `/craft`'s — they're both downstream of the brief, run in that order by convention (design before prioritization), not because `/prep` needs `design/` to exist.
 
 After `/prep`, every active feature has its own `docs/sandwich/specs/F-XXX.md` — scope plus an acceptance-criteria checklist, generated deterministically from the registry. Pick the top feature off `feature-queue.md` and hand its spec file straight to Superpowers brainstorming as the starting point. As implementation proves each acceptance criterion, flip it to `"done": true` in the feature's `F-XXX.json` and re-run `render-specs.ts` (or the next `/prep`) to check it off in the rendered markdown.
 
@@ -226,4 +254,5 @@ Priority is computed deterministically in code: `(impact × urgency × (10 − r
 | `docs/sandwich/` | tracked | Brief artifacts and feature queue — everything shareable |
 | `docs/sandwich/intake/` | tracked | Raw PM inputs (KAK, MOM, meeting notes) |
 | `docs/sandwich/specs/` | tracked | Per-feature specs (`F-XXX.json` + rendered `F-XXX.md`) — the dev's starting point for Superpowers |
+| `design/` | tracked (its `node_modules`/`.next` are not — see its `.gitignore`) | The `/craft`-generated Next.js + shadcn app — a real, deployable design/prototype, not markdown |
 | `.sandwich/registry/` | tracked | Pipeline state (source of truth) |

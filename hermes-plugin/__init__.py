@@ -7,6 +7,7 @@ SKILLS = {
     "order": _REPO_ROOT / "order" / "skills" / "order" / "SKILL.md",
     "prep": _REPO_ROOT / "prep" / "skills" / "prep" / "SKILL.md",
     "status": _REPO_ROOT / "prep" / "skills" / "status" / "SKILL.md",
+    "craft": _REPO_ROOT / "craft" / "skills" / "craft" / "SKILL.md",
 }
 
 
