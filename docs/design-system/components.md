@@ -173,7 +173,7 @@ Initials on an accent or zinc fill:
 <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center flex-shrink-0 text-xs font-medium text-on-accent tracking-tight">MR</div>
 ```
 
-Sizes: `w-4 h-4 text-[10px]` (chip), `w-9 h-9`, `w-10 h-10`, `w-11 h-11 text-sm`. Fill rotation: `bg-accent`/`bg-info` (text-on-accent), `bg-warn` (text-on-warn), `bg-inverse-3` (text-inverse-ink-mid). Icon variant: `bg-inverse-3` + `solar:user-circle-linear` in `text-inverse-ink-2`.
+Sizes: `w-4 h-4 text-[10px]` (chip), `w-9 h-9`, `w-10 h-10`, `w-11 h-11 text-sm`. Fill rotation: `bg-accent` (text-on-accent), `bg-info` (text-on-info), `bg-warn` (text-on-warn), `bg-inverse-3` (text-inverse-ink-mid). Icon variant: `bg-inverse-3` + `solar:user-circle-linear` in `text-inverse-ink-2`.
 
 ## badge
 
