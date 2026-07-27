@@ -68,6 +68,10 @@ Accent application: 2×2 dots (`w-2 h-2 rounded-full bg-green-400`), count
 badges, avatar fills, icon tints on active items. One accent (green)
 dominates per view; cyan and orange are supporting. **Never**: large accent
 surfaces, accent-colored body text, gradients, colors outside this palette.
+Two narrow, enumerated carve-outs exist (one accent-filled CTA on a
+marketing page's featured pricing tier; a smaller `w-1.5 h-1.5` inline dot)
+— see [Documented exceptions](#documented-exceptions) below. Nothing outside
+that list.
 
 ## Surfaces & layout
 
@@ -93,7 +97,8 @@ use a bottom nav (see `patterns/mobile.html`).
 
 ## Radius / shadow / motion
 
-- `rounded-3xl` shell → `rounded-2xl` panels & cards → `rounded-xl`
+- `rounded-3xl` shell (and full-width marketing bands — see
+  [Documented exceptions](#documented-exceptions)) → `rounded-2xl` panels & cards → `rounded-xl`
   controls (nav items, inputs, rect buttons, chips) → `rounded-full`
   pills, icon buttons, avatars, badges, dots. `rounded-lg` only for tiny
   nested thumbnails.
@@ -127,14 +132,70 @@ Default tint `text-zinc-400` or `text-zinc-500`; accent tint on active
 search https://icon-sets.iconify.design/solar/ — always the `-linear`
 variant.
 
-## Scrollbar
+## Shared HTML head
 
-```css
+Canonical for every plain-HTML page. All six `patterns/*.html` files carry
+this exact block — only the `<title>` differs. Copy it verbatim (including
+the scrollbar CSS and the `iconify-icon` stroke rule) and substitute the
+title:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PAGE TITLE HERE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+iconify-icon { stroke-width: 1.5; }
+/* Custom Scrollbar for a cleaner look */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style></head>
 ```
+
+On a build-step stack (Next.js etc.), the same four concerns move to your
+own entry points: Tailwind via your config, Inter via `next/font/google`
+weights `["200","300","400","500"]`, iconify via `@iconify/react` or the
+script in the root layout, and the `<style>` block's rules into your global
+stylesheet.
+
+## Documented exceptions
+
+Three places where the exemplars in `patterns/` legitimately go beyond the
+rules above. These are the *complete* list — anything not listed here is a
+violation, and none of these generalize past their stated scope.
+
+**1. One accent-filled CTA per marketing page.** Exactly one accent-filled
+CTA button is allowed per marketing/landing page: the featured pricing
+tier's primary action, using
+`bg-green-400 text-zinc-950 rounded-xl py-2.5 w-full text-xs font-medium tracking-wide hover:bg-green-300 transition-colors`
+(see `patterns/landing.html`, the dark pricing card). This is the only place
+a button may use a large accent fill, and `green-300` exists solely as that
+button's hover state. Nowhere else — not app-shell primaries, not secondary
+CTAs, not the non-featured pricing tiers, not a second button on the same
+page. Everywhere else the primary button is the zinc `button-primary`
+recipe.
+
+**2. Second dot size for inline unread indicators.** The unread-indicator
+dot has a second valid size, `w-1.5 h-1.5 rounded-full bg-green-400`, in
+addition to the documented `w-2 h-2`. Use `w-1.5 h-1.5` when the dot sits
+inline next to a name or title inside a list row (see `patterns/dashboard.html`,
+`patterns/mobile.html`); use `w-2 h-2` for a standalone status dot (KPI
+cards, stat bands, live indicators).
+
+**3. `rounded-3xl` is not app-shell-only.** In addition to the app shell,
+`rounded-3xl` applies to full-width marketing bands — e.g. the dark stats
+band in `patterns/landing.html`. Panels and cards *inside* any such band are
+still `rounded-2xl`. The radius scale is otherwise exactly as stated above.
 
 ## Do / Don't
 
@@ -143,7 +204,7 @@ variant.
 | Zinc + the 3 accents | Any other color, gradients |
 | Inter 200–500 | `font-semibold`/`font-bold`, other fonts |
 | Solar linear icons | lucide, tabler, heroicons, emoji |
-| Accent dots/badges/tints | Accent panels, accent buttons, accent headlines |
+| Accent dots/badges/tints | Accent panels, accent headlines, accent buttons — except the single documented exception above |
 | Shade separation on dark | Borders on dark surfaces |
 | `rounded-xl`+ on controls | `rounded-md`/`rounded`/square corners |
 | `shadow-sm` | `shadow-md` and up, colored shadows |

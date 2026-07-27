@@ -40,8 +40,10 @@ context and substitute it literally.
    `components.md` sections you actually need. Full screens start from a
    pattern's shell; single components come straight from `components.md`.
 3. **Detect the target stack** — look at the project you're in:
-   - Plain HTML: copy the shared head from any pattern file (Tailwind CDN,
-     Inter link, iconify script, scrollbar CSS).
+   - Plain HTML: copy the canonical shared head from `foundations.md`'s
+     "Shared HTML head" section (Tailwind CDN, Inter link, iconify script,
+     scrollbar CSS) — every `patterns/*.html` file carries that exact block,
+     differing only in `<title>`.
    - React/Next.js + Tailwind: same markup with `className`; Inter via
      `next/font/google` weights `["200","300","400","500"]`; icons via
      `@iconify/react` (`<Icon icon="solar:…-linear" />`) or the
@@ -53,13 +55,18 @@ context and substitute it literally.
    reference files. Adapt content, not style.
 5. **Self-check before finishing** — verify against the hard rules:
    - Only zinc + `green-400`/`cyan-400`/`orange-500`; accents only as
-     dots, badges, avatar fills, icon tints.
+     dots, badges, avatar fills, icon tints (the one documented exception:
+     a single accent-filled CTA button on a marketing page's featured
+     pricing tier — see `foundations.md`'s Documented exceptions section).
    - Inter 200–500 only; no `font-semibold`/`font-bold`.
    - Only `solar:*-linear` icons; no lucide/tabler/emoji.
    - Radius scale: 3xl shell / 2xl panels / xl controls / full pills.
    - `shadow-sm` max; `transition-colors` only (plus `animate-pulse`
      skeletons).
-   Anything that fails the check gets fixed before you report done.
+   Anything that fails the check gets fixed before you report done. The only
+   sanctioned deviations are the closed list in `foundations.md`'s
+   "Documented exceptions" section — check there before "fixing" something
+   you copied straight out of a pattern file.
 
 ## Forbidden
 

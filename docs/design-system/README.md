@@ -13,12 +13,13 @@ exemplars.
    `orange-500` (warning).
 3. Accents appear only as **small elements** — dots, count badges, avatar
    fills, icon tints. Never large fills, never gradients, never accent
-   body text.
+   body text. The only carve-outs are the short, closed list in
+   [`foundations.md` § Documented exceptions](./foundations.md#documented-exceptions).
 4. Icons are **Solar linear** (`solar:*-linear`) via iconify. No lucide,
    no tabler, no emoji.
-5. Radius scale is fixed: `rounded-3xl` app shell / `rounded-2xl` panels
-   and cards / `rounded-xl` controls / `rounded-full` pills, icon buttons,
-   avatars, dots.
+5. Radius scale is fixed: `rounded-3xl` app shell (and full-width marketing
+   bands — see § Documented exceptions) / `rounded-2xl` panels and cards /
+   `rounded-xl` controls / `rounded-full` pills, icon buttons, avatars, dots.
 6. `shadow-sm` is the heaviest shadow. `transition-colors` is the only
    motion (plus `animate-pulse` for skeletons).
 7. Dark surfaces separate by background shade, never borders. Light
@@ -42,8 +43,10 @@ component sections / pattern files you actually need.
 The exemplars are plain HTML + Tailwind CDN. The classes and markup
 structure are the design system — keep them identical everywhere:
 
-- **Plain HTML:** copy the shared head from any pattern file (Tailwind CDN,
-  Inter, iconify script, scrollbar CSS).
+- **Plain HTML:** copy the canonical shared head from
+  [`foundations.md`](./foundations.md#shared-html-head) (Tailwind CDN, Inter,
+  iconify script, scrollbar CSS) — every `patterns/*.html` file carries that
+  exact block, differing only in `<title>`.
 - **React/Next.js:** same markup, `class` → `className`. Icons: keep the
   `<iconify-icon>` custom element (load the iconify script in the root
   layout) or use `@iconify/react`'s `<Icon icon="solar:…-linear" />` —
