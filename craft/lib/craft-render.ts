@@ -7,10 +7,10 @@ function screenLink(s: ManifestScreen): string {
     .filter(Boolean)
     .join(" · ");
   const label = flags ? `${s.name} (${flags})` : s.name;
-  return `        <Link href={${JSON.stringify(s.route)}} className="block w-full p-4 border border-border hover:border-primary hover:bg-secondary transition rounded-lg">
-          <p className="text-base font-semibold">{${JSON.stringify(label)}}</p>
-          <p className="text-xs text-muted-foreground mt-1">{${JSON.stringify(s.flows.join(", "))}}</p>
-        </Link>`;
+  return `          <Link href={${JSON.stringify(s.route)}} className="block w-full p-4 bg-zinc-50/80 border border-zinc-100 hover:bg-zinc-100 transition-colors rounded-xl">
+            <p className="text-sm font-medium text-zinc-950 tracking-tight">{${JSON.stringify(label)}}</p>
+            <p className="text-xs font-light text-zinc-500 mt-1">{${JSON.stringify(s.flows.join(", "))}}</p>
+          </Link>`;
 }
 
 // Deterministic — this is the only screen file this pipeline ever
@@ -27,10 +27,12 @@ import { PageHeader } from "@/components/craft/PageHeader";
 export default function Home() {
   return (
     <PageShell>
-      <PageHeader title="Design" />
-      <div className="space-y-3">
+      <main className="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
+        <PageHeader title="Design" description="Generated screens" />
+        <div className="flex flex-col gap-2 p-5 overflow-y-auto">
 ${items}
-      </div>
+        </div>
+      </main>
     </PageShell>
   );
 }

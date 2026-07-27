@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auth — login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+iconify-icon { stroke-width: 1.5; }
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style></head>
+<body class="bg-zinc-100 h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-zinc-900">
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1100px] h-full max-h-[720px] shadow-sm overflow-hidden">
+
+    <!-- BRAND PANEL (dark) -->
+    <aside class="bg-zinc-950 rounded-2xl p-8 flex-col justify-between w-[440px] flex-shrink-0 hidden md:flex overflow-y-auto">
+      <!-- brand row -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+          <iconify-icon icon="solar:letter-linear" class="text-zinc-950 text-base"></iconify-icon>
+        </div>
+        <span class="text-lg font-medium text-zinc-50 tracking-tight">Mail</span>
+      </div>
+      <!-- middle: tagline + proof -->
+      <div class="flex flex-col gap-6">
+        <span class="text-3xl font-extralight text-zinc-100 tracking-tight leading-snug">Every conversation, one calm inbox.</span>
+        <div class="flex gap-3 w-full">
+          <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-xs text-zinc-400 font-light">Teams on Mail</span>
+              <div class="w-2 h-2 rounded-full bg-green-400"></div>
+            </div>
+            <span class="text-3xl font-extralight text-zinc-100 tracking-tight">4,200</span>
+          </div>
+          <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-xs text-zinc-400 font-light">Avg. reply time</span>
+              <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+            </div>
+            <span class="text-3xl font-extralight text-zinc-100 tracking-tight">12m</span>
+          </div>
+        </div>
+        <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-3">
+          <p class="text-sm font-light text-zinc-400 leading-relaxed">“We moved the whole studio over in an afternoon. Nobody asked a single question — it just made sense.”</p>
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-full bg-cyan-400 flex items-center justify-center text-xs font-medium text-zinc-950 tracking-tight">SL</div>
+            <div class="flex flex-col">
+              <span class="text-sm font-normal text-zinc-50">Sarah Lin</span>
+              <span class="text-xs font-light text-zinc-500">Ops lead, Nordbyte</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="text-xs font-light text-zinc-600">© 2026 Nordbyte</span>
+    </aside>
+
+    <!-- FORM PANEL -->
+    <main class="bg-white rounded-2xl flex flex-col items-center justify-center flex-1 overflow-y-auto p-8">
+      <div class="w-full max-w-[360px] flex flex-col gap-6">
+        <div class="flex flex-col gap-1.5">
+          <span class="text-xl font-medium text-zinc-950 tracking-tight">Welcome back</span>
+          <span class="text-xs font-light text-zinc-500">Sign in to continue to your inbox.</span>
+        </div>
+        <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors">
+          <iconify-icon icon="solar:shield-keyhole-linear" class="text-zinc-500 text-base"></iconify-icon>
+          <span class="text-xs font-normal text-zinc-700">Continue with SSO</span>
+        </button>
+        <!-- divider -->
+        <div class="flex items-center gap-3">
+          <div class="h-px bg-zinc-100 flex-1"></div>
+          <span class="text-xs font-light text-zinc-400">or</span>
+          <div class="h-px bg-zinc-100 flex-1"></div>
+        </div>
+        <div class="flex flex-col gap-4">
+          <label class="flex flex-col gap-1.5 w-full">
+            <span class="text-xs font-light text-zinc-500">Email</span>
+            <input type="email" placeholder="you@company.com" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+          </label>
+          <label class="flex flex-col gap-1.5 w-full">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-light text-zinc-500">Password</span>
+              <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Forgot password?</a>
+            </div>
+            <input type="password" placeholder="Enter your password" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+          </label>
+        </div>
+        <button class="flex items-center gap-2 w-full justify-center bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-white">
+          <iconify-icon icon="solar:login-2-linear" class="text-sm"></iconify-icon>
+          <span class="text-xs font-medium tracking-wide">Sign In</span>
+        </button>
+        <span class="text-xs font-light text-zinc-500 text-center">Don’t have an account? <a href="#" class="font-normal text-zinc-950 hover:underline">Create one</a></span>
+      </div>
+    </main>
+
+  </div>
+</body>
+</html>

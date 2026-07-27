@@ -31,7 +31,8 @@
       "./order/skills",
       "./prep/skills/prep",
       "./prep/skills/status",
-      "./craft/skills/craft"
+      "./craft/skills/craft",
+      "./design/skills/design"
     ]
   },
   "devDependencies": {

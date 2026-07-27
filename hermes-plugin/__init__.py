@@ -8,6 +8,7 @@ SKILLS = {
     "prep": _REPO_ROOT / "prep" / "skills" / "prep" / "SKILL.md",
     "status": _REPO_ROOT / "prep" / "skills" / "status" / "SKILL.md",
     "craft": _REPO_ROOT / "craft" / "skills" / "craft" / "SKILL.md",
+    "design": _REPO_ROOT / "design" / "skills" / "design" / "SKILL.md",
 }
 
 

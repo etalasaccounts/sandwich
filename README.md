@@ -35,7 +35,7 @@ hermes plugins enable sandwich
 After installing, restart your AI session so the skills are discovered.
 
 > Hermes support is new and untested against a live install — if `/order` (or any of the
-> four commands) doesn't show up after enabling the plugin, check
+> five commands) doesn't show up after enabling the plugin, check
 > `HERMES_PLUGINS_DEBUG=1 hermes plugins list` for why, and check whether Hermes needs the
 > namespaced form (`/sandwich:order`) instead of the bare command shown below.
 
@@ -48,21 +48,22 @@ After installing, restart your AI session so the skills are discovered.
 | Command | Role |
 |---------|------|
 | `/order` | Turn any client input into four standardized brief artifacts |
-| `/craft` | Design the UI — a real Next.js + shadcn app, composed from the live registry |
+| `/craft` | Design the UI — a real Next.js app styled by the house design system |
+| `/design` | Generate UI in any project following the house design system (no brief required) |
 | `/prep` | Tech lead prioritization — score features, build the queue |
 | `/status` | Morning-check dashboard — what's blocking, what's next |
 
-**Explicit-invocation only.** None of the four skills above ever trigger on
+**Explicit-invocation only.** None of the five skills above ever trigger on
 topical similarity, keywords, or inferred intent — pasting a KAK, asking
 "what should we build next," or discussing UI design in conversation does
 **not** run anything. Each one only runs when you type its literal command
-(`/order`, `/craft`, `/prep`, `/status`, or the namespaced form your host
-requires, e.g. `/sandwich:order`). This is deliberate: you should never be
-surprised by one of these firing on its own, and never have to second-guess
-whether talking about your project will accidentally kick off a pipeline
-step. Every `SKILL.md` states this explicitly in its own description and
-"When to invoke" section — if you're auditing behavior, that's the
-authoritative source per skill.
+(`/order`, `/craft`, `/design`, `/prep`, `/status`, or the namespaced form
+your host requires, e.g. `/sandwich:order`). This is deliberate: you should
+never be surprised by one of these firing on its own, and never have to
+second-guess whether talking about your project will accidentally kick off
+a pipeline step. Every `SKILL.md` states this explicitly in its own
+description and "When to invoke" section — if you're auditing behavior,
+that's the authoritative source per skill.
 
 ---
 
@@ -102,7 +103,7 @@ Paste the client's answers alongside `/order`. The skill detects answer mode and
 /craft
 ```
 
-Reads `needsUI` flows from the brief and produces a real Next.js + shadcn app in `design/`, composed from the live shadcn component registry (never a fixed/narrow set — full base components, real page-level blocks, a secondary registry for marketing sections). Requires `/order` to have run first, and will stop and ask before designing over an unresolved high-priority open question rather than guess. Re-running is safe: changed flows flag existing screens `stale` for you to act on, they're never silently rewritten.
+Reads `needsUI` flows from the brief and produces a real Next.js app in `design/`, styled by the house design system (`docs/design-system/` — foundations, component recipes, full-page patterns; never an external component registry). Requires `/order` to have run first, and will stop and ask before designing over an unresolved high-priority open question rather than guess. Re-running is safe: changed flows flag existing screens `stale` for you to act on, they're never silently rewritten.
 
 ```bash
 cd design && npm run dev
@@ -168,6 +169,7 @@ Full maintenance report — useful for billing evidence and SLA logs.
 |---------|----------|
 | `/order` | Generate or update brief artifacts (auto-detects mode) |
 | `/craft` | Generate/update the design app from `needsUI` flows (requires `/order`) |
+| `/design` | Generate UI in any project following the house design system — no brief, no prerequisites, any stack |
 | `/prep` | Smart reconcile if brief changed, else use existing queue |
 | `/prep --fresh` | Force re-extraction, ignore existing registry |
 | `/prep --done F-001 [sha...]` | Mark a feature done and record its commits |
@@ -254,5 +256,5 @@ Priority is computed deterministically in code: `(impact × urgency × (10 − r
 | `docs/sandwich/` | tracked | Brief artifacts and feature queue — everything shareable |
 | `docs/sandwich/intake/` | tracked | Raw PM inputs (KAK, MOM, meeting notes) |
 | `docs/sandwich/specs/` | tracked | Per-feature specs (`F-XXX.json` + rendered `F-XXX.md`) — the dev's starting point for Superpowers |
-| `design/` | tracked (its `node_modules`/`.next` are not — see its `.gitignore`) | The `/craft`-generated Next.js + shadcn app — a real, deployable design/prototype, not markdown |
+| `design/` | tracked (its `node_modules`/`.next` are not — see its `.gitignore`) | The `/craft`-generated Next.js app styled by the house design system — a real, deployable design/prototype, not markdown |
 | `.sandwich/registry/` | tracked | Pipeline state (source of truth) |

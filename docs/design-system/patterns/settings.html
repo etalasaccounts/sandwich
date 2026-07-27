@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings — forms &amp; preferences</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+iconify-icon { stroke-width: 1.5; }
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style></head>
+<body class="bg-zinc-100 h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-zinc-900">
+
+  <!-- App Shell -->
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="bg-zinc-950 rounded-2xl p-4 gap-5 flex-col w-[320px] flex-shrink-0 hidden lg:flex overflow-y-auto">
+
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 mt-1 px-1">
+        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+          <iconify-icon icon="solar:letter-linear" class="text-zinc-950 text-base"></iconify-icon>
+        </div>
+        <span class="text-lg font-medium text-zinc-50 tracking-tight">Mail</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex flex-col w-full gap-0.5 mt-2">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-zinc-900 cursor-pointer">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:user-circle-linear" class="text-green-400 text-base"></iconify-icon>
+            <span class="text-sm font-normal text-zinc-50 tracking-tight">Profile</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:bell-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Notifications</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:wallet-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Billing</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:shield-keyhole-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Security</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="flex-1"></div>
+
+      <!-- User Footer -->
+      <div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 w-full">
+        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <iconify-icon icon="solar:user-circle-linear" class="text-zinc-400 text-lg"></iconify-icon>
+        </div>
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="text-sm font-normal text-zinc-50 truncate">Avery Nolan</span>
+          <span class="text-xs font-light text-zinc-500 truncate">avery@nordbyte.com</span>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 hover:bg-zinc-700 transition-colors">
+          <iconify-icon icon="solar:settings-linear" class="text-zinc-400 text-sm"></iconify-icon>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
+
+      <!-- Header -->
+      <div class="flex flex-col gap-0.5 p-7 border-b border-zinc-100">
+        <span class="text-xl font-medium text-zinc-950 tracking-tight">Profile</span>
+        <span class="text-xs font-light text-zinc-500">How you appear to everyone else on the Nordbyte workspace.</span>
+      </div>
+
+      <!-- Content -->
+      <div class="flex flex-col gap-4 p-7 overflow-y-auto max-w-3xl">
+
+        <!-- Profile card -->
+        <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-5">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 text-sm font-medium text-zinc-950 tracking-tight">AN</div>
+            <div class="flex flex-col gap-0.5 flex-1 min-w-0">
+              <span class="text-sm font-medium text-zinc-950">Avery Nolan</span>
+              <span class="text-xs font-light text-zinc-500">avery@nordbyte.com</span>
+            </div>
+            <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors flex-shrink-0">
+              <iconify-icon icon="solar:camera-linear" class="text-zinc-500 text-base"></iconify-icon>
+              <span class="text-xs font-normal text-zinc-700">Change photo</span>
+            </button>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Full name</span>
+              <input type="text" value="Avery Nolan" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+            </label>
+            <label class="flex flex-col gap-1.5 w-full">
+              <span class="text-xs font-light text-zinc-500">Email</span>
+              <input type="email" value="avery@nordbyte.com" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+            </label>
+          </div>
+
+          <label class="flex flex-col gap-1.5 w-full">
+            <span class="text-xs font-light text-zinc-500">Bio</span>
+            <textarea placeholder="A line or two about what you work on." class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors resize-none min-h-[100px]">Ops lead at Nordbyte. I look after onboarding, billing and whatever else lands in the shared inbox.</textarea>
+          </label>
+        </div>
+
+        <!-- Notifications card -->
+        <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-5">
+          <div class="flex items-center justify-between py-1">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-normal text-zinc-950">Email digest</span>
+              <span class="text-xs font-light text-zinc-500">One summary of unread threads every weekday at 8am.</span>
+            </div>
+            <button class="w-10 h-6 rounded-full bg-green-400 p-0.5 flex items-center transition-colors" aria-pressed="true">
+              <span class="w-5 h-5 rounded-full bg-white shadow-sm ml-auto"></span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between py-1">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-normal text-zinc-950">Mentions</span>
+              <span class="text-xs font-light text-zinc-500">Notify me when a teammate mentions me in a note.</span>
+            </div>
+            <button class="w-10 h-6 rounded-full bg-green-400 p-0.5 flex items-center transition-colors" aria-pressed="true">
+              <span class="w-5 h-5 rounded-full bg-white shadow-sm ml-auto"></span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between py-1">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-normal text-zinc-950">Product updates</span>
+              <span class="text-xs font-light text-zinc-500">Occasional notes about what shipped in Mail.</span>
+            </div>
+            <button class="w-10 h-6 rounded-full bg-zinc-200 p-0.5 flex items-center transition-colors" aria-pressed="false">
+              <span class="w-5 h-5 rounded-full bg-white shadow-sm"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Plan card -->
+        <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex items-center justify-between">
+          <div class="flex flex-col gap-2.5">
+            <span class="bg-zinc-100 rounded-full py-0.5 px-3 text-xs font-light text-zinc-600 self-start">Pro</span>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-3xl font-extralight tracking-tight text-zinc-950">$24</span>
+              <span class="text-xs font-light text-zinc-500">/mo</span>
+            </div>
+            <span class="text-xs font-light text-zinc-500">6 of 10 seats used. Renews on August 14, 2026.</span>
+          </div>
+          <button class="flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2 px-4 shadow-sm text-white flex-shrink-0">
+            <iconify-icon icon="solar:wallet-linear" class="text-sm"></iconify-icon>
+            <span class="text-xs font-medium tracking-wide">Upgrade</span>
+          </button>
+        </div>
+
+        <!-- Danger zone -->
+        <div class="flex items-start gap-3 bg-zinc-50/80 border border-zinc-100 rounded-xl p-4">
+          <iconify-icon icon="solar:danger-triangle-linear" class="text-orange-500 text-base mt-0.5"></iconify-icon>
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-zinc-950">Delete account</span>
+            <span class="text-xs font-light text-zinc-500">This removes your profile and every thread you own. It cannot be undone.</span>
+          </div>
+          <button class="bg-white border border-zinc-100 rounded-xl py-2 px-4 text-xs font-medium text-orange-500 hover:bg-zinc-50 transition-colors ml-auto flex-shrink-0">Delete</button>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>
