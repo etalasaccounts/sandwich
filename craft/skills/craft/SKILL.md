@@ -146,8 +146,8 @@ All written to `design/` (a standalone Next.js app, sibling to `docs/` and
 
 The load-bearing invariant: the only files this pipeline ever writes are
 `manifest.json`, `.snapshot.json`, `app/page.tsx`, and brand-new screen
-route files — plus the one-time app scaffold and nav-shell install on the
-very first run. Every code path that detects a change on an *existing*
+route files — plus the one-time app scaffold and `AppSidebar` composition
+on the very first run. Every code path that detects a change on an *existing*
 screen sets a flag — it never edits that screen's `page.tsx`.
 
 ## Viewing the result
@@ -219,5 +219,5 @@ look.
 - **Never invent a style.** Every element must trace to a `components.md` recipe or a `patterns/` section, recorded in `componentsUsed`. If nothing fits, report it as a gap (a candidate to add to `components.md`) rather than hand-rolling off-DNA markup.
 - Every icon is Solar linear (`solar:*-linear`) via `@iconify/react`. No lucide, no tabler, no emoji.
 - The per-screen empty/loading/error/responsive checklist in step 10 is mandatory, not optional polish.
-- Report `stale`/`orphaned` counts, gaps, and registry items pulled prominently — they are the signal a human needs to act on.
+- Report `stale`/`orphaned` counts, gaps, and design-system pieces used prominently — they are the signal a human needs to act on.
 - Do not skip the readiness gate. Silently designing over an unresolved high-priority question is exactly the kind of "guessing" this skill exists to avoid.
