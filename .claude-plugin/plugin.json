@@ -5,10 +5,5 @@
   "author": {
     "name": "Etalas"
   },
-  "skills": ["./order/skills/order", "./prep/skills/prep", "./prep/skills/status"],
-  "workflows": [
-    "./order/workflow/order.workflow.ts",
-    "./prep/workflow/prep.workflow.ts",
-    "./prep/workflow/status.workflow.ts"
-  ]
+  "skills": ["./order/skills/order", "./prep/skills/prep", "./prep/skills/status", "./craft/skills/craft"]
 }
