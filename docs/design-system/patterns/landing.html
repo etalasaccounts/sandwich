@@ -4,241 +4,301 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Landing — marketing page</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-<style>
-body { font-family: 'Inter', sans-serif; }
+<style type="text/tailwindcss">
+@theme inline {
+  --color-*: initial;
+  --color-page: var(--page);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-control: var(--control);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-ink: var(--ink);
+  --color-ink-mid: var(--ink-mid);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-faint: var(--ink-faint);
+  --color-inverse: var(--inverse);
+  --color-inverse-2: var(--inverse-2);
+  --color-inverse-3: var(--inverse-3);
+  --color-inverse-4: var(--inverse-4);
+  --color-inverse-ink: var(--inverse-ink);
+  --color-inverse-ink-mid: var(--inverse-ink-mid);
+  --color-inverse-ink-2: var(--inverse-ink-2);
+  --color-inverse-ink-3: var(--inverse-ink-3);
+  --color-inverse-label: var(--inverse-label);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-info: var(--info);
+  --color-on-info: var(--on-info);
+  --color-warn: var(--warn);
+  --color-on-warn: var(--on-warn);
+}
+:root {
+  --page: #f4f4f5;
+  --panel: #ffffff;
+  --panel-2: #fafafa;
+  --control: #e4e4e7;
+  --line: #f4f4f5;
+  --line-2: #d4d4d8;
+  --ink: #09090b;
+  --ink-mid: #3f3f46;
+  --ink-2: #71717a;
+  --ink-3: #a1a1aa;
+  --ink-faint: #d4d4d8;
+  --inverse: #09090b;
+  --inverse-2: #18181b;
+  --inverse-3: #27272a;
+  --inverse-4: #3f3f46;
+  --inverse-ink: #fafafa;
+  --inverse-ink-mid: #d4d4d8;
+  --inverse-ink-2: #a1a1aa;
+  --inverse-ink-3: #71717a;
+  --inverse-label: #52525b;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --on-accent: #09090b;
+  --info: #22d3ee;
+  --on-info: #09090b;
+  --warn: #f97316;
+  --on-warn: #ffffff;
+  --font-sans: 'Inter', sans-serif;
+}
+body { font-family: var(--font-sans); }
 iconify-icon { stroke-width: 1.5; }
 /* Custom Scrollbar for a cleaner look */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+::-webkit-scrollbar-thumb { background: var(--control); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--line-2); }
 </style></head>
-<body class="bg-zinc-100 text-sm antialiased text-zinc-900">
+<body class="bg-page text-sm antialiased text-ink">
 
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col gap-4 py-4">
 
     <!-- NAV -->
-    <nav class="bg-white rounded-2xl px-5 py-3 flex items-center justify-between shadow-sm">
+    <nav class="bg-panel rounded-2xl px-5 py-3 flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
-          <iconify-icon icon="solar:letter-linear" class="text-zinc-950 text-base"></iconify-icon>
+        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+          <iconify-icon icon="solar:letter-linear" class="text-on-accent text-base"></iconify-icon>
         </div>
-        <span class="text-lg font-medium tracking-tight text-zinc-950">Mail</span>
+        <span class="text-lg font-medium tracking-tight text-ink">Mail</span>
       </div>
 
       <div class="hidden md:flex items-center gap-6">
-        <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Product</a>
-        <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Pricing</a>
-        <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Changelog</a>
-        <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Docs</a>
+        <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Product</a>
+        <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Pricing</a>
+        <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Changelog</a>
+        <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Docs</a>
       </div>
 
-      <button class="flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2 px-4 shadow-sm text-white">
+      <button class="flex items-center gap-2 bg-inverse hover:bg-inverse-3 transition-colors rounded-xl py-2 px-4 shadow-sm text-inverse-ink">
         <iconify-icon icon="solar:login-2-linear" class="text-sm"></iconify-icon>
         <span class="text-xs font-medium tracking-wide">Get Started</span>
       </button>
     </nav>
 
     <!-- HERO -->
-    <section class="bg-white rounded-2xl px-6 py-20 flex flex-col items-center text-center gap-6">
-      <span class="bg-zinc-100 rounded-full py-0.5 px-3 text-xs font-light text-zinc-600">New — Mail 2.0</span>
+    <section class="bg-panel rounded-2xl px-6 py-20 flex flex-col items-center text-center gap-6">
+      <span class="bg-page rounded-full py-0.5 px-3 text-xs font-light text-ink-2">New — Mail 2.0</span>
 
-      <h1 class="text-5xl sm:text-6xl font-extralight tracking-tight text-zinc-950 max-w-2xl leading-tight">Every conversation, one calm inbox.</h1>
+      <h1 class="text-5xl sm:text-6xl font-extralight tracking-tight text-ink max-w-2xl leading-tight">Every conversation, one calm inbox.</h1>
 
-      <p class="text-sm font-light text-zinc-500 leading-relaxed max-w-xl">Mail keeps your team's threads, drafts and follow-ups in one quiet place. Shared inboxes, real search, and rules that clear the noise before you open your laptop.</p>
+      <p class="text-sm font-light text-ink-2 leading-relaxed max-w-xl">Mail keeps your team's threads, drafts and follow-ups in one quiet place. Shared inboxes, real search, and rules that clear the noise before you open your laptop.</p>
 
       <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
-        <button class="flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-white">
+        <button class="flex items-center gap-2 bg-inverse hover:bg-inverse-3 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-inverse-ink">
           <iconify-icon icon="solar:letter-linear" class="text-sm"></iconify-icon>
           <span class="text-xs font-medium tracking-wide">Start Free Trial</span>
         </button>
-        <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors">
-          <iconify-icon icon="solar:play-circle-linear" class="text-zinc-500 text-base"></iconify-icon>
-          <span class="text-xs font-normal text-zinc-700">View demo</span>
+        <button class="flex items-center justify-center gap-2 bg-panel-2/80 border border-line rounded-xl py-2.5 px-4 hover:bg-page transition-colors">
+          <iconify-icon icon="solar:play-circle-linear" class="text-ink-2 text-base"></iconify-icon>
+          <span class="text-xs font-normal text-ink-mid">View demo</span>
         </button>
       </div>
     </section>
 
     <!-- SOCIAL PROOF -->
     <section class="flex flex-col items-center gap-4 py-8">
-      <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Trusted by teams at</span>
+      <span class="text-xs uppercase tracking-widest text-ink-3 font-normal">Trusted by teams at</span>
       <div class="flex flex-wrap justify-center gap-x-10 gap-y-3">
-        <span class="text-sm font-light text-zinc-400">Vellum Health</span>
-        <span class="text-sm font-light text-zinc-400">Halcyon Labs</span>
-        <span class="text-sm font-light text-zinc-400">Meridian Studio</span>
-        <span class="text-sm font-light text-zinc-400">Ostara</span>
-        <span class="text-sm font-light text-zinc-400">Fernpath</span>
+        <span class="text-sm font-light text-ink-3">Vellum Health</span>
+        <span class="text-sm font-light text-ink-3">Halcyon Labs</span>
+        <span class="text-sm font-light text-ink-3">Meridian Studio</span>
+        <span class="text-sm font-light text-ink-3">Ostara</span>
+        <span class="text-sm font-light text-ink-3">Fernpath</span>
       </div>
     </section>
 
     <!-- FEATURES -->
     <section class="grid md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-2xl p-6 flex flex-col gap-4">
-        <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
-          <iconify-icon icon="solar:inbox-in-linear" class="text-zinc-500 text-lg"></iconify-icon>
+      <div class="bg-panel rounded-2xl p-6 flex flex-col gap-4">
+        <div class="w-10 h-10 rounded-full bg-page flex items-center justify-center">
+          <iconify-icon icon="solar:inbox-in-linear" class="text-ink-2 text-lg"></iconify-icon>
         </div>
-        <span class="text-sm font-medium text-zinc-950 tracking-tight">One shared inbox</span>
-        <p class="text-xs font-light text-zinc-500 leading-relaxed">Every thread your team touches lives in one place. Assign an owner, leave a private note, and see who replied without forwarding a single message.</p>
+        <span class="text-sm font-medium text-ink tracking-tight">One shared inbox</span>
+        <p class="text-xs font-light text-ink-2 leading-relaxed">Every thread your team touches lives in one place. Assign an owner, leave a private note, and see who replied without forwarding a single message.</p>
       </div>
-      <div class="bg-white rounded-2xl p-6 flex flex-col gap-4">
-        <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
-          <iconify-icon icon="solar:magnifer-linear" class="text-zinc-500 text-lg"></iconify-icon>
+      <div class="bg-panel rounded-2xl p-6 flex flex-col gap-4">
+        <div class="w-10 h-10 rounded-full bg-page flex items-center justify-center">
+          <iconify-icon icon="solar:magnifer-linear" class="text-ink-2 text-lg"></iconify-icon>
         </div>
-        <span class="text-sm font-medium text-zinc-950 tracking-tight">Search that finds it</span>
-        <p class="text-xs font-light text-zinc-500 leading-relaxed">Search across mail, attachments and notes in one field. Results come back in under 40ms, whether the thread is from this morning or four years ago.</p>
+        <span class="text-sm font-medium text-ink tracking-tight">Search that finds it</span>
+        <p class="text-xs font-light text-ink-2 leading-relaxed">Search across mail, attachments and notes in one field. Results come back in under 40ms, whether the thread is from this morning or four years ago.</p>
       </div>
-      <div class="bg-white rounded-2xl p-6 flex flex-col gap-4">
-        <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
-          <iconify-icon icon="solar:tuning-square-2-linear" class="text-zinc-500 text-lg"></iconify-icon>
+      <div class="bg-panel rounded-2xl p-6 flex flex-col gap-4">
+        <div class="w-10 h-10 rounded-full bg-page flex items-center justify-center">
+          <iconify-icon icon="solar:tuning-square-2-linear" class="text-ink-2 text-lg"></iconify-icon>
         </div>
-        <span class="text-sm font-medium text-zinc-950 tracking-tight">Rules that run themselves</span>
-        <p class="text-xs font-light text-zinc-500 leading-relaxed">Route invoices to finance, snooze newsletters until Friday, escalate anything waiting more than a day. Set a rule once and stop triaging by hand.</p>
+        <span class="text-sm font-medium text-ink tracking-tight">Rules that run themselves</span>
+        <p class="text-xs font-light text-ink-2 leading-relaxed">Route invoices to finance, snooze newsletters until Friday, escalate anything waiting more than a day. Set a rule once and stop triaging by hand.</p>
       </div>
     </section>
 
     <!-- STATS BAND -->
-    <section class="bg-zinc-950 rounded-3xl p-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+    <section class="bg-inverse rounded-3xl p-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-inverse-2 rounded-2xl p-4 flex flex-col gap-2 flex-1">
         <div class="flex items-center justify-between w-full">
-          <span class="text-xs text-zinc-400 font-light">Teams on Mail</span>
-          <div class="w-2 h-2 rounded-full bg-green-400"></div>
+          <span class="text-xs text-inverse-ink-2 font-light">Teams on Mail</span>
+          <div class="w-2 h-2 rounded-full bg-accent"></div>
         </div>
-        <span class="text-3xl font-extralight text-zinc-100 tracking-tight">4,200</span>
+        <span class="text-3xl font-extralight text-inverse-ink tracking-tight">4,200</span>
       </div>
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+      <div class="bg-inverse-2 rounded-2xl p-4 flex flex-col gap-2 flex-1">
         <div class="flex items-center justify-between w-full">
-          <span class="text-xs text-zinc-400 font-light">Messages a day</span>
-          <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+          <span class="text-xs text-inverse-ink-2 font-light">Messages a day</span>
+          <div class="w-2 h-2 rounded-full bg-info"></div>
         </div>
-        <span class="text-3xl font-extralight text-zinc-100 tracking-tight">1.8M</span>
+        <span class="text-3xl font-extralight text-inverse-ink tracking-tight">1.8M</span>
       </div>
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+      <div class="bg-inverse-2 rounded-2xl p-4 flex flex-col gap-2 flex-1">
         <div class="flex items-center justify-between w-full">
-          <span class="text-xs text-zinc-400 font-light">Uptime, 90 days</span>
-          <div class="w-2 h-2 rounded-full bg-green-400"></div>
+          <span class="text-xs text-inverse-ink-2 font-light">Uptime, 90 days</span>
+          <div class="w-2 h-2 rounded-full bg-accent"></div>
         </div>
-        <span class="text-3xl font-extralight text-zinc-100 tracking-tight">99.98%</span>
+        <span class="text-3xl font-extralight text-inverse-ink tracking-tight">99.98%</span>
       </div>
-      <div class="bg-zinc-900 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+      <div class="bg-inverse-2 rounded-2xl p-4 flex flex-col gap-2 flex-1">
         <div class="flex items-center justify-between w-full">
-          <span class="text-xs text-zinc-400 font-light">Avg. reply time</span>
-          <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+          <span class="text-xs text-inverse-ink-2 font-light">Avg. reply time</span>
+          <div class="w-2 h-2 rounded-full bg-warn"></div>
         </div>
-        <span class="text-3xl font-extralight text-zinc-100 tracking-tight">12m</span>
+        <span class="text-3xl font-extralight text-inverse-ink tracking-tight">12m</span>
       </div>
     </section>
 
     <!-- PRICING -->
     <section class="flex flex-col gap-8 py-12">
       <div class="flex flex-col items-center text-center gap-3">
-        <h2 class="text-3xl font-extralight tracking-tight text-zinc-950">Simple pricing, per seat</h2>
-        <p class="text-sm font-light text-zinc-500 leading-relaxed max-w-xl">Every plan includes the shared inbox, search and rules. Move up when you need more history, more automation or SSO.</p>
+        <h2 class="text-3xl font-extralight tracking-tight text-ink">Simple pricing, per seat</h2>
+        <p class="text-sm font-light text-ink-2 leading-relaxed max-w-xl">Every plan includes the shared inbox, search and rules. Move up when you need more history, more automation or SSO.</p>
       </div>
 
       <div class="grid md:grid-cols-3 gap-4">
 
         <!-- Starter (light) -->
-        <div class="bg-white rounded-2xl p-6 flex flex-col gap-5">
+        <div class="bg-panel rounded-2xl p-6 flex flex-col gap-5">
           <div class="flex flex-col gap-1">
-            <span class="text-sm font-medium text-zinc-950 tracking-tight">Starter</span>
-            <span class="text-xs font-light text-zinc-500">For one person keeping it tidy.</span>
+            <span class="text-sm font-medium text-ink tracking-tight">Starter</span>
+            <span class="text-xs font-light text-ink-2">For one person keeping it tidy.</span>
           </div>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-3xl font-extralight tracking-tight text-zinc-950">$0</span>
-            <span class="text-xs font-light text-zinc-500">/mo</span>
+            <span class="text-3xl font-extralight tracking-tight text-ink">$0</span>
+            <span class="text-xs font-light text-ink-2">/mo</span>
           </div>
           <div class="flex flex-col gap-2.5">
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">One inbox, one seat</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">One inbox, one seat</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">90 days of history</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">90 days of history</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">3 automation rules</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">3 automation rules</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">Community support</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">Community support</span>
             </div>
           </div>
-          <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors w-full mt-auto">
-            <span class="text-xs font-normal text-zinc-700">Start for free</span>
+          <button class="flex items-center justify-center gap-2 bg-panel-2/80 border border-line rounded-xl py-2.5 px-4 hover:bg-page transition-colors w-full mt-auto">
+            <span class="text-xs font-normal text-ink-mid">Start for free</span>
           </button>
         </div>
 
         <!-- Pro (dark, popular) -->
-        <div class="bg-zinc-950 rounded-2xl p-6 flex flex-col gap-5">
+        <div class="bg-inverse rounded-2xl p-6 flex flex-col gap-5">
           <div class="flex flex-col gap-1">
             <div class="flex items-center justify-between gap-3">
-              <span class="text-sm font-medium text-zinc-50 tracking-tight">Pro</span>
-              <span class="rounded-full py-0.5 px-2.5 text-xs font-normal bg-green-400 text-zinc-950">Popular</span>
+              <span class="text-sm font-medium text-inverse-ink tracking-tight">Pro</span>
+              <span class="rounded-full py-0.5 px-2.5 text-xs font-normal bg-accent text-on-accent">Popular</span>
             </div>
-            <span class="text-xs font-light text-zinc-400">For a team sharing the load.</span>
+            <span class="text-xs font-light text-inverse-ink-2">For a team sharing the load.</span>
           </div>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-3xl font-extralight tracking-tight text-zinc-100">$24</span>
-            <span class="text-xs font-light text-zinc-500">/mo</span>
+            <span class="text-3xl font-extralight tracking-tight text-inverse-ink">$24</span>
+            <span class="text-xs font-light text-inverse-ink-3">/mo</span>
           </div>
           <div class="flex flex-col gap-2.5">
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Unlimited shared inboxes</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-inverse-ink-2">Unlimited shared inboxes</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Full history, full-text search</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-inverse-ink-2">Full history, full-text search</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Unlimited rules and snoozes</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-inverse-ink-2">Unlimited rules and snoozes</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-400">Assignments and private notes</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-inverse-ink-2">Assignments and private notes</span>
             </div>
           </div>
-          <button class="bg-green-400 text-zinc-950 rounded-xl py-2.5 w-full text-xs font-medium tracking-wide hover:bg-green-300 transition-colors mt-auto">Start 14-day trial</button>
+          <button class="bg-accent text-on-accent rounded-xl py-2.5 w-full text-xs font-medium tracking-wide hover:bg-accent-hover transition-colors mt-auto">Start 14-day trial</button>
         </div>
 
         <!-- Business (light) -->
-        <div class="bg-white rounded-2xl p-6 flex flex-col gap-5">
+        <div class="bg-panel rounded-2xl p-6 flex flex-col gap-5">
           <div class="flex flex-col gap-1">
-            <span class="text-sm font-medium text-zinc-950 tracking-tight">Business</span>
-            <span class="text-xs font-light text-zinc-500">For companies with a policy.</span>
+            <span class="text-sm font-medium text-ink tracking-tight">Business</span>
+            <span class="text-xs font-light text-ink-2">For companies with a policy.</span>
           </div>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-3xl font-extralight tracking-tight text-zinc-950">$64</span>
-            <span class="text-xs font-light text-zinc-500">/mo</span>
+            <span class="text-3xl font-extralight tracking-tight text-ink">$64</span>
+            <span class="text-xs font-light text-ink-2">/mo</span>
           </div>
           <div class="flex flex-col gap-2.5">
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">Everything in Pro</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">Everything in Pro</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">SAML SSO and SCIM</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">SAML SSO and SCIM</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">Audit log and retention rules</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">Audit log and retention rules</span>
             </div>
             <div class="flex items-center gap-2.5">
-              <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-sm"></iconify-icon>
-              <span class="text-xs font-light text-zinc-500">Named support engineer</span>
+              <iconify-icon icon="solar:check-circle-linear" class="text-accent text-sm"></iconify-icon>
+              <span class="text-xs font-light text-ink-2">Named support engineer</span>
             </div>
           </div>
-          <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors w-full mt-auto">
-            <span class="text-xs font-normal text-zinc-700">Talk to sales</span>
+          <button class="flex items-center justify-center gap-2 bg-panel-2/80 border border-line rounded-xl py-2.5 px-4 hover:bg-page transition-colors w-full mt-auto">
+            <span class="text-xs font-normal text-ink-mid">Talk to sales</span>
           </button>
         </div>
 
@@ -246,53 +306,53 @@ iconify-icon { stroke-width: 1.5; }
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-white rounded-2xl p-8 flex flex-col gap-8">
+    <footer class="bg-panel rounded-2xl p-8 flex flex-col gap-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
-              <iconify-icon icon="solar:letter-linear" class="text-zinc-950 text-base"></iconify-icon>
+            <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+              <iconify-icon icon="solar:letter-linear" class="text-on-accent text-base"></iconify-icon>
             </div>
-            <span class="text-lg font-medium tracking-tight text-zinc-950">Mail</span>
+            <span class="text-lg font-medium tracking-tight text-ink">Mail</span>
           </div>
-          <p class="text-xs font-light text-zinc-500 leading-relaxed">A shared inbox for teams who would rather answer than sort. Built by Nordbyte in Oslo.</p>
+          <p class="text-xs font-light text-ink-2 leading-relaxed">A shared inbox for teams who would rather answer than sort. Built by Nordbyte in Oslo.</p>
         </div>
 
         <div class="flex flex-col gap-3">
-          <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Product</span>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Shared inbox</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Search</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Rules</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Integrations</a>
+          <span class="text-xs uppercase tracking-widest text-ink-3 font-normal">Product</span>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Shared inbox</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Search</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Rules</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Integrations</a>
         </div>
 
         <div class="flex flex-col gap-3">
-          <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Company</span>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">About Nordbyte</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Careers</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Changelog</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Press kit</a>
+          <span class="text-xs uppercase tracking-widest text-ink-3 font-normal">Company</span>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">About Nordbyte</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Careers</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Changelog</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Press kit</a>
         </div>
 
         <div class="flex flex-col gap-3">
-          <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Resources</span>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Docs</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Migration guide</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Status</a>
-          <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Privacy</a>
+          <span class="text-xs uppercase tracking-widest text-ink-3 font-normal">Resources</span>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Docs</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Migration guide</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Status</a>
+          <a href="#" class="text-xs font-light text-ink-2 hover:text-ink transition-colors">Privacy</a>
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-6 border-t border-zinc-100">
-        <span class="text-xs font-light text-zinc-400">© 2026 Nordbyte AS. All rights reserved.</span>
+      <div class="flex items-center justify-between pt-6 border-t border-line">
+        <span class="text-xs font-light text-ink-3">© 2026 Nordbyte AS. All rights reserved.</span>
         <div class="flex items-center gap-1">
-          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
             <iconify-icon icon="solar:letter-linear" class="text-base"></iconify-icon>
           </button>
-          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
             <iconify-icon icon="solar:chat-round-line-linear" class="text-base"></iconify-icon>
           </button>
-          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-page transition-colors text-ink-2">
             <iconify-icon icon="solar:global-linear" class="text-base"></iconify-icon>
           </button>
         </div>
