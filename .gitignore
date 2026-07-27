@@ -5,3 +5,4 @@ docs/breakdown/
 .superpowers/
 .playwright-mcp/
 __pycache__/
+.baselines/
