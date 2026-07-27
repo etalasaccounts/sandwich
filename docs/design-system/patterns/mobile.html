@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mobile — bottom nav app</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+body { font-family: 'Inter', sans-serif; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style>
+</head>
+<body class="bg-zinc-100 min-h-screen w-full flex items-center justify-center p-4 text-sm antialiased text-zinc-900">
+
+  <!-- PHONE FRAME -->
+  <div class="bg-white rounded-3xl p-2 w-full max-w-[390px] h-[780px] shadow-sm overflow-hidden flex flex-col gap-2">
+
+    <!-- CONTENT PANEL -->
+    <div class="bg-zinc-50 rounded-2xl flex flex-col flex-1 overflow-y-auto">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between p-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 text-xs font-medium text-zinc-950 tracking-tight">AN</div>
+          <div class="flex flex-col">
+            <span class="text-xs font-light text-zinc-500">Good morning</span>
+            <span class="text-sm font-medium text-zinc-950 tracking-tight">Avery Nolan</span>
+          </div>
+        </div>
+        <div class="relative">
+          <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+            <iconify-icon icon="solar:bell-linear" class="text-base"></iconify-icon>
+          </button>
+          <div class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-green-400"></div>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="flex gap-3 px-5">
+        <div class="bg-white border border-zinc-100 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-xs text-zinc-500 font-light">Unreads</span>
+            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+          </div>
+          <span class="text-3xl font-extralight text-zinc-950 tracking-tight">6</span>
+        </div>
+        <div class="bg-white border border-zinc-100 rounded-2xl p-4 flex flex-col gap-2 flex-1">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-xs text-zinc-500 font-light">Updates</span>
+            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+          </div>
+          <span class="text-3xl font-extralight text-zinc-950 tracking-tight">22</span>
+        </div>
+      </div>
+
+      <!-- Section header -->
+      <div class="flex items-center justify-between px-5 pt-6 pb-2">
+        <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Recent</span>
+        <span class="text-xs font-light text-zinc-500">View all</span>
+      </div>
+
+      <!-- List -->
+      <!-- unread -->
+      <div class="flex gap-3.5 p-4 bg-white rounded-2xl mx-3 mb-2 border-l-0 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 text-xs font-medium text-zinc-950 tracking-tight">MR</div>
+        <div class="flex flex-col gap-1.5 flex-1 min-w-0 py-0.5">
+          <div class="flex items-center justify-between w-full">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-zinc-950">Marcus Reid</span>
+              <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+            </div>
+            <span class="text-xs text-zinc-500 font-light">10:42 AM</span>
+          </div>
+          <span class="text-sm font-medium text-zinc-950 truncate tracking-tight">Q3 Proposal — Final Review</span>
+          <span class="text-xs text-zinc-500 font-light truncate">I've attached the final version of the proposal. Let me know if you need changes.</span>
+        </div>
+      </div>
+
+      <!-- unread -->
+      <div class="flex gap-3.5 p-4 bg-white rounded-2xl mx-3 mb-2 border-l-0 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-cyan-400 flex items-center justify-center flex-shrink-0 text-xs font-medium text-zinc-950 tracking-tight">SL</div>
+        <div class="flex flex-col gap-1.5 flex-1 min-w-0 py-0.5">
+          <div class="flex items-center justify-between w-full">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-zinc-950">Sarah Lin</span>
+              <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+            </div>
+            <span class="text-xs text-zinc-500 font-light">9:15 AM</span>
+          </div>
+          <span class="text-sm font-medium text-zinc-950 truncate tracking-tight">Re: Onboarding Schedule</span>
+          <span class="text-xs text-zinc-500 font-light truncate">The new onboarding flow is ready for review. Can we sync tomorrow at 2pm?</span>
+        </div>
+      </div>
+
+      <!-- read -->
+      <div class="flex gap-3.5 p-4 rounded-2xl mx-3 mb-2 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 text-xs font-medium text-white tracking-tight">JK</div>
+        <div class="flex flex-col gap-1.5 flex-1 min-w-0 py-0.5">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-sm font-light text-zinc-600">James Kim</span>
+            <span class="text-xs text-zinc-400 font-light">Yesterday</span>
+          </div>
+          <span class="text-sm font-light text-zinc-700 truncate tracking-tight">Invoice #2024-089 Due</span>
+          <span class="text-xs text-zinc-400 font-light truncate">A reminder that invoice #2024-089 for $4,200 is due on Friday, March 8th.</span>
+        </div>
+      </div>
+
+      <!-- read -->
+      <div class="flex gap-3.5 p-4 rounded-2xl mx-3 mb-2 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 text-xs font-medium text-zinc-300 tracking-tight">TP</div>
+        <div class="flex flex-col gap-1.5 flex-1 min-w-0 py-0.5">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-sm font-light text-zinc-600">Tara Patel</span>
+            <span class="text-xs text-zinc-400 font-light">Mon</span>
+          </div>
+          <span class="text-sm font-light text-zinc-700 truncate tracking-tight">Design System Feedback</span>
+          <span class="text-xs text-zinc-400 font-light truncate">Loved the new button styles — the ghost button feels a touch subtle on dark.</span>
+        </div>
+      </div>
+
+      <!-- read -->
+      <div class="flex gap-3.5 p-4 rounded-2xl mx-3 mb-2 cursor-pointer hover:bg-zinc-100/50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 text-xs font-medium text-zinc-950 tracking-tight">PR</div>
+        <div class="flex flex-col gap-1.5 flex-1 min-w-0 py-0.5">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-sm font-light text-zinc-600">Priya Raman</span>
+            <span class="text-xs text-zinc-400 font-light">Sun</span>
+          </div>
+          <span class="text-sm font-light text-zinc-700 truncate tracking-tight">Renewal terms for Ostara</span>
+          <span class="text-xs text-zinc-400 font-light truncate">They want to move to annual billing from June. Numbers are in the sheet.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bg-zinc-950 rounded-2xl p-2 flex items-center justify-around flex-shrink-0">
+      <button class="w-11 h-11 rounded-full bg-zinc-900 flex items-center justify-center">
+        <iconify-icon icon="solar:home-2-linear" class="text-green-400 text-xl"></iconify-icon>
+      </button>
+      <button class="w-11 h-11 rounded-full flex items-center justify-center">
+        <iconify-icon icon="solar:magnifer-linear" class="text-zinc-500 text-xl hover:text-zinc-300 transition-colors"></iconify-icon>
+      </button>
+      <button class="w-11 h-11 rounded-full flex items-center justify-center">
+        <iconify-icon icon="solar:pen-new-square-linear" class="text-zinc-500 text-xl hover:text-zinc-300 transition-colors"></iconify-icon>
+      </button>
+      <button class="w-11 h-11 rounded-full flex items-center justify-center">
+        <iconify-icon icon="solar:bell-linear" class="text-zinc-500 text-xl hover:text-zinc-300 transition-colors"></iconify-icon>
+      </button>
+      <button class="w-11 h-11 rounded-full flex items-center justify-center">
+        <iconify-icon icon="solar:user-circle-linear" class="text-zinc-500 text-xl hover:text-zinc-300 transition-colors"></iconify-icon>
+      </button>
+    </nav>
+
+  </div>
+
+</body>
+</html>
