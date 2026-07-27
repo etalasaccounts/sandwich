@@ -1,6 +1,6 @@
 ---
 name: prep
-description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use ONLY when the user explicitly runs /prep (or its namespaced form, e.g. /sandwich:prep). Do NOT invoke on topical similarity — discussing priorities, roadmap, or "what to build next" in general conversation is NOT an invocation unless the literal command is typed.
+description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use ONLY when the user explicitly runs /prep (or its namespaced form, e.g. /sandwich:prep). Do NOT invoke on topical similarity — discussing priorities, roadmap, or "what to build next" in general conversation is NOT an invocation unless the literal command is typed. SAFETY: Must confirm which project (check docs/sandwich/ or .sandwich/registry/ existence) before invoking. Never run on wrong project root.
 ---
 
 # sandwich/prep

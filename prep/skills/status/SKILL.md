@@ -1,6 +1,6 @@
 ---
 name: status
-description: Single pane of glass over the sandwich registry. Shows what's done, in flight, blocked, stale, and what specifically needs a human decision. Use ONLY when the user explicitly runs /status (or its namespaced form, e.g. /sandwich:status). Do NOT invoke on topical similarity — asking about project state in general conversation is NOT an invocation unless the literal command is typed.
+description: Single pane of glass over the sandwich registry. Shows what's done, in flight, blocked, stale, and what specifically needs a human decision. Use ONLY when the user explicitly runs /status (or its namespaced form, e.g. /sandwich:status). Do NOT invoke on topical similarity — asking about project state in general conversation is NOT an invocation unless the literal command is typed. SAFETY: Must confirm which project (check docs/sandwich/ or .sandwich/registry/ existence) before invoking. Never run on wrong project root.
 ---
 
 # sandwich/status

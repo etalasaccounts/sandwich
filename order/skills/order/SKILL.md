@@ -1,6 +1,6 @@
 ---
 name: order
-description: Take a project order and produce the kitchen brief — four standardized documents (prd.md, user-flows.md, technical-notes.md, client-questions.md) that the rest of the pipeline needs to cook. Use ONLY when the user explicitly runs /order (or its namespaced form, e.g. /sandwich:order). Do NOT invoke on topical similarity — pasting a KAK/RFQ/meeting notes, or discussing requirements/briefs/documentation in general conversation, is NOT an invocation unless the literal command is typed.
+description: Take a project order and produce the kitchen brief — four standardized documents (prd.md, user-flows.md, technical-notes.md, client-questions.md) that the rest of the pipeline needs to cook. Use ONLY when the user explicitly runs /order (or its namespaced form, e.g. /sandwich:order). Do NOT invoke on topical similarity — pasting a KAK/RFQ/meeting notes, or discussing requirements/briefs/documentation in general conversation, is NOT an invocation unless the literal command is typed. SAFETY: Must confirm which project (check docs/sandwich/ or .sandwich/registry/ existence in cwd) before invoking. Never run on wrong project root.
 ---
 
 # /order
