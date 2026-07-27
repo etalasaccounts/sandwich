@@ -38,23 +38,31 @@ Rejected alternatives:
 
 Two buckets, split by migration mechanics:
 
-**Bucket 1 — colors (require markup renames).** A closed set of **22
-semantic slots** in three groups. House values in parens:
+**Bucket 1 — colors (require markup renames).** A closed set of **27
+semantic slots** in three groups. The set was derived from a full class
+inventory of `components.md` + `patterns/*.html` (not just the
+`foundations.md` tables, which under-document actual exemplar usage —
+e.g. `text-zinc-700` ×25, `text-zinc-600` ×36). House values in parens:
 
 | Group | Slot | House value |
 |---|---|---|
 | Base (light content) | `page` | zinc-100 |
 | | `panel` | white |
 | | `panel-2` | zinc-50 |
-| | `control` | zinc-200 (used with `/50` opacity for fills) |
+| | `control` | zinc-200 (often with `/50` opacity for fills) |
 | | `line` | zinc-100 |
+| | `line-2` | zinc-300 (stronger borders, toggle tracks) |
 | | `ink` | zinc-950 |
+| | `ink-mid` | zinc-700 (emphasized secondary text) |
 | | `ink-2` | zinc-500 |
 | | `ink-3` | zinc-400 |
+| | `ink-faint` | zinc-300 (disabled/faintest text) |
 | Inverse (dark sidebar / stat bands) | `inverse` | zinc-950 |
 | | `inverse-2` | zinc-900 |
 | | `inverse-3` | zinc-800 |
+| | `inverse-4` | zinc-700 (hover on dark controls) |
 | | `inverse-ink` | zinc-50 |
+| | `inverse-ink-mid` | zinc-300 (bright secondary on dark) |
 | | `inverse-ink-2` | zinc-400 |
 | | `inverse-ink-3` | zinc-500 |
 | | `inverse-label` | zinc-600 |
@@ -65,6 +73,13 @@ semantic slots** in three groups. House values in parens:
 | | `on-info` | zinc-950 |
 | | `warn` | orange-500 |
 | | `on-warn` | white |
+
+**Deliberate normalizations** (exemplar drift collapsed into slots; these
+are intentional, near-invisible value changes): `text-zinc-900` → `ink`;
+light-context `text-zinc-600` → `ink-2`; dark-context `text-zinc-100` and
+dark-context decorative `text-white` → `inverse-ink`; `border-zinc-950`
+→ `border-ink` (no separate slot); the modal overlay `bg-zinc-950/50` →
+`bg-inverse/50` (no separate slot).
 
 Markup uses semantic utilities: `bg-panel`, `text-ink-2`, `bg-inverse-2`,
 `text-accent`. Opacity modifiers keep working (`bg-panel-2/80`,
@@ -78,7 +93,7 @@ Brand packs override the variables directly: `--font-sans`,
 Example: a brand font lacking weight 200 sets
 `--font-weight-extralight: 300` and display type degrades gracefully.
 
-**Fixed structure invariant:** every brand has exactly 22 color roles,
+**Fixed structure invariant:** every brand has exactly 27 color roles,
 4 weights, 3 radius levels. Brands fill slots; they cannot add slots
 (no fourth accent, no gradients, no heavier shadows). Usage rules —
 "accents only as dots/badges/avatar fills/icon tints," "inverse surfaces
@@ -135,7 +150,7 @@ build-step stacks) — two-layer pattern:
   --color-*: initial;          /* wipe default palette FIRST */
   --color-page: var(--page);
   --color-panel: var(--panel);
-  /* … all 22 slots … */
+  /* … all 27 slots … */
 }
 :root {
   --page: #f4f4f5;             /* house = zinc-100 */
@@ -180,8 +195,12 @@ Specific known renames: landing CTA exception becomes
 `bg-accent`; dark hover `hover:bg-zinc-900/50` → `hover:bg-inverse-2/50`.
 
 **Acceptance test:** with no pack present, every migrated pattern file
-renders pixel-identical to today. The house identity is the regression
-baseline — if it shifts, the tokenization is wrong.
+renders visually identical to today — pixel-identical except where a
+documented normalization applies (see Token vocabulary). The house
+identity is the regression baseline — if anything else shifts, the
+tokenization is wrong. House slot values use the Tailwind **v3 hex
+palette** (what `cdn.tailwindcss.com` renders today), not v4's oklch
+equivalents, precisely to hold this baseline.
 
 ## SKILL.md changes
 
