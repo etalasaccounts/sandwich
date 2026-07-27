@@ -1,6 +1,6 @@
 ---
 name: order
-description: Take a project order and produce the kitchen brief — four standardized documents (prd.md, user-flows.md, technical-notes.md, client-questions.md) that the rest of the pipeline needs to cook. Use ONLY when explicitly invoked with /order, or when the user asks to document/brief a project. Do NOT invoke during active development, coding tasks, or general conversation.
+description: Take a project order and produce the kitchen brief — four standardized documents (prd.md, user-flows.md, technical-notes.md, client-questions.md) that the rest of the pipeline needs to cook. Use ONLY when the user explicitly runs /order (or its namespaced form, e.g. /sandwich:order). Do NOT invoke on topical similarity — pasting a KAK/RFQ/meeting notes, or discussing requirements/briefs/documentation in general conversation, is NOT an invocation unless the literal command is typed.
 ---
 
 # /order
@@ -9,10 +9,15 @@ You are taking an order. Your job: produce four standardized documents in `docs/
 
 ## When to invoke
 
-- User runs `/order`
-- User pastes a KAK, RFQ, MOM, or meeting notes
-- User says "brief this" / "buat brief" / "document this project" / "generate prd"
-- User is onboarding onto a project with no order yet
+- User explicitly runs `/order` (or the namespaced `/sandwich:order`)
+
+**Do NOT invoke because:**
+- the user pasted a KAK, RFQ, MOM, or meeting notes without typing `/order`
+- the user says something like "brief this" / "buat brief" / "document this project" in passing, without the literal command
+- the project looks like it's missing a brief — that's not your call to make unprompted
+- any other topical or keyword similarity to what this skill does
+
+Wait for the literal command. If the user's intent seems to call for `/order`, say so and let them decide — don't invoke it yourself.
 
 ## Artifacts
 

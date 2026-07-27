@@ -1,6 +1,6 @@
 ---
 name: prep
-description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use when you need to decide what to build next.
+description: Tech lead-level prioritization and impact analysis. Consumes brief artifacts, produces feature queue with scores, dependencies, and recommendations. All outputs validated with zod schemas and confidence checks. Use ONLY when the user explicitly runs /prep (or its namespaced form, e.g. /sandwich:prep). Do NOT invoke on topical similarity — discussing priorities, roadmap, or "what to build next" in general conversation is NOT an invocation unless the literal command is typed.
 ---
 
 # sandwich/prep
@@ -9,10 +9,15 @@ You are running the `prep` pipeline. Your job: produce prioritization data that 
 
 ## When to invoke
 
-- User runs `/prep`
-- User asks "what should we build first" / "apa yang harus dikerjakan dulu"
-- User has a brief and wants to start implementation
-- User wants to understand the impact of a specific feature
+- User explicitly runs `/prep` (or the namespaced `/sandwich:prep`), including its flag forms (`/prep --fresh`, `/prep --done F-001`, `/prep F-001`)
+
+**Do NOT invoke because:**
+- the user asks something like "what should we build first" / "apa yang harus dikerjakan dulu" without the literal command
+- a brief exists and looks ready for prioritization — that's not your call to make unprompted
+- the user is discussing feature impact or dependencies in general conversation
+- any other topical or keyword similarity to what this skill does
+
+Wait for the literal command. If the user's intent seems to call for `/prep`, say so and let them decide — don't invoke it yourself.
 
 ## What it produces
 

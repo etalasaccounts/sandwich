@@ -1,6 +1,6 @@
 ---
 name: status
-description: Single pane of glass over the sandwich registry. Shows what's done, in flight, blocked, stale, and what specifically needs a human decision. Use when you want to know the state of the project or generate a maintenance report.
+description: Single pane of glass over the sandwich registry. Shows what's done, in flight, blocked, stale, and what specifically needs a human decision. Use ONLY when the user explicitly runs /status (or its namespaced form, e.g. /sandwich:status). Do NOT invoke on topical similarity — asking about project state in general conversation is NOT an invocation unless the literal command is typed.
 ---
 
 # sandwich/status
@@ -10,9 +10,14 @@ the project. You do not change anything — this is read-only.
 
 ## When to invoke
 
-- User runs `/status`
-- User asks "where are we" / "apa status proyek" / "what needs my attention"
-- User runs `/status --report` to generate a client/maintenance report
+- User explicitly runs `/status` (or the namespaced `/sandwich:status`)
+- User explicitly runs `/status --report`
+
+**Do NOT invoke because:**
+- the user asks something like "where are we" / "apa status proyek" / "what needs my attention" without the literal command
+- any other topical or keyword similarity to what this skill does
+
+Wait for the literal command. If the user's intent seems to call for `/status`, say so and let them decide — don't invoke it yourself.
 
 ## What it reads
 
