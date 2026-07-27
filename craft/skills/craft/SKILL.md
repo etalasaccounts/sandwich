@@ -1,6 +1,6 @@
 ---
 name: craft
-description: Turn /order's needsUI user flows into a real Next.js + shadcn app, composed from the live shadcn registry (never a fixed/narrow component set) and tracked in a manifest that flags staleness instead of silently overwriting hand-tuned screens. Use ONLY when the user explicitly runs /craft (or its namespaced form, e.g. /sandwich:craft), after /order has run and before /prep. Do NOT invoke on topical similarity — discussing design, UI, or screens in general conversation is NOT an invocation unless the literal command is typed.
+description: "Turn /order's needsUI user flows into a real Next.js + shadcn app, composed from the live shadcn registry (never a fixed/narrow component set) and tracked in a manifest that flags staleness instead of silently overwriting hand-tuned screens. Use ONLY when the user explicitly runs /craft (or its namespaced form, e.g. /sandwich:craft), after /order has run and before /prep. Do NOT invoke on topical similarity — discussing design, UI, or screens in general conversation is NOT an invocation unless the literal command is typed."
 ---
 
 # /craft
