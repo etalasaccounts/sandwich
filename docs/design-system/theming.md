@@ -240,7 +240,7 @@ warn, …) silently falls back to house.
 
 ## 5. Resolution rules and runtime switching
 
-**Resolution** (used by the `/design` skill at step 0):
+**Resolution** (used by the `/design` skill at step 1):
 
 1. No `design/themes/` directory, or it's empty → house identity;
    `data-theme` is never set on the page.
