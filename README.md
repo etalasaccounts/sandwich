@@ -48,7 +48,8 @@ After installing, restart your AI session so the skills are discovered.
 | Command | Role |
 |---------|------|
 | `/order` | Turn any client input into four standardized brief artifacts |
-| `/craft` | Design the UI — a real Next.js + shadcn app, composed from the live registry |
+| `/craft` | Design the UI — a real Next.js app styled by the house design system |
+| `/design` | Generate UI in any project following the house design system (no brief required) |
 | `/prep` | Tech lead prioritization — score features, build the queue |
 | `/status` | Morning-check dashboard — what's blocking, what's next |
 
@@ -102,7 +103,7 @@ Paste the client's answers alongside `/order`. The skill detects answer mode and
 /craft
 ```
 
-Reads `needsUI` flows from the brief and produces a real Next.js + shadcn app in `design/`, composed from the live shadcn component registry (never a fixed/narrow set — full base components, real page-level blocks, a secondary registry for marketing sections). Requires `/order` to have run first, and will stop and ask before designing over an unresolved high-priority open question rather than guess. Re-running is safe: changed flows flag existing screens `stale` for you to act on, they're never silently rewritten.
+Reads `needsUI` flows from the brief and produces a real Next.js app in `design/`, styled by the house design system (`docs/design-system/` — foundations, component recipes, full-page patterns; never an external component registry). Requires `/order` to have run first, and will stop and ask before designing over an unresolved high-priority open question rather than guess. Re-running is safe: changed flows flag existing screens `stale` for you to act on, they're never silently rewritten.
 
 ```bash
 cd design && npm run dev
@@ -254,5 +255,5 @@ Priority is computed deterministically in code: `(impact × urgency × (10 − r
 | `docs/sandwich/` | tracked | Brief artifacts and feature queue — everything shareable |
 | `docs/sandwich/intake/` | tracked | Raw PM inputs (KAK, MOM, meeting notes) |
 | `docs/sandwich/specs/` | tracked | Per-feature specs (`F-XXX.json` + rendered `F-XXX.md`) — the dev's starting point for Superpowers |
-| `design/` | tracked (its `node_modules`/`.next` are not — see its `.gitignore`) | The `/craft`-generated Next.js + shadcn app — a real, deployable design/prototype, not markdown |
+| `design/` | tracked (its `node_modules`/`.next` are not — see its `.gitignore`) | The `/craft`-generated Next.js app styled by the house design system — a real, deployable design/prototype, not markdown |
 | `.sandwich/registry/` | tracked | Pipeline state (source of truth) |
