@@ -16,7 +16,7 @@ content, pull anything extra from [`../components.md`](../components.md).
 | [`product-form.html`](./product-form.html) | Complex CRUD form (commerce) | Creating/editing a record with media, pricing, variants, and inventory — products, listings, catalog items | Sticky save/publish header, image dropzone + thumbnail grid, price inputs, variant chips + table, `segmented-control`, `select-field`, `tag-input`, `checkbox-item`, SEO fields |
 | [`blog-post-form.html`](./blog-post-form.html) | Complex CRUD form (content) | Creating/editing long-form content with a schedule — blog posts, articles, docs, changelog entries | Same header/status/organization/SEO shell as `product-form.html`, plus a rich-text toolbar, word count, featured-image dropzone, author row, 3-way `segmented-control` with a conditional schedule field |
 | [`chat-interface.html`](./chat-interface.html) | Chat / messaging | Support chat, DMs, AI assistant threads | Conversation list (avatars, online dot, unread badge), `chat-bubble` (sent/received), `date-separator`, `typing-indicator`, composer |
-| [`marketplace-grid.html`](./marketplace-grid.html) | Browse grid | Product/listing browsing, catalog, search results | `secondary-rail` as a filter panel (category, price range, rating, `checkbox-item`s), toolbar (search + sort + view toggle), `product-card` grid, `rating-stars`, pagination |
+| [`marketplace-grid.html`](./marketplace-grid.html) | Browse grid (storefront) | Customer-facing product/listing browsing — marketplaces, catalogs, storefronts, search results | Scrolling `landing.html`-style top nav (search, cart/saved badges, avatar) on `zinc-100`, `secondary-rail` as a floating filter panel (category, price range, rating, `checkbox-item`s), toolbar (sort + view toggle), `product-card` grid, `rating-stars`, pagination |
 
 ## No pattern fits?
 
@@ -46,6 +46,9 @@ it's the reusable part.
 `settings.html`'s Profile/Notifications/Billing/Security column and
 `marketplace-grid.html`'s filter column are the same structural piece —
 [`../components.md#secondary-rail`](../components.md#secondary-rail) — used
-for two different purposes (sub-navigation vs. filtering). Any screen that
-needs a light column of options between the dark sidebar and the main
-panel should reuse that recipe rather than inventing a new one.
+for two different purposes (sub-navigation vs. filtering) on two different
+surfaces (nested in a white app-shell vs. floating on the `zinc-100` page,
+see the recipe's two variants). Any screen that needs a light column of
+sub-navigation or filters next to its main content should reuse that
+recipe rather than inventing a new one — pick the surface variant that
+matches whether the screen has a white app-shell or not.

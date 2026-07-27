@@ -432,7 +432,9 @@ Custom checkbox row (checked/unchecked), used for multi-select lists like collec
 
 ## secondary-rail
 
-A light column of sub-navigation or filters, sitting between the dark primary sidebar and the main panel — a second, narrower shell column (see `patterns/settings.html`'s Profile/Notifications/Billing/Security rail, `patterns/marketplace-grid.html`'s filter rail). Container:
+A light column of sub-navigation or filters, sitting beside the main content as a second, narrower shell column. Two surface variants depending on what it floats on:
+
+**Nested in a white app-shell** (dark sidebar + white main panel, e.g. `patterns/settings.html`) — the rail is `bg-zinc-50` so it reads as a distinct layer against the white panel next to it:
 
 ```html
 <nav class="bg-zinc-50 rounded-2xl p-3 gap-1 flex-col w-56 flex-shrink-0 hidden md:flex overflow-y-auto">
@@ -446,6 +448,14 @@ A light column of sub-navigation or filters, sitting between the dark primary si
     <iconify-icon icon="solar:bell-linear" class="text-base"></iconify-icon>
     <span class="text-sm font-light text-zinc-500">Notifications</span>
   </div>
+</nav>
+```
+
+**Floating directly on the `zinc-100` page background** (no white shell wrapper, e.g. `patterns/marketplace-grid.html`'s filter rail) — the rail itself is `bg-white` (it's the card, not a layer inside one) with `shadow-sm`, matching how `landing.html` treats every section as its own white card:
+
+```html
+<nav class="bg-white rounded-2xl p-4 gap-5 flex-col w-64 flex-shrink-0 hidden md:flex shadow-sm">
+  <!-- filter section: section-label heading + checkbox-item rows -->
 </nav>
 ```
 
