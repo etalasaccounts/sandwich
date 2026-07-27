@@ -95,7 +95,7 @@ Labeled form field on light:
 
 ## textarea
 
-Borderless inside a card (see the reply box in `patterns/dashboard.html`), or standalone using the `input-field` shell with `resize-none min-h-[100px]`.
+Borderless inside a card (see the reply box in `patterns/mailbox.html`), or standalone using the `input-field` shell with `resize-none min-h-[100px]`.
 
 ## nav-item
 

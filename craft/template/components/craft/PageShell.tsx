@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-// The floating app shell from docs/design-system/patterns/dashboard.html:
+// The floating app shell from docs/design-system/patterns/mailbox.html:
 // zinc-100 page, white rounded-3xl shell, rounded-2xl panel columns.
 // `sidebar` renders as the dark zinc-950 panel. Each child must style
 // itself as a rounded-2xl panel (bg-white or bg-zinc-50) — see

@@ -34,30 +34,18 @@ iconify-icon { stroke-width: 1.5; }
         <span class="text-lg font-medium text-zinc-50 tracking-tight">Mail</span>
       </div>
 
-      <!-- Nav -->
+      <!-- Nav (primary app nav — Settings is the active top-level area) -->
       <nav class="flex flex-col w-full gap-0.5 mt-2">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:inbox-in-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Inbox</span>
+          </div>
+        </div>
         <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-zinc-900 cursor-pointer">
           <div class="flex items-center gap-3">
-            <iconify-icon icon="solar:user-circle-linear" class="text-green-400 text-base"></iconify-icon>
-            <span class="text-sm font-normal text-zinc-50 tracking-tight">Profile</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
-          <div class="flex items-center gap-3">
-            <iconify-icon icon="solar:bell-linear" class="text-base"></iconify-icon>
-            <span class="text-sm font-light text-zinc-400">Notifications</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
-          <div class="flex items-center gap-3">
-            <iconify-icon icon="solar:wallet-linear" class="text-base"></iconify-icon>
-            <span class="text-sm font-light text-zinc-400">Billing</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
-          <div class="flex items-center gap-3">
-            <iconify-icon icon="solar:shield-keyhole-linear" class="text-base"></iconify-icon>
-            <span class="text-sm font-light text-zinc-400">Security</span>
+            <iconify-icon icon="solar:settings-linear" class="text-green-400 text-base"></iconify-icon>
+            <span class="text-sm font-normal text-zinc-50 tracking-tight">Settings</span>
           </div>
         </div>
       </nav>
@@ -80,6 +68,26 @@ iconify-icon { stroke-width: 1.5; }
 
     </aside>
 
+    <!-- SETTINGS SUB-NAV (secondary rail — sections within Settings) -->
+    <nav class="bg-zinc-50 rounded-2xl p-3 gap-1 flex-col w-56 flex-shrink-0 hidden md:flex overflow-y-auto">
+      <div class="flex items-center gap-3 rounded-xl py-2 px-3 bg-white shadow-sm cursor-pointer">
+        <iconify-icon icon="solar:user-circle-linear" class="text-green-400 text-base"></iconify-icon>
+        <span class="text-sm font-normal text-zinc-950 tracking-tight">Profile</span>
+      </div>
+      <div class="flex items-center gap-3 rounded-xl py-2 px-3 hover:bg-white/60 cursor-pointer transition-colors text-zinc-500">
+        <iconify-icon icon="solar:bell-linear" class="text-base"></iconify-icon>
+        <span class="text-sm font-light text-zinc-500">Notifications</span>
+      </div>
+      <div class="flex items-center gap-3 rounded-xl py-2 px-3 hover:bg-white/60 cursor-pointer transition-colors text-zinc-500">
+        <iconify-icon icon="solar:wallet-linear" class="text-base"></iconify-icon>
+        <span class="text-sm font-light text-zinc-500">Billing</span>
+      </div>
+      <div class="flex items-center gap-3 rounded-xl py-2 px-3 hover:bg-white/60 cursor-pointer transition-colors text-zinc-500">
+        <iconify-icon icon="solar:shield-keyhole-linear" class="text-base"></iconify-icon>
+        <span class="text-sm font-light text-zinc-500">Security</span>
+      </div>
+    </nav>
+
     <!-- MAIN PANEL -->
     <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
 
@@ -89,8 +97,8 @@ iconify-icon { stroke-width: 1.5; }
         <span class="text-xs font-light text-zinc-500">How you appear to everyone else on the Nordbyte workspace.</span>
       </div>
 
-      <!-- Content -->
-      <div class="flex flex-col gap-4 p-7 overflow-y-auto max-w-3xl">
+      <!-- Content (centered within the panel) -->
+      <div class="flex flex-col gap-4 p-7 overflow-y-auto w-full max-w-3xl mx-auto">
 
         <!-- Profile card -->
         <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-5">

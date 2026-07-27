@@ -9,7 +9,7 @@ export const ScreenSchema = z.object({
   // Which design-system pieces this screen was actually built from —
   // component ids from docs/design-system/components.md (e.g. "kpi-card",
   // "list-row") and/or pattern files from docs/design-system/patterns/
-  // (e.g. "dashboard.html"). This is what makes coverage auditable instead
+  // (e.g. "mailbox.html"). This is what makes coverage auditable instead
   // of a black box: /status-style tooling (or a human) can see exactly
   // what a screen leans on.
   componentsUsed: z.array(z.string().min(1)).default([]),

@@ -7,7 +7,7 @@ content, pull anything extra from [`../components.md`](../components.md).
 
 | File | Screen type | Use when | Demonstrates |
 |---|---|---|---|
-| [`dashboard.html`](./dashboard.html) | App shell, 3-pane | Any app screen: inbox, CRM, admin, tools | App shell, dark sidebar (nav, KPIs, labels, account), list panel with row states, detail pane, reply composer, attachments |
+| [`mailbox.html`](./mailbox.html) | App shell, 3-pane | Any app screen: inbox, CRM, admin, tools | App shell, dark sidebar (nav, KPIs, labels, account), list panel with row states, detail pane, reply composer, attachments |
 | [`auth.html`](./auth.html) | Auth | Login, register, forgot password | Split brand/form layout, form fields, SSO button, divider |
 | [`landing.html`](./landing.html) | Marketing | Public/landing pages | Top nav, hero display type, feature cards, dark stats band, pricing, footer |
 | [`settings.html`](./settings.html) | Settings/forms | Settings, profile, preferences, any form-heavy screen | Card groups, field rows, toggles, plan card, danger zone |
@@ -16,7 +16,7 @@ content, pull anything extra from [`../components.md`](../components.md).
 
 ## No pattern fits?
 
-Start from the closest shell anyway — `dashboard.html` for anything app-like,
+Start from the closest shell anyway — `mailbox.html` for anything app-like,
 `landing.html` for anything public — and compose the rest from
 `components.md`. A screen type you keep rebuilding deserves a new pattern
 file here (same shared head, realistic content) and a row in this table.

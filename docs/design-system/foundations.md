@@ -188,7 +188,7 @@ recipe.
 **2. Second dot size for inline unread indicators.** The unread-indicator
 dot has a second valid size, `w-1.5 h-1.5 rounded-full bg-green-400`, in
 addition to the documented `w-2 h-2`. Use `w-1.5 h-1.5` when the dot sits
-inline next to a name or title inside a list row (see `patterns/dashboard.html`,
+inline next to a name or title inside a list row (see `patterns/mailbox.html`,
 `patterns/mobile.html`); use `w-2 h-2` for a standalone status dot (KPI
 cards, stat bands, live indicators).
 
