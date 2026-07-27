@@ -6,12 +6,13 @@ export const ScreenSchema = z.object({
   route: z.string().regex(/^\/[a-z0-9-]*$/, "Route must be a lowercase-hyphenated path starting with /, e.g. /plp"),
   flows: z.array(z.string().regex(/^UF-\d{3}$/, "Flow id must be UF-XXX")).min(1, "A screen needs at least one flow"),
   navigatesTo: z.array(z.string().regex(/^SCR-\d{3}$/, "Screen id must be SCR-XXX")).default([]),
-  // Which registry items this screen was actually built from — real shadcn
-  // block/component names (e.g. "sidebar-07", "dashboard-01", "card"), or a
-  // "shadcnblocks:<name>" prefix for the secondary marketing registry. This
-  // is what makes coverage auditable instead of a black box: /status-style
-  // tooling (or a human) can see exactly what a screen leans on.
-  registryUses: z.array(z.string().min(1)).default([]),
+  // Which design-system pieces this screen was actually built from —
+  // component ids from docs/design-system/components.md (e.g. "kpi-card",
+  // "list-row") and/or pattern files from docs/design-system/patterns/
+  // (e.g. "dashboard.html"). This is what makes coverage auditable instead
+  // of a black box: /status-style tooling (or a human) can see exactly
+  // what a screen leans on.
+  componentsUsed: z.array(z.string().min(1)).default([]),
   flags: z.object({
     stale: z.boolean().default(false),
     orphaned: z.boolean().default(false),

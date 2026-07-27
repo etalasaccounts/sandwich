@@ -25,12 +25,12 @@ check("validateCraftManifest accepts a minimal valid manifest and fills defaults
   assert.equal(r.data!.screens[0].flags.orphaned, false);
   assert.deepEqual(r.data!.screens[0].staleReasons, []);
   assert.deepEqual(r.data!.screens[0].navigatesTo, []);
-  assert.deepEqual(r.data!.screens[0].registryUses, []);
+  assert.deepEqual(r.data!.screens[0].componentsUsed, []);
 });
-check("validateCraftManifest accepts an explicit registryUses list", () => {
-  const r = validateCraftManifest({ screens: [{ ...VALID_SCREEN, registryUses: ["sidebar-07", "dashboard-01"] }] });
+check("validateCraftManifest accepts an explicit componentsUsed list", () => {
+  const r = validateCraftManifest({ screens: [{ ...VALID_SCREEN, componentsUsed: ["kpi-card", "data-table"] }] });
   assert.equal(r.valid, true);
-  assert.deepEqual(r.data!.screens[0].registryUses, ["sidebar-07", "dashboard-01"]);
+  assert.deepEqual(r.data!.screens[0].componentsUsed, ["kpi-card", "data-table"]);
 });
 check("validateCraftManifest rejects a malformed screen id", () => {
   const r = validateCraftManifest({ screens: [{ ...VALID_SCREEN, id: "S1" }] });
@@ -138,12 +138,12 @@ check("diffFlows detects new and removed flow ids", () => {
 check("writeManifest + readManifest round-trip a valid manifest", () => {
   const dir = mkdtempSync(join(tmpdir(), "craft-io-"));
   try {
-    const manifest = { screens: [{ id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], registryUses: ["card"], flags: { stale: false, orphaned: false }, staleReasons: [] }] };
+    const manifest = { screens: [{ id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], componentsUsed: ["list-row"], flags: { stale: false, orphaned: false }, staleReasons: [] }] };
     const path = writeManifest(dir, manifest);
     assert.ok(path.endsWith("manifest.json"));
     const back = readManifest(dir);
     assert.equal(back?.screens[0].id, "SCR-001");
-    assert.deepEqual(back?.screens[0].registryUses, ["card"]);
+    assert.deepEqual(back?.screens[0].componentsUsed, ["list-row"]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -229,7 +229,7 @@ check("scaffoldCraftApp copies the real template into a fresh project, seeds the
 
 import { renderNavHubPage } from "./craft-render.ts";
 
-const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], registryUses: [], flags: { stale: false, orphaned: false }, staleReasons: [] };
+const RENDERED_SCREEN = { id: "SCR-001", name: "Homepage", route: "/homepage", flows: ["UF-001"], navigatesTo: [], componentsUsed: [], flags: { stale: false, orphaned: false }, staleReasons: [] };
 
 check("renderNavHubPage emits a Link and name for every screen in the manifest", () => {
   const tsx = renderNavHubPage({ screens: [RENDERED_SCREEN] });
