@@ -42,7 +42,7 @@ def check_register_wires_skills_and_hook():
 
 
 def check_skill_paths_exist():
-    assert set(plugin.SKILLS.keys()) == {"order", "prep", "status", "wireframe"}
+    assert set(plugin.SKILLS.keys()) == {"order", "prep", "status", "craft"}
     for name, path in plugin.SKILLS.items():
         assert path.exists(), f"{name} -> {path} does not exist"
         assert path.name == "SKILL.md", f"{name} -> {path} is not a SKILL.md"
