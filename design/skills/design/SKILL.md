@@ -25,14 +25,21 @@ from one component to a full screen.
 
 ## Where the design system lives
 
-`$SANDWICH_ROOT/docs/design-system/`. `SANDWICH_ROOT` is injected into your
-context at session start as plain text (e.g. `SANDWICH_ROOT=/path/to/plugin`)
-— it is NOT a live shell environment variable. Read the path from your
-context and substitute it literally.
+**House design system:** `$SANDWICH_ROOT/docs/design-system/`
+
+**Project overrides:** If `$PROJECT_ROOT/docs/design-system/` exists with a `foundations.md`, that takes precedence. This allows projects to define their own color palette, fonts, and component styles while still following the structural patterns.
+
+`SANDWICH_ROOT` and `PROJECT_ROOT` are injected into your context at session start as plain text. Read the paths from your context and substitute literally.
 
 ## Pipeline
 
-1. **Read the rules** — `$SANDWICH_ROOT/docs/design-system/README.md` and
+0. **Resolve theme** — check for project-level design system:
+   - Look for `$PROJECT_ROOT/docs/design-system/` (or `THEME_PATH` env if set)
+   - If found and contains `foundations.md`, use that as the design system
+   - If not found, use house design system at `$SANDWICH_ROOT/docs/design-system/`
+   - Report which theme is active at the start of your response
+
+1. **Read the rules** — From the resolved theme path, read `README.md` and
    `foundations.md`, in full, every invocation. Do not work from memory of
    a previous session.
 2. **Pick references** — open `patterns/patterns.md`, pick the closest
