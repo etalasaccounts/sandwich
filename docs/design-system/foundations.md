@@ -205,6 +205,40 @@ title:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style type="text/tailwindcss">
+  @theme {
+    /* Accent colors for sandwich design system */
+    --color-accent-primary: #4ade80;      /* green-400 */
+    --color-accent-primary-hover: #86efac; /* green-300 */
+    --color-accent-secondary: #22d3ee;    /* cyan-400 */
+    --color-accent-warning: #f97316;      /* orange-500 */
+    
+    /* Font family */
+    --font-sans: 'Inter', sans-serif;
+  }
+  
+  body { font-family: var(--font-sans); }
+  iconify-icon { stroke-width: 1.5; }
+  
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style>
+</head>
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PAGE TITLE HERE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <style>
 body { font-family: 'Inter', sans-serif; }
 iconify-icon { stroke-width: 1.5; }

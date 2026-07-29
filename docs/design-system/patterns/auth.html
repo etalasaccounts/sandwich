@@ -9,17 +9,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-<style>
-body { font-family: 'Inter', sans-serif; }
-iconify-icon { stroke-width: 1.5; }
-/* Custom Scrollbar for a cleaner look */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
-</style></head>
-<body class="bg-zinc-100 h-screen w-full flex items-center justify-center p-2 sm:p-4 text-sm antialiased text-zinc-900">
-  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1100px] h-full max-h-[720px] shadow-sm overflow-hidden">
+<style type="text/tailwindcss">
+  @theme {
+    /* Accent colors for sandwich design system */
+    --color-accent-primary: #4ade80;      /* green-400 */
+    --color-accent-primary-hover: #86efac; /* green-300 */
+    --color-accent-secondary: #22d3ee;    /* cyan-400 */
+    --color-accent-warning: #f97316;      /* orange-500 */
+    
+    /* Font family */
+    --font-sans: 'Inter', sans-serif;
+  }
+  
+  body { font-family: var(--font-sans); }
+  iconify-icon { stroke-width: 1.5; }
+  
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+</style>
+</head>
 
     <!-- BRAND PANEL (dark) -->
     <aside class="bg-zinc-950 rounded-2xl p-8 flex-col justify-between w-[440px] flex-shrink-0 hidden md:flex overflow-y-auto">
