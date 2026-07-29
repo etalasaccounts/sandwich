@@ -54,3 +54,54 @@ structure are the design system — keep them identical everywhere:
   `["200","300","400","500"]`.
 - Tailwind with a build step needs no config beyond the font family — the
   system uses stock zinc/green/cyan/orange utilities on purpose.
+
+## Project Theme Packs
+
+Projects can override the house design system by creating their own `docs/design-system/` directory.
+
+### Required files
+
+```
+docs/design-system/
+├── foundations.md    # Colors, typography, layout rules
+├── components.md     # Component recipes (optional, falls back to house)
+└── patterns/         # Pattern files (optional, falls back to house)
+```
+
+### Minimal override
+
+To customize just the color palette while keeping everything else:
+
+1. Copy the house `foundations.md` to `$PROJECT_ROOT/docs/design-system/`
+2. Modify only the accent colors:
+
+```markdown
+## Color
+
+### Accents
+
+| Accent | Meaning | Text on top |
+|---|---|---|
+| `blue-500` | primary accent | `text-white` |
+| `violet-400` | secondary | `text-zinc-950` |
+| `amber-500` | warning | `text-zinc-950` |
+```
+
+3. Update the `@theme` block in the shared head to match:
+
+```css
+@theme {
+  --color-accent-primary: #3b82f6;     /* blue-500 */
+  --color-accent-secondary: #a78bfa;   /* violet-400 */
+  --color-accent-warning: #f59e0b;     /* amber-500 */
+  --font-sans: 'Inter', sans-serif;
+}
+```
+
+### Full override
+
+If your project has a significantly different design language (different font, radius philosophy, surface colors), copy all files from the house design system and modify freely. The `/design` skill will use your project's files instead of the house defaults.
+
+### How it works
+
+The `/design` skill checks for `$PROJECT_ROOT/docs/design-system/foundations.md` first. If found, it uses that directory as the design system. If not, it falls back to the house design system at `$SANDWICH_ROOT/docs/design-system/`.
