@@ -76,7 +76,7 @@ Dark and light:
   <input type="text" placeholder="Search mail..." class="bg-transparent border-none outline-none text-xs text-zinc-300 w-full placeholder-zinc-500 font-light" />
 </div>
 <!-- light -->
-<div class="flex items-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 w-full">
+<div class="flex items-center gap-2 bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 w-full focus-within:border-green-400 transition-colors">
   <iconify-icon icon="solar:magnifer-linear" class="text-zinc-400 text-sm"></iconify-icon>
   <input type="text" placeholder="Search..." class="bg-transparent border-none outline-none text-xs text-zinc-700 w-full placeholder-zinc-400 font-light" />
 </div>
@@ -89,7 +89,7 @@ Labeled form field on light:
 ```html
 <label class="flex flex-col gap-1.5 w-full">
   <span class="text-xs font-light text-zinc-500">Email</span>
-  <input type="email" placeholder="you@company.com" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+  <input type="email" placeholder="you@company.com" class="bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-green-400 transition-colors" />
 </label>
 ```
 
@@ -393,7 +393,7 @@ Two- or three-way state toggle (Draft/Active, Draft/Scheduled/Published) — a p
 
 ```html
 <div class="relative">
-  <select class="bg-white border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-zinc-300 transition-colors appearance-none pr-9">
+  <select class="bg-white border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none w-full focus:border-green-400 transition-colors appearance-none pr-9">
     <option>Accessories</option>
   </select>
   <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-sm pointer-events-none"></iconify-icon>
@@ -405,7 +405,7 @@ Two- or three-way state toggle (Draft/Active, Draft/Scheduled/Published) — a p
 A bordered field that holds removable chips plus a borderless inline input for adding more — the field container takes the border/background that `input-field` normally puts on the `<input>` itself.
 
 ```html
-<div class="flex flex-wrap items-center gap-1.5 p-2 border border-zinc-100 bg-white rounded-xl">
+<div class="flex flex-wrap items-center gap-1.5 p-2 border border-zinc-200 bg-white rounded-xl focus-within:border-green-400 transition-colors">
   <span class="bg-zinc-100 rounded-full py-1 px-2.5 text-xs font-light text-zinc-700 flex items-center gap-1.5">leather <iconify-icon icon="solar:close-circle-linear" class="text-zinc-400 text-xs cursor-pointer"></iconify-icon></span>
   <input type="text" placeholder="Add tag…" class="bg-transparent outline-none text-xs font-light text-zinc-700 placeholder-zinc-400 flex-1 min-w-[60px]" />
 </div>
@@ -492,9 +492,9 @@ Centered divider inside a scrolling thread or feed:
 
 ```html
 <div class="flex items-center gap-3 py-2">
-  <div class="h-px bg-zinc-100 flex-1"></div>
+  <div class="h-px bg-zinc-200 flex-1"></div>
   <span class="text-xs font-light text-zinc-400">Today</span>
-  <div class="h-px bg-zinc-100 flex-1"></div>
+  <div class="h-px bg-zinc-200 flex-1"></div>
 </div>
 ```
 

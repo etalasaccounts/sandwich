@@ -51,7 +51,7 @@ No borders on dark surfaces — separation is by shade.
 | Shell / primary panel | `bg-white` |
 | Secondary panel / card | `bg-zinc-50` (cards often `bg-zinc-50/80 border border-zinc-100`) |
 | Control fill | `bg-zinc-200/50`, hover `bg-zinc-200` |
-| Border | `border-zinc-100` (sometimes `/50`) |
+| Border | `border-zinc-200` (sometimes `/50`) |
 | Primary text | `text-zinc-950` |
 | Secondary text | `text-zinc-500` |
 | Tertiary text | `text-zinc-400` |

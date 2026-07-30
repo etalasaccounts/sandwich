@@ -9,19 +9,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-<style type="text/tailwindcss">
-  @theme {
-    /* Accent colors for sandwich design system */
-    --color-accent-primary: #4ade80;      /* green-400 */
-    --color-accent-primary-hover: #86efac; /* green-300 */
-    --color-accent-secondary: #22d3ee;    /* cyan-400 */
-    --color-accent-warning: #f97316;      /* orange-500 */
-    
-    /* Font family */
-    --font-sans: 'Inter', sans-serif;
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+        },
+        colors: {
+          accent: {
+            primary: '#4ade80',
+            'primary-hover': '#86efac',
+            secondary: '#22d3ee',
+            warning: '#f97316',
+          }
+        }
+      }
+    }
   }
-  
-  body { font-family: var(--font-sans); }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
   iconify-icon { stroke-width: 1.5; }
   
   /* Custom Scrollbar */
@@ -31,7 +39,8 @@
   ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
 </style>
 </head>
-
+<body class="bg-zinc-100 min-h-screen flex items-center justify-center p-4">
+  <div class="flex rounded-2xl overflow-hidden shadow-xl max-w-[900px] w-full h-[600px]">
     <!-- BRAND PANEL (dark) -->
     <aside class="bg-zinc-950 rounded-2xl p-8 flex-col justify-between w-[440px] flex-shrink-0 hidden md:flex overflow-y-auto">
       <!-- brand row -->
@@ -81,27 +90,27 @@
           <span class="text-xl font-medium text-zinc-950 tracking-tight">Welcome back</span>
           <span class="text-xs font-light text-zinc-500">Sign in to continue to your inbox.</span>
         </div>
-        <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors">
+        <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors">
           <iconify-icon icon="solar:shield-keyhole-linear" class="text-zinc-500 text-base"></iconify-icon>
           <span class="text-xs font-normal text-zinc-700">Continue with SSO</span>
         </button>
         <!-- divider -->
         <div class="flex items-center gap-3">
-          <div class="h-px bg-zinc-100 flex-1"></div>
+          <div class="h-px bg-zinc-200 flex-1"></div>
           <span class="text-xs font-light text-zinc-400">or</span>
-          <div class="h-px bg-zinc-100 flex-1"></div>
+          <div class="h-px bg-zinc-200 flex-1"></div>
         </div>
         <div class="flex flex-col gap-4">
           <label class="flex flex-col gap-1.5 w-full">
             <span class="text-xs font-light text-zinc-500">Email</span>
-            <input type="email" placeholder="you@company.com" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+            <input type="email" placeholder="you@company.com" class="bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-green-400 transition-colors" />
           </label>
           <label class="flex flex-col gap-1.5 w-full">
             <div class="flex items-center justify-between">
               <span class="text-xs font-light text-zinc-500">Password</span>
               <a href="#" class="text-xs font-light text-zinc-500 hover:text-zinc-950 transition-colors">Forgot password?</a>
             </div>
-            <input type="password" placeholder="Enter your password" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+            <input type="password" placeholder="Enter your password" class="bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-green-400 transition-colors" />
           </label>
         </div>
         <button class="flex items-center gap-2 w-full justify-center bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2.5 px-4 shadow-sm text-white">
@@ -111,7 +120,6 @@
         <span class="text-xs font-light text-zinc-500 text-center">Don’t have an account? <a href="#" class="font-normal text-zinc-950 hover:underline">Create one</a></span>
       </div>
     </main>
-
   </div>
 </body>
 </html>

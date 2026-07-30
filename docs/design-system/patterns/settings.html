@@ -103,7 +103,7 @@
     <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
 
       <!-- Header -->
-      <div class="flex flex-col gap-0.5 p-7 border-b border-zinc-100">
+      <div class="flex flex-col gap-0.5 p-7 border-b border-zinc-200">
         <span class="text-xl font-medium text-zinc-950 tracking-tight">Profile</span>
         <span class="text-xs font-light text-zinc-500">How you appear to everyone else on the Nordbyte workspace.</span>
       </div>
@@ -112,14 +112,14 @@
       <div class="flex flex-col gap-4 p-7 overflow-y-auto w-full max-w-3xl mx-auto">
 
         <!-- Profile card -->
-        <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-5">
+        <div class="bg-zinc-50/80 border border-zinc-200 rounded-2xl p-5 flex flex-col gap-5">
           <div class="flex items-center gap-4">
             <div class="w-11 h-11 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 text-sm font-medium text-zinc-950 tracking-tight">AN</div>
             <div class="flex flex-col gap-0.5 flex-1 min-w-0">
               <span class="text-sm font-medium text-zinc-950">Avery Nolan</span>
               <span class="text-xs font-light text-zinc-500">avery@nordbyte.com</span>
             </div>
-            <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors flex-shrink-0">
+            <button class="flex items-center justify-center gap-2 bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-4 hover:bg-zinc-100 transition-colors flex-shrink-0">
               <iconify-icon icon="solar:camera-linear" class="text-zinc-500 text-base"></iconify-icon>
               <span class="text-xs font-normal text-zinc-700">Change photo</span>
             </button>
@@ -128,22 +128,22 @@
           <div class="grid sm:grid-cols-2 gap-4">
             <label class="flex flex-col gap-1.5 w-full">
               <span class="text-xs font-light text-zinc-500">Full name</span>
-              <input type="text" value="Avery Nolan" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+              <input type="text" value="Avery Nolan" class="bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-green-400 transition-colors" />
             </label>
             <label class="flex flex-col gap-1.5 w-full">
               <span class="text-xs font-light text-zinc-500">Email</span>
-              <input type="email" value="avery@nordbyte.com" class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors" />
+              <input type="email" value="avery@nordbyte.com" class="bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-green-400 transition-colors" />
             </label>
           </div>
 
           <label class="flex flex-col gap-1.5 w-full">
             <span class="text-xs font-light text-zinc-500">Bio</span>
-            <textarea placeholder="A line or two about what you work on." class="bg-zinc-50/80 border border-zinc-100 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-zinc-300 transition-colors resize-none min-h-[100px]">Ops lead at Nordbyte. I look after onboarding, billing and whatever else lands in the shared inbox.</textarea>
+            <textarea placeholder="A line or two about what you work on." class="bg-zinc-50/80 border border-zinc-200 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-green-400 transition-colors resize-none min-h-[100px]">Ops lead at Nordbyte. I look after onboarding, billing and whatever else lands in the shared inbox.</textarea>
           </label>
         </div>
 
         <!-- Notifications card -->
-        <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex flex-col gap-5">
+        <div class="bg-zinc-50/80 border border-zinc-200 rounded-2xl p-5 flex flex-col gap-5">
           <div class="flex items-center justify-between py-1">
             <div class="flex flex-col gap-0.5">
               <span class="text-sm font-normal text-zinc-950">Email digest</span>
@@ -174,7 +174,7 @@
         </div>
 
         <!-- Plan card -->
-        <div class="bg-zinc-50/80 border border-zinc-100 rounded-2xl p-5 flex items-center justify-between">
+        <div class="bg-zinc-50/80 border border-zinc-200 rounded-2xl p-5 flex items-center justify-between">
           <div class="flex flex-col gap-2.5">
             <span class="bg-zinc-100 rounded-full py-0.5 px-3 text-xs font-light text-zinc-600 self-start">Pro</span>
             <div class="flex items-baseline gap-1.5">
@@ -190,13 +190,13 @@
         </div>
 
         <!-- Danger zone -->
-        <div class="flex items-start gap-3 bg-zinc-50/80 border border-zinc-100 rounded-xl p-4">
+        <div class="flex items-start gap-3 bg-zinc-50/80 border border-zinc-200 rounded-xl p-4">
           <iconify-icon icon="solar:danger-triangle-linear" class="text-orange-500 text-base mt-0.5"></iconify-icon>
           <div class="flex flex-col gap-1">
             <span class="text-sm font-medium text-zinc-950">Delete account</span>
             <span class="text-xs font-light text-zinc-500">This removes your profile and every thread you own. It cannot be undone.</span>
           </div>
-          <button class="bg-white border border-zinc-100 rounded-xl py-2 px-4 text-xs font-medium text-orange-500 hover:bg-zinc-50 transition-colors ml-auto flex-shrink-0">Delete</button>
+          <button class="bg-white border border-zinc-200 rounded-xl py-2 px-4 text-xs font-medium text-orange-500 hover:bg-zinc-50 transition-colors ml-auto flex-shrink-0">Delete</button>
         </div>
 
       </div>
