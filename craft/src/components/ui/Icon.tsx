@@ -1,8 +1,10 @@
 import { Icon as IconifyIcon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 
+export type IconName = string;
+
 export interface IconProps {
-  icon: string;
+  icon: IconName;
   className?: string;
 }
 

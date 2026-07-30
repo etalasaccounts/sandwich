@@ -25,9 +25,10 @@ function renderStars(rating: number) {
 
 export function MarketplaceGridPage() {
   return (
-    <div className="bg-white min-h-full flex flex-col">\      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col flex-1">
-      {/* NAV */}
-      <nav className="flex items-center justify-between gap-4 py-4 border-b border-zinc-100">
+    <div className="bg-white min-h-full flex flex-col">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col flex-1 w-full">
+        {/* NAV */}
+        <nav className="flex items-center justify-between gap-4 py-4 border-b border-zinc-100">
         <div className="flex items-center gap-2.5 flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
             <Icon icon="solar:layers-minimalistic-linear" className="text-zinc-950 text-base" />
@@ -203,5 +204,6 @@ export function MarketplaceGridPage() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

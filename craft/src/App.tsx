@@ -5,6 +5,7 @@ import {
   BlogPostFormPage,
   ChatInterfacePage,
   DataTablePage,
+  DetailPage,
   LandingPage,
   MailboxPage,
   MarketplaceGridPage,
@@ -18,6 +19,7 @@ const patterns: Pattern[] = [
   { id: "blog-form", label: "Blog Form" },
   { id: "chat", label: "Chat Interface" },
   { id: "data-table", label: "Data Table" },
+  { id: "detail", label: "Detail" },
   { id: "landing", label: "Landing" },
   { id: "mailbox", label: "Mailbox" },
   { id: "marketplace", label: "Marketplace" },
@@ -31,6 +33,7 @@ const patternComponents: Record<string, React.ComponentType> = {
   "blog-form": BlogPostFormPage,
   chat: ChatInterfacePage,
   "data-table": DataTablePage,
+  detail: DetailPage,
   landing: LandingPage,
   mailbox: MailboxPage,
   marketplace: MarketplaceGridPage,
@@ -54,7 +57,7 @@ function App() {
   return (
     <div className="flex h-screen">
       <PatternNav patterns={patterns} current={current} onSelect={setCurrent} />
-      <main className="flex-1 overflow-auto bg-zinc-100 p-4">
+      <main className="flex-1 overflow-auto bg-white">
         {Pattern ? <Pattern /> : <AuthPage />}
       </main>
     </div>

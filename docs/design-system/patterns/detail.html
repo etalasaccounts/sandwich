@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail — Customer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-zinc-100 min-h-screen p-4">
+  <!-- App shell: dark sidebar + white main panel -->
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden mx-auto">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="bg-zinc-950 rounded-2xl p-4 gap-5 flex-col w-[280px] flex-shrink-0 hidden lg:flex overflow-y-auto">
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 mt-1 px-1">
+        <div class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+          <iconify-icon icon="solar:layers-minimalistic-linear" class="text-zinc-950 text-base"></iconify-icon>
+        </div>
+        <span class="text-lg font-medium text-zinc-50 tracking-tight">Nordbyte</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex flex-col w-full gap-0.5 mt-4">
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:home-2-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Overview</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 bg-zinc-900 cursor-pointer">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:users-group-rounded-linear" class="text-green-400 text-base"></iconify-icon>
+            <span class="text-sm font-normal text-zinc-50 tracking-tight">Customers</span>
+          </div>
+          <span class="rounded-full py-0.5 px-2.5 text-xs font-normal bg-green-400 text-zinc-950">42</span>
+        </div>
+        <div class="flex items-center justify-between rounded-xl py-2 px-3 hover:bg-zinc-900/50 cursor-pointer transition-colors text-zinc-500">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="solar:document-text-linear" class="text-base"></iconify-icon>
+            <span class="text-sm font-light text-zinc-400">Invoices</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="flex-1"></div>
+
+      <!-- User Footer -->
+      <div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 w-full">
+        <div class="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <iconify-icon icon="solar:user-circle-linear" class="text-zinc-400 text-lg"></iconify-icon>
+        </div>
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="text-sm font-normal text-zinc-50 truncate">Avery Nolan</span>
+          <span class="text-xs font-light text-zinc-500 truncate">avery@nordbyte.com</span>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 hover:bg-zinc-700 transition-colors">
+          <iconify-icon icon="solar:settings-linear" class="text-zinc-400 text-sm"></iconify-icon>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-7 border-b border-zinc-100">
+        <div class="flex items-center gap-3">
+          <a href="/customers" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+            <iconify-icon icon="solar:alt-arrow-left-linear" class="text-base"></iconify-icon>
+          </a>
+          <div class="flex flex-col">
+            <span class="text-xs font-light text-zinc-400">Customers</span>
+            <span class="text-xl font-medium text-zinc-950 tracking-tight">Acme Corp</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="flex items-center gap-2 bg-zinc-50/80 border border-zinc-200 rounded-xl py-2 px-4 hover:bg-zinc-100 transition-colors">
+            <iconify-icon icon="solar:pen-linear" class="text-zinc-500 text-sm"></iconify-icon>
+            <span class="text-xs font-normal text-zinc-700">Edit</span>
+          </button>
+          <button class="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors rounded-xl py-2 px-4 shadow-sm text-white">
+            <iconify-icon icon="solar:trash-bin-trash-linear" class="text-sm"></iconify-icon>
+            <span class="text-xs font-medium tracking-wide">Delete</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Body: two columns -->
+      <div class="flex flex-1 overflow-hidden">
+        <!-- Main: field groups -->
+        <div class="flex-1 p-7 overflow-y-auto">
+          <div class="flex flex-col gap-6 max-w-2xl">
+            <!-- Contact info -->
+            <div class="flex flex-col gap-4">
+              <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Contact</span>
+              <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">Email</span>
+                  <span class="text-sm font-light text-zinc-900">billing@acme.com</span>
+                </div>
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">Phone</span>
+                  <span class="text-sm font-light text-zinc-900">+1 (555) 123-4567</span>
+                </div>
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">Address</span>
+                  <span class="text-sm font-light text-zinc-900 text-right max-w-[300px]">123 Market Street, Suite 400<br>San Francisco, CA 94105</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Billing info -->
+            <div class="flex flex-col gap-4">
+              <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Billing</span>
+              <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">Plan</span>
+                  <span class="text-sm font-light text-zinc-900">Pro</span>
+                </div>
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">MRR</span>
+                  <span class="text-sm font-light text-zinc-900">$2,400</span>
+                </div>
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">Billing cycle</span>
+                  <span class="text-sm font-light text-zinc-900">Monthly</span>
+                </div>
+                <div class="flex items-start justify-between py-2 border-b border-zinc-100">
+                  <span class="text-sm font-light text-zinc-500">Payment method</span>
+                  <span class="text-sm font-light text-zinc-900">Visa •••• 4242</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="flex flex-col gap-4">
+              <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Notes</span>
+              <p class="text-sm font-light text-zinc-700 leading-relaxed">
+                Enterprise customer since 2023. Primary contact for quarterly business reviews.
+                Interested in expanding to the Business tier for additional team members.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="w-80 border-l border-zinc-100 p-5 flex flex-col gap-5 overflow-y-auto">
+          <!-- Status card -->
+          <div class="bg-zinc-50/80 rounded-2xl p-4 flex flex-col gap-3">
+            <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Status</span>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-green-400"></div>
+              <span class="text-sm font-light text-zinc-600">Active</span>
+            </div>
+          </div>
+
+          <!-- Metadata -->
+          <div class="flex flex-col gap-3">
+            <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Metadata</span>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-light text-zinc-500">Created</span>
+                <span class="text-xs font-light text-zinc-600">Mar 4, 2024</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-light text-zinc-500">Updated</span>
+                <span class="text-xs font-light text-zinc-600">Jul 18, 2025</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-light text-zinc-500">ID</span>
+                <button class="text-xs font-light text-zinc-600 hover:text-zinc-900 transition-colors flex items-center gap-1">
+                  cus_n8k2m9x4
+                  <iconify-icon icon="solar:copy-linear" class="text-zinc-400 text-xs"></iconify-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Related: recent invoices -->
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Recent invoices</span>
+              <a href="/invoices" class="text-xs font-light text-green-600 hover:text-green-700 transition-colors">View all</a>
+            </div>
+            <div class="flex flex-col gap-2">
+              <a href="/invoices/inv-001" class="flex items-center justify-between py-2 px-3 bg-zinc-50/80 rounded-xl hover:bg-zinc-100 transition-colors">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-light text-zinc-900">#2024-089</span>
+                  <span class="text-xs font-light text-zinc-500">Jul 1</span>
+                </div>
+                <span class="text-xs font-light text-zinc-600">$2,400</span>
+              </a>
+              <a href="/invoices/inv-002" class="flex items-center justify-between py-2 px-3 bg-zinc-50/80 rounded-xl hover:bg-zinc-100 transition-colors">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-light text-zinc-900">#2024-060</span>
+                  <span class="text-xs font-light text-zinc-500">Jun 1</span>
+                </div>
+                <span class="text-xs font-light text-zinc-600">$2,400</span>
+              </a>
+              <a href="/invoices/inv-003" class="flex items-center justify-between py-2 px-3 bg-zinc-50/80 rounded-xl hover:bg-zinc-100 transition-colors">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-light text-zinc-900">#2024-031</span>
+                  <span class="text-xs font-light text-zinc-500">May 1</span>
+                </div>
+                <span class="text-xs font-light text-zinc-600">$2,400</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="flex flex-col gap-3 pt-2">
+            <span class="text-xs uppercase tracking-widest text-zinc-400 font-normal">Quick actions</span>
+            <div class="flex flex-col gap-2">
+              <button class="flex items-center gap-2 py-2 px-3 bg-zinc-50/80 rounded-xl hover:bg-zinc-100 transition-colors text-left">
+                <iconify-icon icon="solar:letter-linear" class="text-zinc-400 text-base"></iconify-icon>
+                <span class="text-xs font-light text-zinc-700">Send invoice</span>
+              </button>
+              <button class="flex items-center gap-2 py-2 px-3 bg-zinc-50/80 rounded-xl hover:bg-zinc-100 transition-colors text-left">
+                <iconify-icon icon="solar:refresh-linear" class="text-zinc-400 text-base"></iconify-icon>
+                <span class="text-xs font-light text-zinc-700">Reset password</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- LOADING STATE (commented out) -->
+  <!--
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden mx-auto">
+    <aside class="bg-zinc-950 rounded-2xl w-[280px] flex-shrink-0 hidden lg:flex"></aside>
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden animate-pulse">
+      <div class="p-7 border-b border-zinc-100 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-zinc-100"></div>
+        <div class="flex flex-col gap-2">
+          <div class="h-3 bg-zinc-100 rounded-full w-16"></div>
+          <div class="h-4 bg-zinc-100 rounded-full w-32"></div>
+        </div>
+      </div>
+      <div class="flex flex-1 overflow-hidden">
+        <div class="flex-1 p-7">
+          <div class="flex flex-col gap-6 max-w-2xl">
+            <div class="flex flex-col gap-4">
+              <div class="h-3 bg-zinc-100 rounded-full w-20"></div>
+              <div class="flex flex-col gap-3">
+                <div class="h-10 bg-zinc-100 rounded-lg"></div>
+                <div class="h-10 bg-zinc-100 rounded-lg"></div>
+                <div class="h-10 bg-zinc-100 rounded-lg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="w-80 border-l border-zinc-100 p-5">
+          <div class="h-20 bg-zinc-100 rounded-2xl"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  -->
+
+  <!-- ERROR STATE (commented out) -->
+  <!--
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden mx-auto">
+    <aside class="bg-zinc-950 rounded-2xl w-[280px] flex-shrink-0 hidden lg:flex"></aside>
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden items-center justify-center">
+      <div class="flex items-start gap-3 bg-zinc-50/80 border border-zinc-100 rounded-xl p-4 max-w-md">
+        <iconify-icon icon="solar:danger-triangle-linear" class="text-orange-500 text-base mt-0.5"></iconify-icon>
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-medium text-zinc-950">Failed to load customer</span>
+          <span class="text-xs font-light text-zinc-500">There was an error fetching this record. Please try again.</span>
+        </div>
+      </div>
+      <button class="mt-4 flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2 px-4 shadow-sm text-white">
+        <iconify-icon icon="solar:refresh-linear" class="text-sm"></iconify-icon>
+        <span class="text-xs font-medium tracking-wide">Retry</span>
+      </button>
+    </main>
+  </div>
+  -->
+
+  <!-- NOT FOUND STATE (commented out) -->
+  <!--
+  <div class="bg-white rounded-3xl p-2 gap-2 flex flex-row w-full max-w-[1440px] h-full max-h-[900px] shadow-sm overflow-hidden mx-auto">
+    <aside class="bg-zinc-950 rounded-2xl w-[280px] flex-shrink-0 hidden lg:flex"></aside>
+    <main class="bg-white rounded-2xl flex flex-col flex-1 overflow-hidden items-center justify-center">
+      <div class="flex flex-col items-center justify-center gap-3 py-16 text-center">
+        <div class="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center">
+          <iconify-icon icon="solar:user-cross-linear" class="text-zinc-400 text-xl"></iconify-icon>
+        </div>
+        <span class="text-sm font-medium text-zinc-950 tracking-tight">Customer not found</span>
+        <span class="text-xs font-light text-zinc-500 max-w-[240px]">This customer may have been deleted or the ID is incorrect.</span>
+        <a href="/customers" class="mt-2 flex items-center gap-2 bg-zinc-950 hover:bg-zinc-800 transition-colors rounded-xl py-2 px-4 shadow-sm text-white">
+          <iconify-icon icon="solar:alt-arrow-left-linear" class="text-sm"></iconify-icon>
+          <span class="text-xs font-medium tracking-wide">Back to customers</span>
+        </a>
+      </div>
+    </main>
+  </div>
+  -->
+
+  <!-- CONFIRM DELETE DIALOG (commented out) -->
+  <!--
+  <div class="fixed inset-0 bg-zinc-950/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md flex flex-col gap-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-lg font-medium text-zinc-950 tracking-tight">Delete customer</span>
+        <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+          <iconify-icon icon="solar:close-circle-linear" class="text-base"></iconify-icon>
+        </button>
+      </div>
+      <p class="text-sm font-light text-zinc-700 leading-relaxed">This will permanently delete Acme Corp and all associated data including 12 invoices. This action cannot be undone.</p>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button class="rounded-full py-1.5 px-4 text-xs text-zinc-500 hover:bg-zinc-100 font-light transition-colors">Cancel</button>
+        <button class="bg-red-600 hover:bg-red-700 transition-colors rounded-xl py-2 px-4 shadow-sm text-white text-xs font-medium tracking-wide">Delete</button>
+      </div>
+    </div>
+  </div>
+  -->
+</body>
+</html>

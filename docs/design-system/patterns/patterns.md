@@ -8,6 +8,7 @@ content, pull anything extra from [`../components.md`](../components.md).
 | File | Screen type | Use when | Demonstrates |
 |---|---|---|---|
 | [`mailbox.html`](./mailbox.html) | App shell, 3-pane | Any app screen: inbox, CRM, admin, tools | App shell, dark sidebar (nav, KPIs, labels, account), list panel with row states, detail pane, reply composer, attachments |
+| [`detail.html`](./detail.html) | Detail screen | Viewing a single record: customer, order, invoice, product, user | Back navigation, field groups as read-only rows, status card, metadata section, related records, Edit/Delete actions, loading/error/not-found states |
 | [`auth.html`](./auth.html) | Auth | Login, register, forgot password | Split brand/form layout, form fields, SSO button, divider |
 | [`landing.html`](./landing.html) | Marketing (flat) | Public/landing pages | Flat public-facing surface (`bg-white` page, `border-t`/`border-b` dividers between sections, no section-level card wrappers) with cards used per-item where comparison needs a boundary: flat nav, hero + bordered product-preview frame, card feature trio, full-bleed dark stats band, card testimonials, card pricing tiers (dark featured card), flat FAQ rows, full-bleed CTA band, footer |
 | [`settings.html`](./settings.html) | Settings/forms | Settings, profile, preferences, any form-heavy screen | Card groups, field rows, toggles, plan card, danger zone |
@@ -18,17 +19,35 @@ content, pull anything extra from [`../components.md`](../components.md).
 | [`chat-interface.html`](./chat-interface.html) | Chat / messaging | Support chat, DMs, AI assistant threads | Conversation list (avatars, online dot, unread badge), `chat-bubble` (sent/received), `date-separator`, `typing-indicator`, composer |
 | [`marketplace-grid.html`](./marketplace-grid.html) | Browse grid (storefront, flat) | Customer-facing product/listing browsing — marketplaces, catalogs, storefronts, job boards, search results | Same flat surface as `landing.html`: flat nav (search, cart/saved badges, avatar), `secondary-rail`'s flat `border-r` variant as a filter panel (category, price range, rating, `checkbox-item`s), toolbar (sort + view toggle), flat `product-card` grid (no card wrapper, just the image tile), `rating-stars`, pagination |
 
+## CRUD flow patterns
+
+For each entity, the full CRUD cycle uses three pattern archetypes:
+
+| Operation | Pattern | Notes |
+|-----------|---------|-------|
+| Create | `product-form.html` or `blog-post-form.html` | Form with validation, dropzones, sidebar cards |
+| Read (List) | `data-table.html` | Searchable/filterable table, row actions |
+| Read (Detail) | `detail.html` | Field groups, status, metadata, related records |
+| Update | Same as Create | Pre-populated form linked from Detail's Edit button |
+| Delete | `confirm-dialog` (component) | Triggered from Detail or row action |
+
+**Navigation wiring:**
+- List screen → Add button → Create screen
+- List screen → Row click → Detail screen
+- Detail screen → Edit button → Edit screen (same as Create, pre-filled)
+- Detail screen → Delete button → confirm-dialog → toast → back to List
+
 ## No pattern fits?
 
 Start from the closest shell anyway — `mailbox.html` for anything app-like,
 `landing.html` for anything public, `product-form.html` or
 `blog-post-form.html` for anything create/edit-with-many-fields,
-`chat-interface.html` for anything conversational, `marketplace-grid.html`
-for anything browse/grid — and compose the rest from `components.md`. A
-screen type you keep rebuilding deserves a new pattern file here (same
-shared head, realistic content) and a row in this table. Never invent
-outside the DNA: if it isn't in `foundations.md` or `components.md`, it
-doesn't ship.
+`detail.html` for single-record viewing, `chat-interface.html` for anything
+conversational, `marketplace-grid.html` for anything browse/grid — and compose
+the rest from `components.md`. A screen type you keep rebuilding deserves a
+new pattern file here (same shared head, realistic content) and a row in this
+table. Never invent outside the DNA: if it isn't in `foundations.md` or
+`components.md`, it doesn't ship.
 
 ## Two CRUD forms, one shell
 

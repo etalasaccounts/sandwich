@@ -556,6 +556,99 @@ Grid item for a browse/marketplace screen (see `patterns/marketplace-grid.html`)
 
 The add-to-cart button is a small circular action (not `button-primary`) — it's a repeated grid action, not the one primary action on the view.
 
+## toast
+
+Notification feedback for actions, positioned bottom-right, auto-dismisses after 4 seconds. Three variants:
+
+```html
+<!-- success -->
+<div class="flex items-center gap-3 bg-zinc-950 rounded-xl py-3 px-4 shadow-lg">
+  <iconify-icon icon="solar:check-circle-linear" class="text-green-400 text-base"></iconify-icon>
+  <span class="text-sm font-light text-zinc-50">Message sent</span>
+</div>
+
+<!-- error -->
+<div class="flex items-center gap-3 bg-zinc-950 rounded-xl py-3 px-4 shadow-lg">
+  <iconify-icon icon="solar:danger-triangle-linear" class="text-orange-500 text-base"></iconify-icon>
+  <span class="text-sm font-light text-zinc-50">Failed to save</span>
+</div>
+
+<!-- info -->
+<div class="flex items-center gap-3 bg-zinc-950 rounded-xl py-3 px-4 shadow-lg">
+  <iconify-icon icon="solar:info-circle-linear" class="text-cyan-400 text-base"></iconify-icon>
+  <span class="text-sm font-light text-zinc-50">Copied to clipboard</span>
+</div>
+```
+
+Container for multiple toasts: `fixed bottom-4 right-4 flex flex-col gap-2 z-50`.
+
+## dropdown-menu
+
+Action menu anchored to a trigger button (usually an `icon-button`). Used for row actions, overflow menus, and contextual options:
+
+```html
+<div class="relative">
+  <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+    <iconify-icon icon="solar:menu-dots-linear" class="text-base"></iconify-icon>
+  </button>
+  <div class="absolute right-0 top-full mt-1 bg-white rounded-xl border border-zinc-100 shadow-lg py-1 w-40 z-10">
+    <button class="flex items-center gap-2 w-full px-3 py-2 text-sm font-light text-zinc-700 hover:bg-zinc-50 transition-colors">
+      <iconify-icon icon="solar:pen-linear" class="text-zinc-400"></iconify-icon>
+      Edit
+    </button>
+    <button class="flex items-center gap-2 w-full px-3 py-2 text-sm font-light text-zinc-700 hover:bg-zinc-50 transition-colors">
+      <iconify-icon icon="solar:copy-linear" class="text-zinc-400"></iconify-icon>
+      Duplicate
+    </button>
+    <div class="h-px bg-zinc-100 my-1"></div>
+    <button class="flex items-center gap-2 w-full px-3 py-2 text-sm font-light text-red-600 hover:bg-red-50 transition-colors">
+      <iconify-icon icon="solar:trash-bin-trash-linear" class="text-red-500"></iconify-icon>
+      Delete
+    </button>
+  </div>
+</div>
+```
+
+On dark surfaces, use `bg-zinc-800 border-zinc-700` with `text-zinc-300` items and `hover:bg-zinc-700`. Destructive items always use `text-red-500` + `hover:bg-red-900/20`.
+
+## confirm-dialog
+
+Destructive-action confirmation modal — extends `modal` with a danger-styled confirm button:
+
+```html
+<div class="fixed inset-0 bg-zinc-950/50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-md flex flex-col gap-5 shadow-sm">
+    <div class="flex items-center justify-between">
+      <span class="text-lg font-medium text-zinc-950 tracking-tight">Delete customer</span>
+      <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-500">
+        <iconify-icon icon="solar:close-circle-linear" class="text-base"></iconify-icon>
+      </button>
+    </div>
+    <p class="text-sm font-light text-zinc-700 leading-relaxed">This will permanently delete Acme Corp and all associated data. This action cannot be undone.</p>
+    <div class="flex items-center justify-end gap-2 pt-2">
+      <button class="rounded-full py-1.5 px-4 text-xs text-zinc-500 hover:bg-zinc-100 font-light transition-colors">Cancel</button>
+      <button class="bg-red-600 hover:bg-red-700 transition-colors rounded-xl py-2 px-4 shadow-sm text-white text-xs font-medium tracking-wide">Delete</button>
+    </div>
+  </div>
+</div>
+```
+
+For non-destructive confirmations (e.g., "Archive this item?"), use the standard `modal` with a `button-primary` confirm.
+
+## form-field-error
+
+Validation-error state for `input-field`:
+
+```html
+<label class="flex flex-col gap-1.5 w-full">
+  <span class="text-xs font-light text-zinc-500">Email</span>
+  <input type="email" class="bg-zinc-50/80 border border-red-300 rounded-xl py-2.5 px-3.5 text-sm font-light text-zinc-900 outline-none placeholder-zinc-400 w-full focus:border-red-500 transition-colors" />
+  <span class="text-xs text-red-600 font-light">Please enter a valid email address</span>
+</label>
+```
+
+Same pattern applies to `select-field`, `textarea`, and `tag-input` — swap `border-zinc-200` for `border-red-300`, add `focus:border-red-500`, and include the error message below.
+
 ## Adding a component
 
 A recurring need with no recipe here is a gap: compose it from the DNA (foundations.md), verify it against the Do/Don't table, and add it to this file with a stable kebab-case id — don't solve it ad hoc per project.

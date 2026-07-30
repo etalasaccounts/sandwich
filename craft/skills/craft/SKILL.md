@@ -125,7 +125,33 @@ All written to `design/` (a standalone Next.js app, sibling to `docs/` and
    `className`; icons via `@iconify/react`'s
    `<Icon icon="solar:…-linear" />`). Record every recipe id and pattern
    file used in the screen's `componentsUsed`.
-10. **Write TSX for new screens only** — one `page.tsx` per brand-new screen under `design/app/<route>/`, composed from the recipes/pattern just identified plus `components/craft/{PageShell,PageHeader}`. `PageShell` is for app-shell screens (mailbox-style, with a sidebar) — a screen that's a public/marketing page instead follows `patterns/landing.html`'s scrolling-page structure (no fixed-height shell, no sidebar) rather than being forced into `PageShell`. For each screen, work through this checklist explicitly — don't skip any of it:
+10. **Write TSX for new screens only** — one `page.tsx` per brand-new screen under `design/app/<route>/`, composed from the recipes/pattern just identified plus `components/craft/{PageShell,PageHeader}`. `PageShell` is for app-shell screens (mailbox-style, with a sidebar) — a screen that's a public/marketing page instead follows `patterns/landing.html`'s scrolling-page structure (no fixed-height shell, no sidebar) rather than being forced into `PageShell`.
+
+    **Interactivity wiring (mandatory — no dead buttons):**
+    Every action button MUST be wired. Static UI with unclickable buttons is a failure mode.
+
+    | Action Type | Wiring |
+    |-------------|--------|
+    | Navigation | Wrap in `<Link href="...">` or use `router.push()` in `onClick` |
+    | Destructive (delete, remove) | `onClick` opens `confirm-dialog`; on confirm, show `toast` success |
+    | Form submit | `onSubmit` handler → validate → `toast` on success; `form-field-error` on validation failure |
+    | Table row actions | `dropdown-menu` with items (View → link, Edit → link, Delete → confirm-dialog) |
+    | Copy/export/batch | `onClick` → `toast` feedback ("Copied to clipboard", "Export started") |
+
+    State placeholders: Even without backend integration, wire loading states and simulated handlers so the demo is testable:
+    ```tsx
+    const [loading, setLoading] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+    const handleDelete = async (id: string) => {
+      setLoading(true);
+      await new Promise(r => setTimeout(r, 500)); // simulated
+      toast.success("Deleted successfully");
+      setLoading(false);
+      setConfirmDelete(null);
+    };
+    ```
+
+    **Per-screen checklist (mandatory — don't skip):**
     - Cover every flow's `steps` as visible elements/states; render real fields (per `fields`, using the matching input component) instead of placeholder copy where the flow specifies them.
     - **Empty state** — what does this screen look like with zero data? Use the `empty-state` recipe, don't leave it unconsidered.
     - **Loading state** — is there an obvious async boundary (a table, a fetched list)? Use the `skeleton-row` recipe, or leave a clear `// TODO: loading state` if it depends on real data-fetching wiring you don't have yet — never silently omit the thought.
@@ -133,7 +159,23 @@ All written to `design/` (a standalone Next.js app, sibling to `docs/` and
     - **Responsive behavior** — does this layout hold up narrower? Don't design desktop-only by default.
     - Any action in `navigatesTo` uses `next/link`'s `<Link>` to the target's `route`.
     - Use the client's own terminology from `title`/`actor`/`steps`/`outcome` — don't translate or rename.
-11. **Flag gaps (report only)** — propose commonly-expected supporting screens not covered by any current flow (login, 404, empty states, settings), judged from the PRD's actors/modules. Report these; never generate them.
+
+    **CRUD completeness check:**
+    For each entity/module identified in the PRD, verify screens exist for the full CRUD cycle:
+
+    | Operation | Screen Type | Required Elements |
+    |-----------|-------------|-------------------|
+    | Create | Form screen (`product-form.html` or `blog-post-form.html` pattern) | "Add" button in list screen navigates here |
+    | Read (List) | Data table (`data-table.html` pattern) | Search, filters, row click → detail |
+    | Read (Detail) | Detail screen (`detail.html` pattern) | Back link, Edit/Delete actions, related records |
+    | Update | Form screen (reuse Create pattern, pre-populated) | Navigated from Detail's Edit button |
+    | Delete | `confirm-dialog` + `toast` | Triggered from Detail or row action |
+
+    If any CRUD screens are missing for an entity, flag them in the gaps report:
+    > "CRUD gaps: Customer has List/Detail but missing Create/Edit screens. Invoice has List only."
+
+    Missing screens are reported, not auto-generated. The human decides whether to add flows for them.
+11. **Flag gaps (report only)** — propose commonly-expected supporting screens not covered by any current flow (login, 404, empty states, settings), judged from the PRD's actors/modules. Also flag any CRUD gaps discovered in step 10. Report these; never generate them.
 12. **Write `manifest.json`** — matching the schema below exactly. Validate it:
     ```bash
     node --experimental-strip-types $SANDWICH_ROOT/craft/scripts/render.ts
@@ -143,7 +185,7 @@ All written to `design/` (a standalone Next.js app, sibling to `docs/` and
     environment variable. Read the path from your context and substitute it
     literally in place of `$SANDWICH_ROOT` above before running.
     If validation fails, the script prints the exact errors — fix the JSON and re-run.
-13. **Report** — screens created / flagged stale (with reasons) / orphaned / unchanged / gaps to consider / design-system pieces used.
+13. **Report** — screens created / flagged stale (with reasons) / orphaned / unchanged / gaps to consider / CRUD coverage per entity / design-system pieces used.
 
 The load-bearing invariant: the only files this pipeline ever writes are
 `manifest.json`, `.snapshot.json`, `app/page.tsx`, and brand-new screen
@@ -168,9 +210,16 @@ manual follow-up step outside this skill's scope.
 ✓ design/app/<new-screen-1>/page.tsx
 ✓ design/app/<new-screen-2>/page.tsx
 
-Design-system pieces used: mailbox.html, kpi-card, list-row, data-table
+Interactivity: all buttons wired, toast on actions, confirm-dialog on delete
+
+CRUD coverage:
+✓ Customer: Create, List, Detail, Edit, Delete
+⚠ Invoice: Create, List only — missing Detail, Edit, Delete
+
+Design-system pieces used: mailbox.html, kpi-card, list-row, data-table, detail.html, toast, dropdown-menu, confirm-dialog
 [one sentence: N screens created, N flagged stale, N orphaned, N unchanged]
 [if any: Gaps to consider (not generated): Login, 404/Not found, Settings]
+[if any: CRUD gaps: Entity X missing Y/Z screens]
 ```
 
 ## Output schema (MANDATORY)
@@ -202,7 +251,7 @@ Design-system pieces used: mailbox.html, kpi-card, list-row, data-table
 | `route` | string | URL path, lowercase-hyphenated, leading `/`, e.g. `"/plp"` — never `/` (that's the nav hub) |
 | `flows` | string[] | One or more `UF-XXX` ids this screen serves |
 | `navigatesTo` | string[] | `SCR-XXX` ids of screens this screen's primary actions link to |
-| `componentsUsed` | string[] | Every `components.md` recipe id and `patterns/` file actually used |
+| `componentsUsed` | string[] | Every `components.md` recipe id and `patterns/` file actually used — e.g., `"kpi-card"`, `"detail.html"`, `"toast"`, `"dropdown-menu"`, `"confirm-dialog"` |
 | `flags.stale` | boolean | Set when an underlying flow's content changed since this screen was generated |
 | `flags.orphaned` | boolean | Set when none of this screen's flows still need UI |
 | `staleReasons` | string[] | Human-readable reasons, e.g. `"UF-004 content changed"` |
